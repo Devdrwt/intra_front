@@ -22,7 +22,8 @@ function readCookie(name: string): string | null {
 }
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? '/api/v1',
+  // `||` (et non `??`) : une variable d'env VIDE ('') doit aussi retomber sur /api/v1.
+  baseURL: import.meta.env.VITE_API_URL || '/api/v1',
   timeout: 20_000,
   withCredentials: true,
 });
