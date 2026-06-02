@@ -16,6 +16,7 @@ export function useAddDocument(employeId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: DocumentInput) => documentsService.create(employeId, input),
+    meta: { successMessage: 'Document ajouté', silentError: true },
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEY, 'employe', employeId] }),
   });
 }
@@ -24,6 +25,7 @@ export function useRemoveDocument(employeId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => documentsService.remove(id),
+    meta: { successMessage: 'Document supprimé' },
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEY, 'employe', employeId] }),
   });
 }

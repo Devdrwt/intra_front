@@ -20,6 +20,7 @@ export function useCreateDepartment() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: DepartmentInput) => settingsService.createDepartment(input),
+    meta: { successMessage: 'Département ajouté' },
     onSuccess: () => qc.invalidateQueries({ queryKey: DEPTS }),
   });
 }
@@ -28,6 +29,7 @@ export function useDeleteDepartment() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => settingsService.deleteDepartment(id),
+    meta: { successMessage: 'Département supprimé' },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['settings'] }),
   });
 }
@@ -40,6 +42,7 @@ export function useCreateService() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: ServiceInput) => settingsService.createService(input),
+    meta: { successMessage: 'Service ajouté' },
     onSuccess: () => qc.invalidateQueries({ queryKey: SERVICES }),
   });
 }
@@ -48,6 +51,7 @@ export function useDeleteService() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => settingsService.deleteService(id),
+    meta: { successMessage: 'Service supprimé' },
     onSuccess: () => qc.invalidateQueries({ queryKey: SERVICES }),
   });
 }

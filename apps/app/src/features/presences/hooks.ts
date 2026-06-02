@@ -14,6 +14,7 @@ export function usePointer() {
   return useMutation({
     mutationFn: ({ employeId, sens }: { employeId: string; sens: 'ENTREE' | 'SORTIE' }) =>
       presencesService.pointer(employeId, sens),
+    meta: { successMessage: 'Pointage enregistré' },
     onSuccess: () => qc.invalidateQueries({ queryKey: [POINTAGES] }),
   });
 }
@@ -26,6 +27,7 @@ export function useCreateConge() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: DemandeCongeInput) => presencesService.createConge(input),
+    meta: { successMessage: 'Demande de congé envoyée' },
     onSuccess: () => qc.invalidateQueries({ queryKey: [CONGES] }),
   });
 }
@@ -35,6 +37,7 @@ export function useSetStatutConge() {
   return useMutation({
     mutationFn: ({ id, statut }: { id: string; statut: StatutConge }) =>
       presencesService.setStatutConge(id, statut),
+    meta: { successMessage: 'Demande mise à jour' },
     onSuccess: () => qc.invalidateQueries({ queryKey: [CONGES] }),
   });
 }

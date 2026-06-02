@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Bell, Check } from 'lucide-react';
 import { Spinner, cn } from '@drwindesk/ui';
+import { toast } from '@/lib/toast';
 import { useMarkAllRead, useMarkRead, useNotifications, useUnreadCount } from './hooks';
 import { severityDot, timeAgo } from './helpers';
 
@@ -12,6 +13,16 @@ export function NotificationBell() {
   const markRead = useMarkRead();
   const markAllRead = useMarkAllRead();
   const count = unread?.count ?? 0;
+
+  // Popup quand le nombre de non-lues augmente (nouvelle notification).
+  const prevCount = useRef<number | null>(null);
+  useEffect(() => {
+    if (prevCount.current !== null && count > prevCount.current) {
+      const latest = notifications?.find((n) => !n.read);
+      toast.info('Nouvelle notification', latest?.title);
+    }
+    prevCount.current = count;
+  }, [count, notifications]);
 
   return (
     <div className="relative">

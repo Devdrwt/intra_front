@@ -30,6 +30,7 @@ export function useCreateEmploye() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: EmployeInput) => employesService.create(input),
+    meta: { successMessage: 'Collaborateur créé' },
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEY] }),
   });
 }
@@ -38,6 +39,7 @@ export function useUpdateEmploye(id: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: EmployeInput) => employesService.update(id, input),
+    meta: { successMessage: 'Fiche mise à jour' },
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEY] }),
   });
 }
@@ -46,6 +48,7 @@ export function useDeleteEmploye() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => employesService.remove(id),
+    meta: { successMessage: 'Collaborateur supprimé' },
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEY] }),
   });
 }

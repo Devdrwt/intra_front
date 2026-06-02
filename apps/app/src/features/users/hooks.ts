@@ -12,6 +12,8 @@ export function useInviteUser() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: InviteUserInput) => usersService.invite(input),
+    // L'erreur est affichée dans le panneau d'invitation (pas de double toast).
+    meta: { silentError: true },
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEY] }),
   });
 }
@@ -21,6 +23,7 @@ export function useUpdateUser() {
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: UpdateUserInput }) =>
       usersService.update(id, input),
+    meta: { successMessage: 'Utilisateur mis à jour' },
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEY] }),
   });
 }
@@ -29,6 +32,7 @@ export function useDeleteUser() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => usersService.remove(id),
+    meta: { successMessage: 'Compte supprimé' },
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEY] }),
   });
 }

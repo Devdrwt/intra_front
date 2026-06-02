@@ -23,6 +23,7 @@ export function useUpsertRapport() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: RapportInput) => rapportsService.upsert(input),
+    meta: { successMessage: 'Rapport enregistré' },
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEY] }),
   });
 }

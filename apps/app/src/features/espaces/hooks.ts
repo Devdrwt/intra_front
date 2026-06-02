@@ -35,6 +35,7 @@ export function useMarkAllRead() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: () => espacesService.markAllRead(),
+    meta: { successMessage: 'Toutes les notifications sont lues' },
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEY] }),
   });
 }

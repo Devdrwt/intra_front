@@ -16,6 +16,7 @@ export function useSetCandidatureStatut() {
   return useMutation({
     mutationFn: ({ id, statut }: { id: string; statut: CandidatureStatut }) =>
       recrutementService.setStatut(id, statut),
+    meta: { successMessage: 'Statut de la candidature mis à jour' },
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEY, 'candidatures'] }),
   });
 }
@@ -31,6 +32,7 @@ export function useMarkContactTraite() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => recrutementService.markTraite(id),
+    meta: { successMessage: 'Message marqué comme traité' },
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEY, 'contact'] }),
   });
 }
