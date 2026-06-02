@@ -10,10 +10,11 @@ export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
   options: SelectOption[];
   placeholder?: string;
+  error?: string;
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select(
-  { className, label, options, placeholder, id, ...props },
+  { className, label, options, placeholder, error, id, ...props },
   ref,
 ) {
   return (
@@ -30,6 +31,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
           className={cn(
             'h-10 w-full appearance-none rounded-xl border border-surface-border bg-surface px-3 pr-9 text-sm text-ink shadow-sm',
             'transition focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/15',
+            error && 'border-danger focus:border-danger focus:ring-danger/15',
             className,
           )}
           {...props}
@@ -51,6 +53,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
           <path d="M6 8l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
+      {error && <span className="text-xs text-danger">{error}</span>}
     </div>
   );
 });

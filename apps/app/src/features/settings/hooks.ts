@@ -9,11 +9,10 @@ export function useDepartments() {
   return useQuery({ queryKey: DEPTS, queryFn: settingsService.listDepartments });
 }
 
-/** Noms de départements (avec repli sur une liste minimale si vide/chargement). */
+/** Noms de départements (liste réelle ; vide tant qu'aucun n'est configuré). */
 export function useDepartmentNames(): string[] {
   const { data } = useDepartments();
-  const names = (data ?? []).map((d) => d.name);
-  return names.length ? names : ['Administration', 'Production', 'Commercial', 'Direction'];
+  return (data ?? []).map((d) => d.name);
 }
 
 export function useCreateDepartment() {

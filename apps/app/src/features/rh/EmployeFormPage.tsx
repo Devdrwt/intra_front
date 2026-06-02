@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
-import { Button, Card, Input, Select, Spinner } from '@drwindesk/ui';
+import { ArrowLeft, Info } from 'lucide-react';
+import { Button, Callout, Card, Input, Select, Spinner } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
 import { useDepartmentNames, useServiceNames } from '@/features/settings/hooks';
 import { STATUT_OPTIONS, TYPE_CONTRAT_OPTIONS, type EmployeInput } from './types';
@@ -22,6 +22,9 @@ const EMPTY: EmployeInput = {
   dateFinContrat: '',
 };
 
+type Errors = Partial<Record<keyof EmployeInput, string>>;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export function EmployeFormPage() {
   const { id } = useParams<{ id: string }>();
   const isEdit = Boolean(id);
@@ -31,8 +34,11 @@ export function EmployeFormPage() {
   const create = useCreateEmploye();
   const update = useUpdateEmploye(id ?? '');
   const [form, setForm] = useState<EmployeInput>(EMPTY);
+  const [errors, setErrors] = useState<Errors>({});
   const [error, setError] = useState<string | null>(null);
+
   const departments = useDepartmentNames();
+  const noDepartments = departments.length === 0;
   const deptOptions = Array.from(new Set([...departments, form.departement].filter(Boolean))).map(
     (d) => ({ value: d, label: d }),
   );
@@ -55,12 +61,38 @@ export function EmployeFormPage() {
     }
   }, [isEdit, departments]);
 
-  const set = <K extends keyof EmployeInput>(key: K, value: EmployeInput[K]) =>
+  const set = <K extends keyof EmployeInput>(key: K, value: EmployeInput[K]) => {
     setForm((f) => ({ ...f, [key]: value }));
+    setErrors((prev) => (prev[key] ? { ...prev, [key]: undefined } : prev));
+  };
+
+  const validate = (f: EmployeInput): Errors => {
+    const e: Errors = {};
+    if (!f.prenom.trim()) e.prenom = 'Le prénom est requis.';
+    if (!f.nom.trim()) e.nom = 'Le nom est requis.';
+    if (!f.email.trim()) e.email = 'L’email est requis.';
+    else if (!EMAIL_RE.test(f.email.trim())) e.email = 'Adresse email invalide.';
+    if (!f.poste.trim()) e.poste = 'Le poste est requis.';
+    if (!f.departement)
+      e.departement = noDepartments
+        ? 'Aucun département — créez-en un dans Paramètres.'
+        : 'Sélectionnez un département.';
+    if (!f.dateEmbauche) e.dateEmbauche = 'La date d’embauche est requise.';
+    if (f.dateFinContrat && f.dateEmbauche && f.dateFinContrat < f.dateEmbauche)
+      e.dateFinContrat = 'La fin de contrat doit suivre l’embauche.';
+    return e;
+  };
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    const errs = validate(form);
+    setErrors(errs);
+    if (Object.values(errs).some(Boolean)) {
+      setError('Veuillez corriger les champs signalés.');
+      return;
+    }
     setError(null);
+
     const payload: EmployeInput = {
       ...form,
       // Matricule retiré de l'UI : auto-généré à la création (le backend l'exige,
@@ -98,26 +130,36 @@ export function EmployeFormPage() {
       >
         <ArrowLeft size={16} /> Retour
       </Link>
-      <h1 className="mb-6 mt-3 text-2xl font-bold text-ink">
+      <h1 className="mb-6 mt-3 text-2xl font-bold tracking-tight text-ink">
         {isEdit ? 'Modifier le collaborateur' : 'Nouveau collaborateur'}
       </h1>
 
-      <form onSubmit={onSubmit}>
-        <Card>
+      <form onSubmit={onSubmit} noValidate>
+        <Card className="space-y-4">
+          {noDepartments && (
+            <Callout tone="warning" icon={<Info size={18} />}>
+              Aucun département n’est configuré. Créez-en au moins un dans{' '}
+              <Link to="/parametres" className="font-medium underline">
+                Paramètres → Organisation
+              </Link>{' '}
+              avant d’ajouter un collaborateur.
+            </Callout>
+          )}
+
           <div className="grid gap-4 sm:grid-cols-2">
             <Input
               id="prenom"
               label="Prénom *"
               value={form.prenom}
               onChange={(e) => set('prenom', e.target.value)}
-              required
+              error={errors.prenom}
             />
             <Input
               id="nom"
               label="Nom *"
               value={form.nom}
               onChange={(e) => set('nom', e.target.value)}
-              required
+              error={errors.nom}
             />
             <Input
               id="email"
@@ -125,7 +167,7 @@ export function EmployeFormPage() {
               label="Email *"
               value={form.email}
               onChange={(e) => set('email', e.target.value)}
-              required
+              error={errors.email}
             />
             <Input
               id="telephone"
@@ -138,14 +180,16 @@ export function EmployeFormPage() {
               label="Poste *"
               value={form.poste}
               onChange={(e) => set('poste', e.target.value)}
-              required
+              error={errors.poste}
             />
             <Select
               id="departement"
               label="Département *"
               options={deptOptions}
+              placeholder={noDepartments ? 'Aucun département' : 'Sélectionner…'}
               value={form.departement}
               onChange={(e) => set('departement', e.target.value)}
+              error={errors.departement}
             />
             <Select
               id="service"
@@ -168,7 +212,7 @@ export function EmployeFormPage() {
               label="Date d'embauche *"
               value={form.dateEmbauche}
               onChange={(e) => set('dateEmbauche', e.target.value)}
-              required
+              error={errors.dateEmbauche}
             />
             <Input
               id="dateFinContrat"
@@ -176,6 +220,7 @@ export function EmployeFormPage() {
               label="Fin de contrat (échéance)"
               value={form.dateFinContrat ?? ''}
               onChange={(e) => set('dateFinContrat', e.target.value)}
+              error={errors.dateFinContrat}
             />
             <Select
               id="statut"
@@ -186,9 +231,9 @@ export function EmployeFormPage() {
             />
           </div>
 
-          {error && <p className="mt-4 text-sm text-danger">{error}</p>}
+          {error && <Callout tone="danger">{error}</Callout>}
 
-          <div className="mt-6 flex justify-end gap-3">
+          <div className="flex justify-end gap-3">
             <Button
               type="button"
               variant="secondary"
@@ -196,8 +241,8 @@ export function EmployeFormPage() {
             >
               Annuler
             </Button>
-            <Button type="submit" disabled={saving}>
-              {saving ? 'Enregistrement…' : isEdit ? 'Enregistrer' : 'Créer'}
+            <Button type="submit" loading={saving}>
+              {isEdit ? 'Enregistrer' : 'Créer'}
             </Button>
           </div>
         </Card>
