@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Button, Card, Input } from '@drwindesk/ui';
+import { Button, Callout, Card, Input } from '@drwindesk/ui';
 import { authService } from '@/features/auth/service';
 import { apiErrorMessage } from '@/lib/api';
 
@@ -80,11 +80,7 @@ export function SetPasswordPage() {
               autoComplete="new-password"
               required
             />
-            {error && (
-              <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-danger">
-                {error}
-              </p>
-            )}
+            {error && <Callout tone="danger">{error}</Callout>}
             <Button type="submit" disabled={loading} className="mt-2">
               {loading ? 'Validation…' : 'Définir le mot de passe'}
             </Button>

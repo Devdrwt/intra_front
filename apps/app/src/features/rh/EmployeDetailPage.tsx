@@ -1,6 +1,6 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Mail, Pencil, Phone, Trash2, TriangleAlert } from 'lucide-react';
-import { Badge, Button, Card, CardTitle, Spinner } from '@drwindesk/ui';
+import { Badge, Button, Callout, Card, CardTitle, Spinner } from '@drwindesk/ui';
 import { useDeleteEmploye, useEmploye } from './hooks';
 import { EmployeDocuments } from '@/features/documents/EmployeDocuments';
 import {
@@ -67,18 +67,15 @@ export function EmployeDetailPage() {
       </header>
 
       {echeance !== null && echeance <= 30 && (
-        <div
-          className={`mb-4 flex items-center gap-2 rounded-xl border px-4 py-3 text-sm ${
-            echeance < 0
-              ? 'border-red-200 bg-red-50 text-danger'
-              : 'border-amber-200 bg-amber-50 text-warning'
-          }`}
+        <Callout
+          tone={echeance < 0 ? 'danger' : 'warning'}
+          icon={<TriangleAlert size={18} />}
+          className="mb-4"
         >
-          <TriangleAlert size={18} />
           {echeance < 0
             ? `Contrat échu depuis ${Math.abs(echeance)} jour(s) (${formatDate(employe.dateFinContrat)}).`
             : `Fin de contrat dans ${echeance} jour(s) — ${formatDate(employe.dateFinContrat)}.`}
-        </div>
+        </Callout>
       )}
 
       <Card>

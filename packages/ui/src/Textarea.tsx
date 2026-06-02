@@ -22,10 +22,10 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
         id={id}
         rows={rows}
         className={cn(
-          'rounded-xl border border-surface-border bg-surface px-3 py-2 text-sm text-ink',
+          'w-full rounded-xl border border-surface-border bg-surface px-3 py-2 text-sm text-ink shadow-sm',
           'placeholder:text-ink-subtle',
-          'focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100',
-          error && 'border-danger focus:border-danger focus:ring-red-100',
+          'transition focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/15',
+          error && 'border-danger focus:border-danger focus:ring-danger/15',
           className,
         )}
         {...props}

@@ -1,11 +1,17 @@
 import type { HTMLAttributes } from 'react';
 import { cn } from './cn';
 
-export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+export interface CardProps extends HTMLAttributes<HTMLDivElement> {
+  /** Effet de survol (élévation) — utile pour les cartes cliquables. */
+  interactive?: boolean;
+}
+
+export function Card({ className, interactive, ...props }: CardProps) {
   return (
     <div
       className={cn(
         'rounded-2xl border border-surface-border bg-surface p-5 shadow-card',
+        interactive && 'transition-shadow hover:shadow-elevated',
         className,
       )}
       {...props}

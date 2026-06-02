@@ -23,23 +23,34 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
           {label}
         </label>
       )}
-      <select
-        ref={ref}
-        id={id}
-        className={cn(
-          'h-10 rounded-xl border border-surface-border bg-surface px-3 text-sm text-ink',
-          'focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100',
-          className,
-        )}
-        {...props}
-      >
-        {placeholder && <option value="">{placeholder}</option>}
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
+      <div className="relative">
+        <select
+          ref={ref}
+          id={id}
+          className={cn(
+            'h-10 w-full appearance-none rounded-xl border border-surface-border bg-surface px-3 pr-9 text-sm text-ink shadow-sm',
+            'transition focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/15',
+            className,
+          )}
+          {...props}
+        >
+          {placeholder && <option value="">{placeholder}</option>}
+          {options.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+        <svg
+          className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-subtle"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        >
+          <path d="M6 8l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </div>
     </div>
   );
 });

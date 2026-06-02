@@ -1,48 +1,86 @@
 /**
- * Design system DrwinDesk — preset Tailwind partagé entre apps/web et apps/app.
- * Importé via `presets: [require('@drwindesk/ui/tailwind-preset')]`.
- * UI sobre, mobile-first, pensée pour des utilisateurs non techniques.
+ * Design system DrwinDesk — preset Tailwind partagé (apps/web + apps/app).
+ * Couleurs pilotées par des variables CSS (cf. src/styles.css) → thème clair/sombre.
+ * UI « SaaS épuré » : sobre, aérée, accent indigo.
  */
+const withAlpha = (v) => `rgb(var(${v}) / <alpha-value>)`;
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        brand: {
-          50: '#eef4ff',
-          100: '#d9e6ff',
-          200: '#bcd2ff',
-          300: '#8eb4ff',
-          400: '#598bff',
-          500: '#3563eb',
-          600: '#2348c4',
-          700: '#1d3a9e',
-          800: '#1d3380',
-          900: '#1d2f6b',
+        surface: {
+          DEFAULT: withAlpha('--surface'),
+          muted: withAlpha('--surface-muted'),
+          elevated: withAlpha('--surface-elevated'),
+          border: withAlpha('--surface-border'),
         },
         ink: {
-          DEFAULT: '#1a2233',
-          muted: '#5b6577',
-          subtle: '#8b94a6',
+          DEFAULT: withAlpha('--ink'),
+          muted: withAlpha('--ink-muted'),
+          subtle: withAlpha('--ink-subtle'),
         },
-        surface: {
-          DEFAULT: '#ffffff',
-          muted: '#f6f8fb',
-          border: '#e4e8ef',
+        brand: {
+          50: withAlpha('--brand-50'),
+          100: withAlpha('--brand-100'),
+          200: withAlpha('--brand-200'),
+          300: withAlpha('--brand-300'),
+          400: withAlpha('--brand-400'),
+          500: withAlpha('--brand-500'),
+          600: withAlpha('--brand-600'),
+          700: withAlpha('--brand-700'),
+          800: withAlpha('--brand-800'),
+          900: withAlpha('--brand-900'),
+          soft: withAlpha('--brand-soft'),
+          'soft-fg': withAlpha('--brand-soft-fg'),
         },
-        success: '#16a34a',
-        warning: '#d97706',
-        danger: '#dc2626',
+        success: {
+          DEFAULT: withAlpha('--success'),
+          soft: withAlpha('--success-soft'),
+          'soft-fg': withAlpha('--success-soft-fg'),
+        },
+        warning: {
+          DEFAULT: withAlpha('--warning'),
+          soft: withAlpha('--warning-soft'),
+          'soft-fg': withAlpha('--warning-soft-fg'),
+        },
+        danger: {
+          DEFAULT: withAlpha('--danger'),
+          soft: withAlpha('--danger-soft'),
+          'soft-fg': withAlpha('--danger-soft-fg'),
+        },
+      },
+      ringColor: {
+        DEFAULT: withAlpha('--ring'),
       },
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
+        lg: '0.625rem',
         xl: '0.875rem',
-        '2xl': '1.25rem',
+        '2xl': '1.125rem',
       },
       boxShadow: {
-        card: '0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.08)',
+        card: '0 1px 2px rgb(16 24 40 / 0.04), 0 1px 3px rgb(16 24 40 / 0.06)',
+        elevated: '0 4px 12px rgb(16 24 40 / 0.08), 0 2px 4px rgb(16 24 40 / 0.04)',
+        pop: '0 8px 28px rgb(16 24 40 / 0.12)',
+      },
+      keyframes: {
+        'fade-in': { from: { opacity: '0' }, to: { opacity: '1' } },
+        'slide-up': {
+          from: { opacity: '0', transform: 'translateY(6px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        shimmer: {
+          '100%': { transform: 'translateX(100%)' },
+        },
+      },
+      animation: {
+        'fade-in': 'fade-in 0.18s ease-out',
+        'slide-up': 'slide-up 0.2s ease-out',
       },
     },
   },

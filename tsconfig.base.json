@@ -15,8 +15,8 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "paths": {
-      "@drwindesk/ui": ["packages/ui/src/index.ts"],
-      "@drwindesk/ui/*": ["packages/ui/src/*"]
+      "@drwindesk/ui": ["./packages/ui/src/index.ts"],
+      "@drwindesk/ui/*": ["./packages/ui/src/*"]
     }
   }
 }

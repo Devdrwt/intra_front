@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BellRing, FileBarChart, Plus } from 'lucide-react';
-import { Badge, Button, Card, Input, Select, Spinner, cn } from '@drwindesk/ui';
+import { Badge, Button, Callout, Card, Input, Select, Spinner, cn } from '@drwindesk/ui';
 import { useAuth } from '@/auth/AuthContext';
 import { useEmployeLookup } from '@/features/rh/hooks';
 import { fullName } from '@/features/rh/helpers';
@@ -116,9 +116,9 @@ function RapportsPanel() {
       </div>
 
       {missingMsg && (
-        <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-warning">
+        <Callout tone="warning" className="mb-4">
           {missingMsg}
-        </div>
+        </Callout>
       )}
 
       <Card className="overflow-hidden p-0">

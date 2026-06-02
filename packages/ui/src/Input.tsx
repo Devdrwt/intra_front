@@ -1,13 +1,16 @@
-import { forwardRef, type InputHTMLAttributes } from 'react';
+import { forwardRef, type InputHTMLAttributes, type ReactNode } from 'react';
 import { cn } from './cn';
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
+  hint?: string;
+  /** Élément décoratif à gauche (icône). */
+  leading?: ReactNode;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { className, label, error, id, ...props },
+  { className, label, error, hint, leading, id, ...props },
   ref,
 ) {
   return (
@@ -17,19 +20,31 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           {label}
         </label>
       )}
-      <input
-        ref={ref}
-        id={id}
-        className={cn(
-          'h-10 rounded-xl border border-surface-border bg-surface px-3 text-sm text-ink',
-          'placeholder:text-ink-subtle',
-          'focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100',
-          error && 'border-danger focus:border-danger focus:ring-red-100',
-          className,
+      <div className="relative">
+        {leading && (
+          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-subtle">
+            {leading}
+          </span>
         )}
-        {...props}
-      />
-      {error && <span className="text-xs text-danger">{error}</span>}
+        <input
+          ref={ref}
+          id={id}
+          className={cn(
+            'h-10 w-full rounded-xl border border-surface-border bg-surface px-3 text-sm text-ink shadow-sm',
+            'placeholder:text-ink-subtle',
+            'transition focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/15',
+            leading && 'pl-9',
+            error && 'border-danger focus:border-danger focus:ring-danger/15',
+            className,
+          )}
+          {...props}
+        />
+      </div>
+      {error ? (
+        <span className="text-xs text-danger">{error}</span>
+      ) : hint ? (
+        <span className="text-xs text-ink-subtle">{hint}</span>
+      ) : null}
     </div>
   );
 });
