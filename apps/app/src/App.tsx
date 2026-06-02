@@ -14,6 +14,7 @@ import { RapportsPage } from '@/features/rapports/RapportsPage';
 import { RapportFormPage } from '@/features/rapports/RapportFormPage';
 import { AlertesPage } from '@/features/espaces/AlertesPage';
 import { RecrutementPage } from '@/features/recrutement/RecrutementPage';
+import { UsersPage } from '@/features/users/UsersPage';
 
 export default function App() {
   return (
@@ -42,6 +43,7 @@ export default function App() {
             <Route path="rapports" element={<RapportsPage />} />
             <Route path="rapports/nouveau" element={<RapportFormPage />} />
             <Route path="recrutement" element={<RecrutementPage />} />
+            <Route path="utilisateurs" element={<UsersPage />} />
             <Route path="alertes" element={<AlertesPage />} />
           </Route>
         </Routes>

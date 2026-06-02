@@ -6,6 +6,7 @@ import {
   FileBarChart,
   Bell,
   Briefcase,
+  ShieldCheck,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -23,5 +24,6 @@ export const MODULES: ModuleRoute[] = [
   { path: '/presences', label: 'Présences & Congés', icon: CalendarClock },
   { path: '/rapports', label: 'Rapports', icon: FileBarChart },
   { path: '/recrutement', label: 'Recrutement', icon: Briefcase },
+  { path: '/utilisateurs', label: 'Utilisateurs & accès', icon: ShieldCheck },
   { path: '/alertes', label: 'Alertes', icon: Bell },
 ];
