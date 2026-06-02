@@ -13,6 +13,14 @@ import { displayName, hasPermission, useAuth } from '@/auth/AuthContext';
 import { useEspaceMoi } from '@/features/espaces/hooks';
 import { severityDot, timeAgo } from '@/features/espaces/helpers';
 
+/** Salutation selon l'heure locale de connexion. */
+function greeting(h: number = new Date().getHours()): { hello: string; emoji: string } {
+  if (h >= 5 && h < 12) return { hello: 'Bonjour', emoji: '☀️' };
+  if (h >= 12 && h < 18) return { hello: 'Bon après-midi', emoji: '🌤️' };
+  if (h >= 18 && h < 22) return { hello: 'Bonsoir', emoji: '🌆' };
+  return { hello: 'Bonne nuit', emoji: '🌙' };
+}
+
 type Tone = 'brand' | 'success' | 'warning' | 'danger';
 const TONE: Record<Tone, string> = {
   brand: 'bg-brand-soft text-brand-soft-fg',
@@ -68,7 +76,7 @@ export function DashboardPage() {
     <div className="space-y-6">
       <header>
         <h2 className="text-2xl font-bold tracking-tight text-ink">
-          Bonjour {user ? displayName(user).split(' ')[0] : ''} 👋
+          {greeting().hello} {user ? displayName(user).split(' ')[0] : ''} {greeting().emoji}
         </h2>
         <p className="text-ink-muted">Voici l’état de votre espace aujourd’hui.</p>
       </header>
