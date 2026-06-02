@@ -5,7 +5,6 @@
     "useDefineForClassFields": true,
     "moduleResolution": "Bundler",
     "allowImportingTsExtensions": false,
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
       "@drwindesk/ui": ["../../packages/ui/src/index.ts"],

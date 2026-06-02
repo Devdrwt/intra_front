@@ -71,10 +71,11 @@ export function useAuth(): AuthState {
   return ctx;
 }
 
-/** Vrai si l'utilisateur possède la permission (ou le wildcard `*`). */
+/** Vrai si l'utilisateur possède la permission (ou le wildcard `*`). Null-safe. */
 export function hasPermission(user: User | null, perm: string): boolean {
-  if (!user) return false;
-  return user.permissions.includes('*') || user.permissions.includes(perm);
+  const perms = user?.permissions;
+  if (!Array.isArray(perms)) return false;
+  return perms.includes('*') || perms.includes(perm);
 }
 
 /** Libellé d'affichage dérivé de l'email (tant qu'aucun nom de profil n'existe). */
