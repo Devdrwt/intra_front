@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button, Card, Input, Select, Spinner } from '@drwindesk/ui';
+import { apiErrorMessage } from '@/lib/api';
 import { useEmployes } from '@/features/rh/hooks';
 import { fullName } from '@/features/rh/helpers';
 import { useCreateConge } from './hooks';
@@ -34,8 +35,8 @@ export function CongeFormPage() {
     try {
       await create.mutateAsync({ ...form, motif: form.motif || undefined });
       navigate('/presences');
-    } catch {
-      setError('Enregistrement impossible.');
+    } catch (err) {
+      setError(apiErrorMessage(err, 'Enregistrement impossible.'));
     }
   };
 

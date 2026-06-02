@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, Send } from 'lucide-react';
 import { Button, Card, Input, Select, Spinner, Textarea } from '@drwindesk/ui';
+import { apiErrorMessage } from '@/lib/api';
 import { useEmployes } from '@/features/rh/hooks';
 import { fullName } from '@/features/rh/helpers';
 import { useUpsertRapport } from './hooks';
@@ -26,8 +27,8 @@ export function RapportFormPage() {
     try {
       await upsert.mutateAsync({ employeId, date, contenu: contenu.trim(), statut });
       navigate('/rapports');
-    } catch {
-      setError('Enregistrement impossible.');
+    } catch (err) {
+      setError(apiErrorMessage(err, 'Enregistrement impossible.'));
     }
   };
 

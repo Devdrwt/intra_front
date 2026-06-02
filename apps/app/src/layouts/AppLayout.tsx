@@ -2,11 +2,14 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import { cn } from '@drwindesk/ui';
 import { MODULES } from '@/config/modules';
-import { displayName, useAuth } from '@/auth/AuthContext';
+import { displayName, hasPermission, useAuth } from '@/auth/AuthContext';
 import { NotificationBell } from '@/features/espaces/NotificationBell';
 
 export function AppLayout() {
   const { user, logout } = useAuth();
+  // Masque les entrées dont la permission requise n'est pas détenue (le backend
+  // reste l'autorité : les routes/API renvoient 403 si on force l'URL).
+  const modules = MODULES.filter((m) => !m.requires || hasPermission(user, m.requires));
 
   return (
     <div className="flex min-h-screen">
@@ -16,7 +19,7 @@ export function AppLayout() {
         </div>
 
         <nav className="flex-1 space-y-1 px-3">
-          {MODULES.map(({ path, label, icon: Icon }) => (
+          {modules.map(({ path, label, icon: Icon }) => (
             <NavLink
               key={path}
               to={path}

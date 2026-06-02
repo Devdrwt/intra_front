@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { FileText, Plus, Trash2, X } from 'lucide-react';
 import { Badge, Button, Input, Select, Spinner } from '@drwindesk/ui';
+import { apiErrorMessage } from '@/lib/api';
 import { UPLOADS_ENABLED } from '@/lib/config';
 import { uploadViaPresign } from '@/lib/upload';
 import { useAddDocument, useDocumentsEmploye, useRemoveDocument } from './hooks';
@@ -58,7 +59,8 @@ export function EmployeDocuments({ employeId }: { employeId: string }) {
       await add.mutateAsync(input);
       reset();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Échec de l’enregistrement.');
+      // Message backend si axios ; sinon message d'erreur d'upload (PUT S3).
+      setError(apiErrorMessage(err, err instanceof Error ? err.message : 'Échec de l’enregistrement.'));
     } finally {
       setBusy(false);
     }

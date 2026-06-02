@@ -71,6 +71,12 @@ export function useAuth(): AuthState {
   return ctx;
 }
 
+/** Vrai si l'utilisateur possède la permission (ou le wildcard `*`). */
+export function hasPermission(user: User | null, perm: string): boolean {
+  if (!user) return false;
+  return user.permissions.includes('*') || user.permissions.includes(perm);
+}
+
 /** Libellé d'affichage dérivé de l'email (tant qu'aucun nom de profil n'existe). */
 export function displayName(u: Pick<User, 'email'>): string {
   const local = u.email.split('@')[0] ?? u.email;

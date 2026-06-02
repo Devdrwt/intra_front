@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button, Card, Input, Select, Spinner } from '@drwindesk/ui';
+import { apiErrorMessage } from '@/lib/api';
 import { DEPARTEMENTS } from './mock';
 import { STATUT_OPTIONS, TYPE_CONTRAT_OPTIONS, type EmployeInput } from './types';
 import { useCreateEmploye, useEmploye, useUpdateEmploye } from './hooks';
@@ -56,8 +57,8 @@ export function EmployeFormPage() {
         ? await update.mutateAsync(payload)
         : await create.mutateAsync(payload);
       navigate(`/rh/${saved.id}`);
-    } catch {
-      setError('Enregistrement impossible. Vérifiez les champs et réessayez.');
+    } catch (err) {
+      setError(apiErrorMessage(err, 'Enregistrement impossible. Vérifiez les champs et réessayez.'));
     }
   };
 
