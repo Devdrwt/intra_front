@@ -12,6 +12,8 @@ import { PresencesPage } from '@/features/presences/PresencesPage';
 import { CongeFormPage } from '@/features/presences/CongeFormPage';
 import { RapportsPage } from '@/features/rapports/RapportsPage';
 import { RapportFormPage } from '@/features/rapports/RapportFormPage';
+import { AlertesPage } from '@/features/espaces/AlertesPage';
+import { RecrutementPage } from '@/features/recrutement/RecrutementPage';
 
 export default function App() {
   return (
@@ -39,7 +41,8 @@ export default function App() {
             <Route path="presences/conges/nouveau" element={<CongeFormPage />} />
             <Route path="rapports" element={<RapportsPage />} />
             <Route path="rapports/nouveau" element={<RapportFormPage />} />
-            <Route path="alertes" element={<ModulePlaceholder title="Alertes" />} />
+            <Route path="recrutement" element={<RecrutementPage />} />
+            <Route path="alertes" element={<AlertesPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

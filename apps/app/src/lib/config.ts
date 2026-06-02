@@ -29,4 +29,6 @@ export const USE_MOCKS = {
   presences: flag(import.meta.env.VITE_MOCK_PRESENCES, globalMock),
   documents: flag(import.meta.env.VITE_MOCK_DOCUMENTS, globalMock),
   rapports: flag(import.meta.env.VITE_MOCK_RAPPORTS, globalMock),
+  espaces: flag(import.meta.env.VITE_MOCK_ESPACES, globalMock),
+  recrutement: flag(import.meta.env.VITE_MOCK_RECRUTEMENT, globalMock),
 } as const;

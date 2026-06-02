@@ -3,6 +3,7 @@ import { LogOut } from 'lucide-react';
 import { cn } from '@drwindesk/ui';
 import { MODULES } from '@/config/modules';
 import { displayName, useAuth } from '@/auth/AuthContext';
+import { NotificationBell } from '@/features/espaces/NotificationBell';
 
 export function AppLayout() {
   const { user, logout } = useAuth();
@@ -51,8 +52,11 @@ export function AppLayout() {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-6xl px-6 py-8">
+      <main className="flex flex-1 flex-col overflow-y-auto">
+        <header className="flex items-center justify-end border-b border-surface-border bg-surface px-6 py-3">
+          <NotificationBell />
+        </header>
+        <div className="mx-auto w-full max-w-6xl px-6 py-8">
           <Outlet />
         </div>
       </main>

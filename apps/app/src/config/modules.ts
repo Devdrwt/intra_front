@@ -5,6 +5,7 @@ import {
   CalendarClock,
   FileBarChart,
   Bell,
+  Briefcase,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -21,5 +22,6 @@ export const MODULES: ModuleRoute[] = [
   { path: '/documents', label: 'Documents & Contrats', icon: FolderArchive },
   { path: '/presences', label: 'Présences & Congés', icon: CalendarClock },
   { path: '/rapports', label: 'Rapports', icon: FileBarChart },
+  { path: '/recrutement', label: 'Recrutement', icon: Briefcase },
   { path: '/alertes', label: 'Alertes', icon: Bell },
 ];

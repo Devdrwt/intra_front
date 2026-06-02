@@ -11,6 +11,8 @@ interface ImportMetaEnv {
   readonly VITE_MOCK_PRESENCES?: string;
   readonly VITE_MOCK_DOCUMENTS?: string;
   readonly VITE_MOCK_RAPPORTS?: string;
+  readonly VITE_MOCK_ESPACES?: string;
+  readonly VITE_MOCK_RECRUTEMENT?: string;
 }
 
 interface ImportMeta {

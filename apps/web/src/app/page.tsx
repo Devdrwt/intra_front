@@ -27,6 +27,11 @@ export default function HomePage() {
             Drwin<span className="text-brand-600">Desk</span>
           </span>
           <nav className="flex items-center gap-3">
+            <Link href="/contact">
+              <Button variant="ghost" size="sm">
+                Contact
+              </Button>
+            </Link>
             <Link href="/candidat">
               <Button variant="ghost" size="sm">
                 Espace candidat
