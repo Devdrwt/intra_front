@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
   Building2,
   ChevronDown,
   ChevronRight,
+  LifeBuoy,
   LogOut,
   Menu,
   PanelLeftClose,
   PanelLeftOpen,
   Search,
+  Settings,
   X,
 } from 'lucide-react';
 import { Avatar, cn } from '@drwindesk/ui';
@@ -301,6 +303,21 @@ function UserMenu({ name, email, onLogout }: { name: string; email: string; onLo
             </div>
           </div>
           <div className="p-1.5">
+            <Link
+              to="/parametres"
+              onClick={() => setOpen(false)}
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-ink-muted transition-colors hover:bg-surface-muted hover:text-ink"
+            >
+              <Settings size={16} /> Paramètres
+            </Link>
+            <Link
+              to="/guide"
+              onClick={() => setOpen(false)}
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-ink-muted transition-colors hover:bg-surface-muted hover:text-ink"
+            >
+              <LifeBuoy size={16} /> Aide & guide
+            </Link>
+            <div className="my-1 h-px bg-surface-border" />
             <button
               onClick={onLogout}
               className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-ink-muted transition-colors hover:bg-surface-muted hover:text-danger"

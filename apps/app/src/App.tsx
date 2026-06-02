@@ -16,6 +16,9 @@ import { AlertesPage } from '@/features/espaces/AlertesPage';
 import { RecrutementPage } from '@/features/recrutement/RecrutementPage';
 import { UsersPage } from '@/features/users/UsersPage';
 import { DocumentsPage } from '@/features/documents/DocumentsPage';
+import { SettingsPage } from '@/pages/SettingsPage';
+import { GuidePage } from '@/pages/GuidePage';
+import { FaqPage } from '@/pages/FaqPage';
 
 export default function App() {
   return (
@@ -44,6 +47,9 @@ export default function App() {
             <Route path="recrutement" element={<RecrutementPage />} />
             <Route path="utilisateurs" element={<UsersPage />} />
             <Route path="alertes" element={<AlertesPage />} />
+            <Route path="guide" element={<GuidePage />} />
+            <Route path="faq" element={<FaqPage />} />
+            <Route path="parametres" element={<SettingsPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

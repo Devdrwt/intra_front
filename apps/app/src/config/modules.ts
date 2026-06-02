@@ -7,6 +7,9 @@ import {
   Bell,
   Briefcase,
   ShieldCheck,
+  BookOpen,
+  HelpCircle,
+  Settings,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -21,7 +24,13 @@ export interface ModuleRoute {
 }
 
 /** Ordre des groupes dans la sidebar. */
-export const MODULE_GROUPS = ['Principal', 'Personnel', 'Activité', 'Administration'] as const;
+export const MODULE_GROUPS = [
+  'Principal',
+  'Personnel',
+  'Activité',
+  'Administration',
+  'Aide & réglages',
+] as const;
 
 /** Modules DrwinDesk (cf. document maître, partie IV). `requires` filtre la nav. */
 export const MODULES: ModuleRoute[] = [
@@ -45,4 +54,7 @@ export const MODULES: ModuleRoute[] = [
     group: 'Administration',
     requires: 'user:read',
   },
+  { path: '/guide', label: 'Guide', icon: BookOpen, group: 'Aide & réglages' },
+  { path: '/faq', label: 'FAQ', icon: HelpCircle, group: 'Aide & réglages' },
+  { path: '/parametres', label: 'Paramètres', icon: Settings, group: 'Aide & réglages' },
 ];
