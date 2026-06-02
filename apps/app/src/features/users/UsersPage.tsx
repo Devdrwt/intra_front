@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Plus, Power, ShieldCheck, Trash2, X } from 'lucide-react';
-import { Avatar, Badge, Button, Card, EmptyState, Input, SkeletonRows, cn } from '@drwindesk/ui';
+import { Avatar, Badge, Button, Callout, Card, EmptyState, Input, SkeletonRows, cn } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
 import { useDeleteUser, useInviteUser, useUpdateUser, useUsers } from './hooks';
@@ -148,6 +148,7 @@ function InvitePanel({ onDone }: { onDone: () => void }) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [roleKeys, setRoleKeys] = useState<string[]>(['employee']);
+  const [emailError, setEmailError] = useState<string | undefined>();
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<InviteResult | null>(null);
 
@@ -157,6 +158,10 @@ function InvitePanel({ onDone }: { onDone: () => void }) {
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
+    const value = email.trim();
+    if (!value) return setEmailError('L’email est requis.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return setEmailError('Adresse email invalide.');
+    setEmailError(undefined);
     if (roleKeys.length === 0) return setError('Sélectionnez au moins un rôle.');
     try {
       const input: InviteUserInput = {
@@ -208,15 +213,18 @@ function InvitePanel({ onDone }: { onDone: () => void }) {
 
   return (
     <Card className="mb-4">
-      <form onSubmit={onSubmit} className="grid gap-4">
+      <form onSubmit={onSubmit} className="grid gap-4" noValidate>
         <Input
           id="email"
           type="email"
           label="Email *"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            if (emailError) setEmailError(undefined);
+          }}
           placeholder="prenom.nom@drwintech.com"
-          required
+          error={emailError}
         />
         <div className="grid gap-4 sm:grid-cols-2">
           <Input
@@ -253,14 +261,14 @@ function InvitePanel({ onDone }: { onDone: () => void }) {
           </div>
         </div>
 
-        {error && <p className="text-sm text-danger">{error}</p>}
+        {error && <Callout tone="danger">{error}</Callout>}
 
         <div className="flex justify-end gap-3">
           <Button type="button" variant="secondary" onClick={onDone}>
             Annuler
           </Button>
-          <Button type="submit" disabled={invite.isPending}>
-            {invite.isPending ? 'Envoi…' : 'Inviter'}
+          <Button type="submit" loading={invite.isPending}>
+            Inviter
           </Button>
         </div>
       </form>
