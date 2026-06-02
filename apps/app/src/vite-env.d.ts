@@ -16,6 +16,8 @@ interface ImportMetaEnv {
   readonly VITE_MOCK_USERS?: string;
   /** 'true' → active l'upload de fichiers via presign S3. Défaut : off. */
   readonly VITE_UPLOADS_ENABLED?: string;
+  /** URL de l'image de fond du login (défaut : photo Pexels). */
+  readonly VITE_LOGIN_BG?: string;
 }
 
 interface ImportMeta {

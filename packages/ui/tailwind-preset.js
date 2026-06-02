@@ -77,10 +77,21 @@ module.exports = {
         shimmer: {
           '100%': { transform: 'translateX(100%)' },
         },
+        'ken-burns': {
+          '0%': { transform: 'scale(1)' },
+          '100%': { transform: 'scale(1.1)' },
+        },
+        blob: {
+          '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
+          '33%': { transform: 'translate(24px, -28px) scale(1.12)' },
+          '66%': { transform: 'translate(-18px, 18px) scale(0.92)' },
+        },
       },
       animation: {
         'fade-in': 'fade-in 0.18s ease-out',
         'slide-up': 'slide-up 0.2s ease-out',
+        'ken-burns': 'ken-burns 22s ease-in-out infinite alternate',
+        blob: 'blob 16s ease-in-out infinite',
       },
     },
   },
