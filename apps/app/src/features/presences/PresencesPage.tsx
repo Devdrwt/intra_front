@@ -1,16 +1,19 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, LogIn, LogOut, Plus, X } from 'lucide-react';
-import { Badge, Button, Card, Spinner, cn } from '@drwindesk/ui';
+import { CalendarOff, Check, Clock, LogIn, LogOut, Plus, X } from 'lucide-react';
+import {
+  Avatar,
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  SkeletonRows,
+  cn,
+} from '@drwindesk/ui';
 import { useEmployeLookup } from '@/features/rh/hooks';
 import { fullName } from '@/features/rh/helpers';
 import { useConges, usePointagesDuJour, usePointer, useSetStatutConge } from './hooks';
-import {
-  STATUT_CONGE_LABEL,
-  TYPE_CONGE_LABEL,
-  nbJours,
-  type StatutConge,
-} from './types';
+import { STATUT_CONGE_LABEL, TYPE_CONGE_LABEL, nbJours, type StatutConge } from './types';
 
 type Tab = 'pointage' | 'conges';
 
@@ -27,17 +30,26 @@ function fmt(iso: string): string {
     : d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
 }
 
+function Person({ name }: { name: string }) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <Avatar name={name} size="sm" />
+      <span className="font-medium text-ink">{name}</span>
+    </div>
+  );
+}
+
 export function PresencesPage() {
   const [tab, setTab] = useState<Tab>('pointage');
 
   return (
-    <div>
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold text-ink">Présences & Congés</h1>
+    <div className="space-y-5">
+      <header>
+        <h2 className="text-2xl font-bold tracking-tight text-ink">Présences & Congés</h2>
         <p className="text-ink-muted">Pointage du jour et gestion des demandes de congés.</p>
       </header>
 
-      <div className="mb-4 flex gap-1 rounded-xl bg-surface-muted p-1">
+      <div className="flex w-full max-w-md gap-1 rounded-xl bg-surface-muted p-1">
         {(
           [
             ['pointage', 'Pointage du jour'],
@@ -67,67 +79,62 @@ function PointagePanel() {
   const { data: pointages, isLoading } = usePointagesDuJour();
   const pointer = usePointer();
 
-  if (isLoading) {
-    return (
-      <Card className="flex justify-center py-16">
-        <Spinner />
-      </Card>
-    );
-  }
-
   return (
     <Card className="overflow-hidden p-0">
-      <table className="w-full text-sm">
-        <thead className="border-b border-surface-border bg-surface-muted text-left text-xs uppercase text-ink-subtle">
-          <tr>
-            <th className="px-5 py-3 font-medium">Collaborateur</th>
-            <th className="px-5 py-3 font-medium">Entrée</th>
-            <th className="px-5 py-3 font-medium">Sortie</th>
-            <th className="px-5 py-3 text-right font-medium">Pointer</th>
-          </tr>
-        </thead>
-        <tbody>
-          {(pointages ?? []).map((p) => {
-            const emp = byId.get(p.employeId);
-            return (
-              <tr key={p.id} className="border-b border-surface-border last:border-0">
-                <td className="px-5 py-3 font-medium text-ink">
-                  {emp ? fullName(emp) : p.employeId}
-                </td>
-                <td className="px-5 py-3 text-ink-muted">{p.heureEntree ?? '—'}</td>
-                <td className="px-5 py-3 text-ink-muted">{p.heureSortie ?? '—'}</td>
-                <td className="px-5 py-3">
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      disabled={pointer.isPending || Boolean(p.heureEntree)}
-                      onClick={() => pointer.mutate({ employeId: p.employeId, sens: 'ENTREE' })}
-                    >
-                      <LogIn size={15} /> Entrée
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      disabled={pointer.isPending || !p.heureEntree || Boolean(p.heureSortie)}
-                      onClick={() => pointer.mutate({ employeId: p.employeId, sens: 'SORTIE' })}
-                    >
-                      <LogOut size={15} /> Sortie
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-          {(!pointages || pointages.length === 0) && (
+      {isLoading ? (
+        <SkeletonRows rows={4} cols={4} />
+      ) : !pointages || pointages.length === 0 ? (
+        <EmptyState
+          icon={<Clock size={20} />}
+          title="Aucun pointage aujourd’hui"
+          description="Les entrées et sorties du jour apparaîtront ici."
+        />
+      ) : (
+        <table className="w-full text-sm">
+          <thead className="border-b border-surface-border bg-surface-muted text-left text-xs uppercase tracking-wide text-ink-subtle">
             <tr>
-              <td colSpan={4} className="px-5 py-12 text-center text-ink-subtle">
-                Aucun pointage aujourd’hui.
-              </td>
+              <th className="px-5 py-2.5 font-medium">Collaborateur</th>
+              <th className="px-5 py-2.5 font-medium">Entrée</th>
+              <th className="px-5 py-2.5 font-medium">Sortie</th>
+              <th className="px-5 py-2.5 text-right font-medium">Pointer</th>
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {pointages.map((p) => {
+              const emp = byId.get(p.employeId);
+              return (
+                <tr key={p.id} className="border-b border-surface-border last:border-0">
+                  <td className="px-5 py-3">
+                    <Person name={emp ? fullName(emp) : p.employeId} />
+                  </td>
+                  <td className="px-5 py-3 tabular-nums text-ink-muted">{p.heureEntree ?? '—'}</td>
+                  <td className="px-5 py-3 tabular-nums text-ink-muted">{p.heureSortie ?? '—'}</td>
+                  <td className="px-5 py-3">
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        disabled={pointer.isPending || Boolean(p.heureEntree)}
+                        onClick={() => pointer.mutate({ employeId: p.employeId, sens: 'ENTREE' })}
+                      >
+                        <LogIn size={15} /> Entrée
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        disabled={pointer.isPending || !p.heureEntree || Boolean(p.heureSortie)}
+                        onClick={() => pointer.mutate({ employeId: p.employeId, sens: 'SORTIE' })}
+                      >
+                        <LogOut size={15} /> Sortie
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
     </Card>
   );
 }
@@ -138,8 +145,8 @@ function CongesPanel() {
   const setStatut = useSetStatutConge();
 
   return (
-    <div>
-      <div className="mb-4 flex justify-end">
+    <div className="space-y-4">
+      <div className="flex justify-end">
         <Link to="/presences/conges/nouveau">
           <Button>
             <Plus size={18} /> Nouvelle demande
@@ -149,36 +156,53 @@ function CongesPanel() {
 
       <Card className="overflow-hidden p-0">
         {isLoading ? (
-          <div className="flex justify-center py-16">
-            <Spinner />
-          </div>
+          <SkeletonRows rows={4} cols={5} />
+        ) : !conges || conges.length === 0 ? (
+          <EmptyState
+            icon={<CalendarOff size={20} />}
+            title="Aucune demande de congé"
+            description="Les demandes de congés à traiter apparaîtront ici."
+            action={
+              <Link to="/presences/conges/nouveau">
+                <Button size="sm">
+                  <Plus size={16} /> Nouvelle demande
+                </Button>
+              </Link>
+            }
+          />
         ) : (
           <table className="w-full text-sm">
-            <thead className="border-b border-surface-border bg-surface-muted text-left text-xs uppercase text-ink-subtle">
+            <thead className="border-b border-surface-border bg-surface-muted text-left text-xs uppercase tracking-wide text-ink-subtle">
               <tr>
-                <th className="px-5 py-3 font-medium">Collaborateur</th>
-                <th className="px-5 py-3 font-medium">Type</th>
-                <th className="px-5 py-3 font-medium">Période</th>
-                <th className="px-5 py-3 font-medium">Jours</th>
-                <th className="px-5 py-3 font-medium">Statut</th>
-                <th className="px-5 py-3 text-right font-medium">Action</th>
+                <th className="px-5 py-2.5 font-medium">Collaborateur</th>
+                <th className="hidden px-5 py-2.5 font-medium sm:table-cell">Type</th>
+                <th className="px-5 py-2.5 font-medium">Période</th>
+                <th className="hidden px-5 py-2.5 font-medium sm:table-cell">Jours</th>
+                <th className="px-5 py-2.5 font-medium">Statut</th>
+                <th className="px-5 py-2.5 text-right font-medium">Action</th>
               </tr>
             </thead>
             <tbody>
-              {(conges ?? []).map((c) => {
+              {conges.map((c) => {
                 const emp = byId.get(c.employeId);
                 return (
                   <tr key={c.id} className="border-b border-surface-border last:border-0">
-                    <td className="px-5 py-3 font-medium text-ink">
-                      {emp ? fullName(emp) : c.employeId}
+                    <td className="px-5 py-3">
+                      <Person name={emp ? fullName(emp) : c.employeId} />
                     </td>
-                    <td className="px-5 py-3 text-ink-muted">{TYPE_CONGE_LABEL[c.type]}</td>
+                    <td className="hidden px-5 py-3 text-ink-muted sm:table-cell">
+                      {TYPE_CONGE_LABEL[c.type]}
+                    </td>
                     <td className="px-5 py-3 text-ink-muted">
                       {fmt(c.dateDebut)} → {fmt(c.dateFin)}
                     </td>
-                    <td className="px-5 py-3 text-ink-muted">{nbJours(c.dateDebut, c.dateFin)}</td>
+                    <td className="hidden px-5 py-3 tabular-nums text-ink-muted sm:table-cell">
+                      {nbJours(c.dateDebut, c.dateFin)}
+                    </td>
                     <td className="px-5 py-3">
-                      <Badge tone={STATUT_TONE[c.statut]}>{STATUT_CONGE_LABEL[c.statut]}</Badge>
+                      <Badge tone={STATUT_TONE[c.statut]} dot>
+                        {STATUT_CONGE_LABEL[c.statut]}
+                      </Badge>
                     </td>
                     <td className="px-5 py-3">
                       {c.statut === 'EN_ATTENTE' ? (
@@ -207,13 +231,6 @@ function CongesPanel() {
                   </tr>
                 );
               })}
-              {(!conges || conges.length === 0) && (
-                <tr>
-                  <td colSpan={6} className="px-5 py-12 text-center text-ink-subtle">
-                    Aucune demande de congé.
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
         )}

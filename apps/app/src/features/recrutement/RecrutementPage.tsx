@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Check, FileText, Inbox, Mail } from 'lucide-react';
-import { Badge, Button, Card, Select, Spinner, cn } from '@drwindesk/ui';
+import { Avatar, Badge, Button, Card, EmptyState, Select, SkeletonRows, cn } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
 import {
   useCandidatures,
@@ -34,15 +34,15 @@ function fmt(iso: string): string {
 export function RecrutementPage() {
   const [tab, setTab] = useState<Tab>('candidatures');
   return (
-    <div>
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold text-ink">Recrutement</h1>
+    <div className="space-y-5">
+      <header>
+        <h2 className="text-2xl font-bold tracking-tight text-ink">Recrutement</h2>
         <p className="text-ink-muted">
           Candidatures et messages de contact remontés du site public.
         </p>
       </header>
 
-      <div className="mb-4 flex gap-1 rounded-xl bg-surface-muted p-1">
+      <div className="flex w-full max-w-md gap-1 rounded-xl bg-surface-muted p-1">
         {(
           [
             ['candidatures', 'Candidatures'],
@@ -73,8 +73,8 @@ function CandidaturesPanel() {
   const setStatutMut = useSetCandidatureStatut();
 
   return (
-    <div>
-      <Card className="mb-4">
+    <div className="space-y-4">
+      <Card>
         <div className="sm:max-w-xs">
           <Select
             options={STATUT_OPTIONS}
@@ -87,22 +87,24 @@ function CandidaturesPanel() {
 
       <Card className="overflow-hidden p-0">
         {isLoading ? (
-          <div className="flex justify-center py-16">
-            <Spinner />
-          </div>
+          <SkeletonRows rows={4} cols={3} />
         ) : !list || list.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-16 text-center">
-            <Inbox className="text-ink-subtle" />
-            <p className="text-ink-muted">Aucune candidature.</p>
-          </div>
+          <EmptyState
+            icon={<Inbox size={20} />}
+            title="Aucune candidature"
+            description="Les candidatures déposées sur le site public apparaîtront ici."
+          />
         ) : (
           <ul className="divide-y divide-surface-border">
             {list.map((c) => (
               <li key={c.id} className="flex flex-wrap items-start gap-4 px-5 py-4">
+                <Avatar name={c.nom} size="md" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-ink">{c.nom}</span>
-                    <Badge tone={STATUT_TONE[c.statut]}>{STATUT_LABEL[c.statut]}</Badge>
+                    <Badge tone={STATUT_TONE[c.statut]} dot>
+                      {STATUT_LABEL[c.statut]}
+                    </Badge>
                   </div>
                   <div className="text-sm text-ink-muted">
                     {c.poste ?? 'Candidature spontanée'} · {c.email}
@@ -116,7 +118,7 @@ function CandidaturesPanel() {
                         href={c.cvUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-brand-600 hover:underline"
+                        className="inline-flex items-center gap-1 text-xs font-medium text-brand-600 hover:underline"
                       >
                         <FileText size={13} /> CV
                       </a>
@@ -148,8 +150,8 @@ function MessagesPanel() {
   const markTraite = useMarkContactTraite();
 
   return (
-    <div>
-      <div className="mb-4 flex gap-1 rounded-xl bg-surface-muted p-1 sm:max-w-xs">
+    <div className="space-y-4">
+      <div className="flex gap-1 rounded-xl bg-surface-muted p-1 sm:max-w-xs">
         {(
           [
             [false, 'Tous'],
@@ -171,18 +173,20 @@ function MessagesPanel() {
 
       <Card className="overflow-hidden p-0">
         {isLoading ? (
-          <div className="flex justify-center py-16">
-            <Spinner />
-          </div>
+          <SkeletonRows rows={3} cols={2} />
         ) : !list || list.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-16 text-center">
-            <Mail className="text-ink-subtle" />
-            <p className="text-ink-muted">Aucun message.</p>
-          </div>
+          <EmptyState
+            icon={<Mail size={20} />}
+            title="Aucun message"
+            description="Les messages envoyés via le formulaire de contact arriveront ici."
+          />
         ) : (
           <ul className="divide-y divide-surface-border">
             {list.map((m) => (
-              <li key={m.id} className={cn('flex items-start gap-4 px-5 py-4', !m.traite && 'bg-brand-50/40')}>
+              <li
+                key={m.id}
+                className={cn('flex items-start gap-4 px-5 py-4', !m.traite && 'bg-brand-50/40')}
+              >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-ink">{m.sujet ?? 'Sans objet'}</span>

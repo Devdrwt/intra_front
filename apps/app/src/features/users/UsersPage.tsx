@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Plus, Power, ShieldCheck, Trash2, X } from 'lucide-react';
-import { Badge, Button, Card, Input, Spinner, cn } from '@drwindesk/ui';
+import { Avatar, Badge, Button, Card, EmptyState, Input, SkeletonRows, cn } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
 import { useDeleteUser, useInviteUser, useUpdateUser, useUsers } from './hooks';
@@ -43,13 +43,13 @@ export function UsersPage() {
   };
 
   return (
-    <div>
-      <header className="mb-6 flex items-center justify-between">
+    <div className="space-y-5">
+      <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-ink">Utilisateurs & accès</h1>
+          <h2 className="text-2xl font-bold tracking-tight text-ink">Utilisateurs & accès</h2>
           <p className="text-ink-muted">Comptes du personnel, rôles et statut de connexion.</p>
         </div>
-        <Button onClick={() => setOpen((v) => !v)}>
+        <Button onClick={() => setOpen((v) => !v)} variant={open ? 'secondary' : 'primary'}>
           {open ? <X size={18} /> : <Plus size={18} />}
           {open ? 'Fermer' : 'Inviter'}
         </Button>
@@ -59,33 +59,42 @@ export function UsersPage() {
 
       <Card className="overflow-hidden p-0">
         {isLoading ? (
-          <div className="flex justify-center py-16">
-            <Spinner />
-          </div>
+          <SkeletonRows rows={5} cols={4} />
         ) : !users || users.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-16 text-center">
-            <ShieldCheck className="text-ink-subtle" />
-            <p className="text-ink-muted">Aucun utilisateur.</p>
-          </div>
+          <EmptyState
+            icon={<ShieldCheck size={20} />}
+            title="Aucun utilisateur"
+            description="Invitez les membres de votre organisation à rejoindre DrwinDesk."
+            action={
+              <Button size="sm" onClick={() => setOpen(true)}>
+                <Plus size={16} /> Inviter un membre
+              </Button>
+            }
+          />
         ) : (
           <table className="w-full text-sm">
-            <thead className="border-b border-surface-border bg-surface-muted text-left text-xs uppercase text-ink-subtle">
+            <thead className="border-b border-surface-border bg-surface-muted text-left text-xs uppercase tracking-wide text-ink-subtle">
               <tr>
-                <th className="px-5 py-3 font-medium">Utilisateur</th>
-                <th className="px-5 py-3 font-medium">Rôles</th>
-                <th className="px-5 py-3 font-medium">Statut</th>
-                <th className="px-5 py-3 font-medium">Dernière connexion</th>
-                <th className="px-5 py-3 text-right font-medium">Actions</th>
+                <th className="px-5 py-2.5 font-medium">Utilisateur</th>
+                <th className="hidden px-5 py-2.5 font-medium sm:table-cell">Rôles</th>
+                <th className="px-5 py-2.5 font-medium">Statut</th>
+                <th className="hidden px-5 py-2.5 font-medium lg:table-cell">Dernière connexion</th>
+                <th className="px-5 py-2.5 text-right font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
               {users.map((u) => (
                 <tr key={u.id} className="border-b border-surface-border last:border-0">
                   <td className="px-5 py-3">
-                    <div className="font-medium text-ink">{userLabel(u)}</div>
-                    <div className="text-xs text-ink-subtle">{u.email}</div>
+                    <div className="flex items-center gap-3">
+                      <Avatar name={userLabel(u)} size="md" />
+                      <div className="min-w-0">
+                        <div className="truncate font-medium text-ink">{userLabel(u)}</div>
+                        <div className="truncate text-xs text-ink-subtle">{u.email}</div>
+                      </div>
+                    </div>
                   </td>
-                  <td className="px-5 py-3">
+                  <td className="hidden px-5 py-3 sm:table-cell">
                     <div className="flex flex-wrap gap-1">
                       {u.roles.map((r) => (
                         <Badge key={r} tone="brand">
@@ -95,9 +104,13 @@ export function UsersPage() {
                     </div>
                   </td>
                   <td className="px-5 py-3">
-                    <Badge tone={STATUT_TONE[u.status]}>{STATUT_LABEL[u.status]}</Badge>
+                    <Badge tone={STATUT_TONE[u.status]} dot>
+                      {STATUT_LABEL[u.status]}
+                    </Badge>
                   </td>
-                  <td className="px-5 py-3 text-ink-muted">{fmt(u.lastLoginAt)}</td>
+                  <td className="hidden px-5 py-3 text-ink-muted lg:table-cell">
+                    {fmt(u.lastLoginAt)}
+                  </td>
                   <td className="px-5 py-3">
                     <div className="flex justify-end gap-2">
                       <Button

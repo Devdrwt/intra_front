@@ -1,16 +1,9 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Mail, Pencil, Phone, Trash2, TriangleAlert } from 'lucide-react';
-import { Badge, Button, Callout, Card, CardTitle, Spinner } from '@drwindesk/ui';
+import { Avatar, Badge, Button, Callout, Card, CardTitle, EmptyState, Skeleton } from '@drwindesk/ui';
 import { useDeleteEmploye, useEmploye } from './hooks';
 import { EmployeDocuments } from '@/features/documents/EmployeDocuments';
-import {
-  fullName,
-  initials,
-  statutLabel,
-  statutTone,
-  formatDate,
-  joursAvantEcheance,
-} from './helpers';
+import { fullName, statutLabel, statutTone, formatDate, joursAvantEcheance } from './helpers';
 
 function Field({ label, value }: { label: string; value: string }) {
   return (
@@ -29,13 +22,36 @@ export function EmployeDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center py-16">
-        <Spinner />
+      <div className="mx-auto max-w-3xl space-y-4">
+        <Skeleton className="h-4 w-32" />
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-14 w-14 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+        </div>
+        <Skeleton className="h-48 w-full rounded-2xl" />
       </div>
     );
   }
   if (isError || !employe) {
-    return <div className="py-16 text-center text-danger">Collaborateur introuvable.</div>;
+    return (
+      <div className="mx-auto max-w-3xl">
+        <EmptyState
+          icon={<TriangleAlert size={20} />}
+          title="Collaborateur introuvable"
+          description="Cette fiche n’existe pas ou a été supprimée."
+          action={
+            <Link to="/rh">
+              <Button variant="secondary" size="sm">
+                <ArrowLeft size={16} /> Retour à la liste
+              </Button>
+            </Link>
+          }
+        />
+      </div>
+    );
   }
 
   const echeance = joursAvantEcheance(employe.dateFinContrat);
@@ -51,19 +67,19 @@ export function EmployeDetailPage() {
         <ArrowLeft size={16} /> Retour à la liste
       </Link>
 
-      <header className="mb-6 mt-3 flex items-start justify-between">
+      <header className="mb-6 mt-3 flex items-start justify-between gap-3">
         <div className="flex items-center gap-4">
-          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-50 text-lg font-semibold text-brand-700">
-            {initials(employe)}
-          </span>
+          <Avatar name={fullName(employe)} size="lg" />
           <div>
-            <h1 className="text-2xl font-bold text-ink">{fullName(employe)}</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-ink">{fullName(employe)}</h1>
             <p className="text-ink-muted">
               {employe.poste} · {employe.matricule}
             </p>
           </div>
         </div>
-        <Badge tone={statutTone(employe.statut)}>{statutLabel(employe.statut)}</Badge>
+        <Badge tone={statutTone(employe.statut)} dot>
+          {statutLabel(employe.statut)}
+        </Badge>
       </header>
 
       {echeance !== null && echeance <= 30 && (

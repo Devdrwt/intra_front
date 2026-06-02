@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { BellOff, Check } from 'lucide-react';
-import { Badge, Button, Card, Spinner, cn } from '@drwindesk/ui';
+import { Badge, Button, Card, EmptyState, Skeleton, cn } from '@drwindesk/ui';
 import { useMarkAllRead, useMarkRead, useNotifications } from './hooks';
 import { SEVERITY_LABEL } from './types';
 import { severityTone, timeAgo } from './helpers';
@@ -12,18 +12,22 @@ export function AlertesPage() {
   const markAllRead = useMarkAllRead();
 
   return (
-    <div>
-      <header className="mb-6 flex items-center justify-between">
+    <div className="space-y-5">
+      <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-ink">Alertes</h1>
+          <h2 className="text-2xl font-bold tracking-tight text-ink">Alertes</h2>
           <p className="text-ink-muted">Notifications de votre espace personnel.</p>
         </div>
-        <Button variant="secondary" onClick={() => markAllRead.mutate()} disabled={markAllRead.isPending}>
+        <Button
+          variant="secondary"
+          onClick={() => markAllRead.mutate()}
+          disabled={markAllRead.isPending}
+        >
           <Check size={16} /> Tout marquer lu
         </Button>
       </header>
 
-      <div className="mb-4 flex gap-1 rounded-xl bg-surface-muted p-1">
+      <div className="flex w-full max-w-xs gap-1 rounded-xl bg-surface-muted p-1">
         {(
           [
             [false, 'Toutes'],
@@ -45,14 +49,23 @@ export function AlertesPage() {
 
       <Card className="overflow-hidden p-0">
         {isLoading ? (
-          <div className="flex justify-center py-16">
-            <Spinner />
+          <div className="divide-y divide-surface-border">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 px-5 py-4">
+                <Skeleton className="h-2 w-2 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-1/3" />
+                  <Skeleton className="h-3 w-2/3" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : !notifications || notifications.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-16 text-center">
-            <BellOff className="text-ink-subtle" />
-            <p className="text-ink-muted">Aucune notification.</p>
-          </div>
+          <EmptyState
+            icon={<BellOff size={20} />}
+            title="Aucune notification"
+            description={unreadOnly ? 'Tout est lu. 🎉' : 'Vous n’avez aucune alerte pour le moment.'}
+          />
         ) : (
           <ul className="divide-y divide-surface-border">
             {notifications.map((n) => (

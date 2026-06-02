@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { FileText, Plus, Trash2, X } from 'lucide-react';
-import { Badge, Button, Input, Select, Spinner } from '@drwindesk/ui';
+import { Badge, Button, EmptyState, Input, Select, Skeleton } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
 import { UPLOADS_ENABLED } from '@/lib/config';
 import { uploadViaPresign } from '@/lib/upload';
@@ -114,16 +114,31 @@ export function EmployeDocuments({ employeId }: { employeId: string }) {
 
       <div className="mt-4">
         {isLoading ? (
-          <div className="flex justify-center py-6">
-            <Spinner />
+          <div className="space-y-3 py-2">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <Skeleton className="h-9 w-9 rounded-lg" />
+                <div className="flex-1 space-y-1.5">
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-3 w-1/4" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : !docs || docs.length === 0 ? (
-          <p className="py-6 text-center text-sm text-ink-subtle">Aucun document.</p>
+          <EmptyState
+            icon={<FileText size={18} />}
+            title="Aucun document"
+            description="Aucun contrat ou pièce n’est encore rattaché."
+            className="py-8"
+          />
         ) : (
           <ul className="divide-y divide-surface-border">
             {docs.map((d) => (
               <li key={d.id} className="flex items-center gap-3 py-3">
-                <FileText size={18} className="shrink-0 text-ink-subtle" />
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-ink-subtle">
+                  <FileText size={16} />
+                </span>
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-medium text-ink">{d.nom}</div>
                   <div className="text-xs text-ink-subtle">
