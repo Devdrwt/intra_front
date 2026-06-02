@@ -66,9 +66,11 @@ export function DashboardPage() {
   const recent = espace?.notifications.recent ?? [];
 
   const actions = [
-    { to: '/rapports/nouveau', label: 'Saisir un rapport', icon: FileBarChart, perm: undefined },
-    { to: '/rh/nouveau', label: 'Nouvel employé', icon: Plus, perm: undefined },
-    { to: '/presences/conges/nouveau', label: 'Demander un congé', icon: CalendarClock, perm: undefined },
+    // Self-service (espace collaborateur) — visibles par tous.
+    { to: '/mes-conges', label: 'Demander un congé', icon: CalendarClock, perm: undefined },
+    { to: '/mes-rapports', label: 'Saisir un rapport', icon: FileBarChart, perm: undefined },
+    // Gestion — gardées par permission (admin / RH-manager).
+    { to: '/rh/nouveau', label: 'Nouvel employé', icon: Plus, perm: 'rh.employe:read' },
     { to: '/utilisateurs', label: 'Inviter un membre', icon: UserPlus, perm: 'user:read' },
   ].filter((a) => !a.perm || hasPermission(user, a.perm));
 

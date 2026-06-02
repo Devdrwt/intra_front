@@ -3,6 +3,7 @@ import {
   Users,
   FolderArchive,
   CalendarClock,
+  CalendarCheck,
   FileBarChart,
   Bell,
   Briefcase,
@@ -10,6 +11,7 @@ import {
   BookOpen,
   HelpCircle,
   Settings,
+  Clock,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -17,29 +19,58 @@ export interface ModuleRoute {
   path: string;
   label: string;
   icon: LucideIcon;
-  /** Groupe d'affichage dans la sidebar. */
+  /** Espace d'appartenance (= section de la sidebar). */
   group: string;
   /** Permission requise pour voir l'entrée (le wildcard `*` la satisfait toujours). */
   requires?: string;
 }
 
-/** Ordre des groupes dans la sidebar. */
-export const MODULE_GROUPS = [
-  'Principal',
-  'Personnel',
-  'Activité',
-  'Administration',
-  'Aide & réglages',
-] as const;
+/**
+ * Deux espaces :
+ *  - « Mon espace » : self-service, visible par tout utilisateur connecté.
+ *  - « Administration » : gestion org-wide, réservée par permission (admin / RH-manager).
+ *  - « Aide & réglages » : transverse.
+ */
+export const MODULE_GROUPS = ['Mon espace', 'Administration', 'Aide & réglages'] as const;
 
-/** Modules DrwinDesk (cf. document maître, partie IV). `requires` filtre la nav. */
 export const MODULES: ModuleRoute[] = [
-  { path: '/', label: 'Tableau de bord', icon: LayoutDashboard, group: 'Principal' },
-  { path: '/rh', label: 'RH & Personnel', icon: Users, group: 'Personnel' },
-  { path: '/presences', label: 'Présences & Congés', icon: CalendarClock, group: 'Personnel' },
-  { path: '/documents', label: 'Documents & Contrats', icon: FolderArchive, group: 'Personnel' },
-  { path: '/rapports', label: 'Rapports', icon: FileBarChart, group: 'Activité' },
-  { path: '/alertes', label: 'Alertes', icon: Bell, group: 'Activité' },
+  // --- Mon espace (collaborateur) -------------------------------------------
+  { path: '/', label: 'Tableau de bord', icon: LayoutDashboard, group: 'Mon espace' },
+  { path: '/mon-pointage', label: 'Mon pointage', icon: Clock, group: 'Mon espace' },
+  { path: '/mes-conges', label: 'Mes congés', icon: CalendarClock, group: 'Mon espace' },
+  { path: '/mes-rapports', label: 'Mes rapports', icon: FileBarChart, group: 'Mon espace' },
+  { path: '/mes-documents', label: 'Mes documents', icon: FolderArchive, group: 'Mon espace' },
+  { path: '/alertes', label: 'Mes alertes', icon: Bell, group: 'Mon espace' },
+
+  // --- Administration (gestion) ---------------------------------------------
+  {
+    path: '/rh',
+    label: 'RH & Personnel',
+    icon: Users,
+    group: 'Administration',
+    requires: 'rh.employe:read',
+  },
+  {
+    path: '/presences',
+    label: 'Présences & Congés',
+    icon: CalendarCheck,
+    group: 'Administration',
+    requires: 'presence:manage',
+  },
+  {
+    path: '/rapports',
+    label: 'Rapports',
+    icon: FileBarChart,
+    group: 'Administration',
+    requires: 'rapport:manage',
+  },
+  {
+    path: '/documents',
+    label: 'Documents (GED)',
+    icon: FolderArchive,
+    group: 'Administration',
+    requires: 'rh.employe:read',
+  },
   {
     path: '/recrutement',
     label: 'Recrutement',
@@ -54,7 +85,15 @@ export const MODULES: ModuleRoute[] = [
     group: 'Administration',
     requires: 'user:read',
   },
+  {
+    path: '/parametres',
+    label: 'Paramètres',
+    icon: Settings,
+    group: 'Administration',
+    requires: 'settings:manage',
+  },
+
+  // --- Aide & réglages -------------------------------------------------------
   { path: '/guide', label: 'Guide', icon: BookOpen, group: 'Aide & réglages' },
   { path: '/faq', label: 'FAQ', icon: HelpCircle, group: 'Aide & réglages' },
-  { path: '/parametres', label: 'Paramètres', icon: Settings, group: 'Aide & réglages' },
 ];

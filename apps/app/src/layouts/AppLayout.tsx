@@ -134,7 +134,12 @@ export function AppLayout() {
           <ThemeToggle />
           <NotificationBell />
           <div className="mx-1 hidden h-6 w-px bg-surface-border sm:block" />
-          <UserMenu name={user ? displayName(user) : 'Collaborateur'} email={user?.email ?? ''} onLogout={logout} />
+          <UserMenu
+            name={user ? displayName(user) : 'Collaborateur'}
+            email={user?.email ?? ''}
+            canSettings={hasPermission(user, 'settings:manage')}
+            onLogout={logout}
+          />
         </header>
 
         <main className="flex-1">
@@ -264,7 +269,17 @@ function SidebarFooter({ collapsed, onToggle }: { collapsed: boolean; onToggle: 
   );
 }
 
-function UserMenu({ name, email, onLogout }: { name: string; email: string; onLogout: () => void }) {
+function UserMenu({
+  name,
+  email,
+  canSettings,
+  onLogout,
+}: {
+  name: string;
+  email: string;
+  canSettings: boolean;
+  onLogout: () => void;
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -303,13 +318,15 @@ function UserMenu({ name, email, onLogout }: { name: string; email: string; onLo
             </div>
           </div>
           <div className="p-1.5">
-            <Link
-              to="/parametres"
-              onClick={() => setOpen(false)}
-              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-ink-muted transition-colors hover:bg-surface-muted hover:text-ink"
-            >
-              <Settings size={16} /> Paramètres
-            </Link>
+            {canSettings && (
+              <Link
+                to="/parametres"
+                onClick={() => setOpen(false)}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-ink-muted transition-colors hover:bg-surface-muted hover:text-ink"
+              >
+                <Settings size={16} /> Paramètres
+              </Link>
+            )}
             <Link
               to="/guide"
               onClick={() => setOpen(false)}

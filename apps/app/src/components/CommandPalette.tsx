@@ -41,9 +41,15 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
       (m) => ({ id: `nav:${m.path}`, label: m.label, group: 'Aller à', icon: m.icon, run: go(m.path) }),
     );
     const actions: Item[] = [
-      { id: 'a:rapport', label: 'Saisir un rapport', group: 'Actions', icon: FileBarChart, run: go('/rapports/nouveau') },
-      { id: 'a:employe', label: 'Nouvel employé', group: 'Actions', icon: Plus, run: go('/rh/nouveau') },
-      { id: 'a:conge', label: 'Demander un congé', group: 'Actions', icon: CalendarClock, run: go('/presences/conges/nouveau') },
+      ...(hasPermission(user, 'rapport:manage')
+        ? [{ id: 'a:rapport', label: 'Saisir un rapport', group: 'Actions' as const, icon: FileBarChart, run: go('/rapports/nouveau') }]
+        : []),
+      ...(hasPermission(user, 'rh.employe:read')
+        ? [{ id: 'a:employe', label: 'Nouvel employé', group: 'Actions' as const, icon: Plus, run: go('/rh/nouveau') }]
+        : []),
+      ...(hasPermission(user, 'presence:manage')
+        ? [{ id: 'a:conge', label: 'Demander un congé', group: 'Actions' as const, icon: CalendarClock, run: go('/presences/conges/nouveau') }]
+        : []),
       ...(hasPermission(user, 'user:read')
         ? [{ id: 'a:invite', label: 'Inviter un membre', group: 'Actions' as const, icon: UserPlus, run: go('/utilisateurs') }]
         : []),
