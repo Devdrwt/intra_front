@@ -49,4 +49,6 @@ export const USE_MOCKS = {
   // Référentiels (départements/services) : backend en place → suit le global comme
   // les autres modules. Override toujours possible via VITE_MOCK_SETTINGS.
   settings: flag(import.meta.env.VITE_MOCK_SETTINGS, globalMock),
+  // Espace collaborateur (endpoints /me/...) : backend en place.
+  me: flag(import.meta.env.VITE_MOCK_ME, globalMock),
 } as const;

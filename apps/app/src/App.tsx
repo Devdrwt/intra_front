@@ -6,7 +6,10 @@ import { AppLayout } from '@/layouts/AppLayout';
 import { LoginPage } from '@/pages/LoginPage';
 import { SetPasswordPage } from '@/pages/SetPasswordPage';
 import { DashboardPage } from '@/pages/DashboardPage';
-import { SelfServicePlaceholder } from '@/pages/SelfServicePlaceholder';
+import { MonPointagePage } from '@/features/me/MonPointagePage';
+import { MesCongesPage } from '@/features/me/MesCongesPage';
+import { MesRapportsPage } from '@/features/me/MesRapportsPage';
+import { MesDocumentsPage } from '@/features/me/MesDocumentsPage';
 import { EmployesListPage } from '@/features/rh/EmployesListPage';
 import { EmployeFormPage } from '@/features/rh/EmployeFormPage';
 import { EmployeDetailPage } from '@/features/rh/EmployeDetailPage';
@@ -38,42 +41,10 @@ export default function App() {
           >
             {/* --- Mon espace (tout utilisateur connecté) ------------------- */}
             <Route index element={<DashboardPage />} />
-            <Route
-              path="mon-pointage"
-              element={
-                <SelfServicePlaceholder
-                  title="Mon pointage"
-                  description="Pointez vos arrivées / départs et consultez votre historique de présence."
-                />
-              }
-            />
-            <Route
-              path="mes-conges"
-              element={
-                <SelfServicePlaceholder
-                  title="Mes congés"
-                  description="Déposez vos demandes de congé et suivez leur statut."
-                />
-              }
-            />
-            <Route
-              path="mes-rapports"
-              element={
-                <SelfServicePlaceholder
-                  title="Mes rapports"
-                  description="Rédigez et envoyez vos rapports journaliers."
-                />
-              }
-            />
-            <Route
-              path="mes-documents"
-              element={
-                <SelfServicePlaceholder
-                  title="Mes documents"
-                  description="Retrouvez vos bulletins, contrats et attestations."
-                />
-              }
-            />
+            <Route path="mon-pointage" element={<MonPointagePage />} />
+            <Route path="mes-conges" element={<MesCongesPage />} />
+            <Route path="mes-rapports" element={<MesRapportsPage />} />
+            <Route path="mes-documents" element={<MesDocumentsPage />} />
             <Route path="alertes" element={<AlertesPage />} />
 
             {/* --- Aide & réglages (transverse) ----------------------------- */}
