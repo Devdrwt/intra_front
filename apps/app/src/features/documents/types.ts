@@ -11,7 +11,10 @@ export interface Document {
   url?: string; // lien S3 signé fourni par le backend
 }
 
-export type DocumentInput = Omit<Document, 'id' | 'dateAjout' | 'url'>;
+export type DocumentInput = Omit<Document, 'id' | 'dateAjout' | 'url'> & {
+  /** Clé objet S3 renvoyée par le presign (si le fichier a été uploadé). */
+  storageKey?: string;
+};
 
 export const TYPE_DOCUMENT_LABEL: Record<TypeDocument, string> = {
   CONTRAT: 'Contrat',

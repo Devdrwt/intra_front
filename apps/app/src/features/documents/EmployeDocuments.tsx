@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from 'react';
 import { FileText, Plus, Trash2, X } from 'lucide-react';
 import { Badge, Button, Input, Select, Spinner } from '@drwindesk/ui';
+import { UPLOADS_ENABLED } from '@/lib/config';
+import { uploadViaPresign } from '@/lib/upload';
 import { useAddDocument, useDocumentsEmploye, useRemoveDocument } from './hooks';
 import {
   TYPE_DOCUMENT_LABEL,
@@ -24,15 +26,42 @@ export function EmployeDocuments({ employeId }: { employeId: string }) {
   const [open, setOpen] = useState(false);
   const [nom, setNom] = useState('');
   const [type, setType] = useState<TypeDocument>('CONTRAT');
+  const [file, setFile] = useState<File | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const reset = () => {
+    setNom('');
+    setType('CONTRAT');
+    setFile(null);
+    setError(null);
+    setOpen(false);
+  };
 
   const onAdd = async (e: FormEvent) => {
     e.preventDefault();
-    // TODO: upload réel du fichier vers S3 (Scaleway) puis enregistrer l'URL renvoyée.
-    const input: DocumentInput = { employeId, nom: nom.trim(), type, tailleKo: 0 };
-    await add.mutateAsync(input);
-    setNom('');
-    setType('CONTRAT');
-    setOpen(false);
+    setError(null);
+    setBusy(true);
+    try {
+      let storageKey: string | undefined;
+      let tailleKo = 0;
+      let nomFinal = nom.trim();
+
+      if (UPLOADS_ENABLED && file) {
+        // 1) presign + PUT direct du binaire vers S3, 2) on garde la storageKey.
+        storageKey = await uploadViaPresign(`/employes/${employeId}/documents/presign`, file);
+        tailleKo = Math.max(1, Math.round(file.size / 1024));
+        if (!nomFinal) nomFinal = file.name;
+      }
+
+      const input: DocumentInput = { employeId, nom: nomFinal, type, tailleKo, storageKey };
+      await add.mutateAsync(input);
+      reset();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Échec de l’enregistrement.');
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -50,22 +79,34 @@ export function EmployeDocuments({ employeId }: { employeId: string }) {
       {open && (
         <form
           onSubmit={onAdd}
-          className="mt-3 grid gap-3 rounded-xl border border-surface-border bg-surface-muted p-3 sm:grid-cols-[1fr_auto_auto]"
+          className="mt-3 flex flex-col gap-3 rounded-xl border border-surface-border bg-surface-muted p-3"
         >
-          <Input
-            placeholder="Nom du document (ex. Contrat CDI.pdf)"
-            value={nom}
-            onChange={(e) => setNom(e.target.value)}
-            required
-          />
-          <Select
-            options={TYPE_DOCUMENT_OPTIONS}
-            value={type}
-            onChange={(e) => setType(e.target.value as TypeDocument)}
-          />
-          <Button type="submit" disabled={add.isPending || !nom.trim()}>
-            {add.isPending ? 'Ajout…' : 'Enregistrer'}
-          </Button>
+          {UPLOADS_ENABLED && (
+            <input
+              type="file"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              className="text-sm text-ink-muted file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-brand-700"
+            />
+          )}
+          <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto]">
+            <Input
+              placeholder={
+                UPLOADS_ENABLED ? 'Nom (optionnel, repris du fichier)' : 'Nom du document (ex. Contrat CDI.pdf)'
+              }
+              value={nom}
+              onChange={(e) => setNom(e.target.value)}
+              required={!UPLOADS_ENABLED}
+            />
+            <Select
+              options={TYPE_DOCUMENT_OPTIONS}
+              value={type}
+              onChange={(e) => setType(e.target.value as TypeDocument)}
+            />
+            <Button type="submit" disabled={busy || (UPLOADS_ENABLED ? !file && !nom.trim() : !nom.trim())}>
+              {busy ? 'Envoi…' : 'Enregistrer'}
+            </Button>
+          </div>
+          {error && <p className="text-sm text-danger">{error}</p>}
         </form>
       )}
 

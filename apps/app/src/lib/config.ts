@@ -23,6 +23,14 @@ function flag(value: string | undefined, fallback: boolean): boolean {
   return fallback;
 }
 
+/**
+ * Upload de fichiers (CV, documents GED) via URL presignée S3.
+ * OFF par défaut : tant que le backend n'expose pas les endpoints `…/presign`,
+ * les formulaires restent en mode métadonnées (rien ne casse). Passer à 'true'
+ * une fois le presign backend disponible.
+ */
+export const UPLOADS_ENABLED = import.meta.env.VITE_UPLOADS_ENABLED === 'true';
+
 export const USE_MOCKS = {
   auth: flag(import.meta.env.VITE_MOCK_AUTH, false),
   rh: flag(import.meta.env.VITE_MOCK_RH, globalMock),

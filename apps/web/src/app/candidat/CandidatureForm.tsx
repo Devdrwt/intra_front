@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 import { Button, Card, CardTitle, CardDescription, Input, Textarea } from '@drwindesk/ui';
-import { postPublic } from '@/lib/api';
+import { postPublic, presignAndUpload, UPLOADS_ENABLED } from '@/lib/api';
 
 interface Form {
   nom: string;
@@ -15,6 +15,7 @@ const EMPTY: Form = { nom: '', email: '', telephone: '', poste: '', message: '' 
 
 export function CandidatureForm() {
   const [form, setForm] = useState<Form>(EMPTY);
+  const [cv, setCv] = useState<File | null>(null);
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [error, setError] = useState<string | null>(null);
 
@@ -26,16 +27,21 @@ export function CandidatureForm() {
     setError(null);
     try {
       // tenantSlug omis → le backend cible "drwintech" par défaut.
-      // cvUrl arrivera avec l'upload S3 (presign) — non câblé pour l'instant.
+      let cvStorageKey: string | undefined;
+      if (UPLOADS_ENABLED && cv) {
+        cvStorageKey = await presignAndUpload('/candidatures/cv/presign', cv);
+      }
       await postPublic('/candidatures', {
         nom: form.nom,
         email: form.email,
         telephone: form.telephone || undefined,
         poste: form.poste || undefined,
         message: form.message || undefined,
+        ...(cvStorageKey ? { cvStorageKey } : {}),
       });
       setStatus('sent');
       setForm(EMPTY);
+      setCv(null);
     } catch (err) {
       setStatus('error');
       setError(err instanceof Error ? err.message : 'Échec de l’envoi.');
@@ -102,9 +108,24 @@ export function CandidatureForm() {
           onChange={(e) => set('message', e.target.value)}
           placeholder="Présentez-vous en quelques lignes…"
         />
-        <p className="text-xs text-ink-subtle">
-          📎 L’envoi du CV (PDF) sera disponible prochainement (stockage S3).
-        </p>
+        {UPLOADS_ENABLED ? (
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="cv" className="text-sm font-medium text-ink">
+              CV (PDF)
+            </label>
+            <input
+              id="cv"
+              type="file"
+              accept="application/pdf"
+              onChange={(e) => setCv(e.target.files?.[0] ?? null)}
+              className="text-sm text-ink-muted file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-brand-700"
+            />
+          </div>
+        ) : (
+          <p className="text-xs text-ink-subtle">
+            📎 L’envoi du CV (PDF) sera disponible prochainement (stockage S3).
+          </p>
+        )}
 
         {status === 'error' && <p className="text-sm text-danger">{error}</p>}
 

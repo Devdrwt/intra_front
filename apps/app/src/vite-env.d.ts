@@ -13,6 +13,8 @@ interface ImportMetaEnv {
   readonly VITE_MOCK_RAPPORTS?: string;
   readonly VITE_MOCK_ESPACES?: string;
   readonly VITE_MOCK_RECRUTEMENT?: string;
+  /** 'true' → active l'upload de fichiers via presign S3. Défaut : off. */
+  readonly VITE_UPLOADS_ENABLED?: string;
 }
 
 interface ImportMeta {

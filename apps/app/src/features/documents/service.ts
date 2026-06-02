@@ -64,9 +64,14 @@ const httpApi = {
     api.get<Document[]>(`/employes/${employeId}/documents`).then((r) => r.data),
   create: (employeId: string, input: DocumentInput) => {
     // employeId est dans l'URL : on n'envoie que les métadonnées dans le body.
-    const { nom, type, tailleKo } = input;
+    const { nom, type, tailleKo, storageKey } = input;
     return api
-      .post<Document>(`/employes/${employeId}/documents`, { nom, type, tailleKo })
+      .post<Document>(`/employes/${employeId}/documents`, {
+        nom,
+        type,
+        tailleKo,
+        ...(storageKey ? { storageKey } : {}),
+      })
       .then((r) => r.data);
   },
   remove: (id: string) => api.delete(`/documents/${id}`).then(() => undefined),

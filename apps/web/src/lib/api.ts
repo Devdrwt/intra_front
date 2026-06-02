@@ -48,3 +48,26 @@ export async function postPublic<T = unknown>(path: string, body: unknown): Prom
   }
   return res.status === 204 ? (undefined as T) : ((await res.json()) as T);
 }
+
+/** Activation de l'upload de fichiers (CV) — off tant que le presign backend n'existe pas. */
+export const UPLOADS_ENABLED = process.env.NEXT_PUBLIC_UPLOADS_ENABLED === 'true';
+
+/**
+ * Upload public via presign (CV de candidature). Contrat backend attendu :
+ *   POST /candidatures/cv/presign { filename, contentType, size } → { uploadUrl, storageKey }
+ * Le binaire est ensuite PUT directement sur `uploadUrl` (URL signée S3).
+ */
+export async function presignAndUpload(presignPath: string, file: File): Promise<string> {
+  const contentType = file.type || 'application/octet-stream';
+  const { uploadUrl, storageKey } = await postPublic<{ uploadUrl: string; storageKey: string }>(
+    presignPath,
+    { filename: file.name, contentType, size: file.size },
+  );
+  const res = await fetch(uploadUrl, {
+    method: 'PUT',
+    headers: { 'Content-Type': contentType },
+    body: file,
+  });
+  if (!res.ok) throw new Error(`Échec du transfert du fichier (${res.status}).`);
+  return storageKey;
+}
