@@ -5,7 +5,6 @@ import { AppLayout } from '@/layouts/AppLayout';
 import { LoginPage } from '@/pages/LoginPage';
 import { SetPasswordPage } from '@/pages/SetPasswordPage';
 import { DashboardPage } from '@/pages/DashboardPage';
-import { ModulePlaceholder } from '@/pages/ModulePlaceholder';
 import { EmployesListPage } from '@/features/rh/EmployesListPage';
 import { EmployeFormPage } from '@/features/rh/EmployeFormPage';
 import { EmployeDetailPage } from '@/features/rh/EmployeDetailPage';
@@ -16,6 +15,7 @@ import { RapportFormPage } from '@/features/rapports/RapportFormPage';
 import { AlertesPage } from '@/features/espaces/AlertesPage';
 import { RecrutementPage } from '@/features/recrutement/RecrutementPage';
 import { UsersPage } from '@/features/users/UsersPage';
+import { DocumentsPage } from '@/features/documents/DocumentsPage';
 
 export default function App() {
   return (
@@ -36,10 +36,7 @@ export default function App() {
             <Route path="rh/nouveau" element={<EmployeFormPage />} />
             <Route path="rh/:id" element={<EmployeDetailPage />} />
             <Route path="rh/:id/editer" element={<EmployeFormPage />} />
-            <Route
-              path="documents"
-              element={<ModulePlaceholder title="Documents & Contrats" />}
-            />
+            <Route path="documents" element={<DocumentsPage />} />
             <Route path="presences" element={<PresencesPage />} />
             <Route path="presences/conges/nouveau" element={<CongeFormPage />} />
             <Route path="rapports" element={<RapportsPage />} />

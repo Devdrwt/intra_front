@@ -18,7 +18,9 @@
 /** Nom d'affichage de l'organisation (le slug technique de connexion reste « drwintech »). */
 export const ORG_NAME = import.meta.env.VITE_ORG_NAME || 'Drwintech Inc';
 
-const globalMock = import.meta.env.VITE_USE_MOCKS !== 'false';
+// Tout est branché sur le backend par défaut. Les mocks ne servent que de repli
+// hors-ligne, et UNIQUEMENT si on les active explicitement (VITE_USE_MOCKS=true).
+const globalMock = import.meta.env.VITE_USE_MOCKS === 'true';
 
 /** 'true' → mock, 'false' → réel, sinon valeur par défaut du domaine. */
 function flag(value: string | undefined, fallback: boolean): boolean {
