@@ -11,15 +11,16 @@ import {
   Select,
   SkeletonRows,
 } from '@drwindesk/ui';
-import { DEPARTEMENTS } from './mock';
 import { STATUT_OPTIONS, type EmployeFilters } from './types';
 import { useEmployes } from './hooks';
+import { useDepartmentNames } from '@/features/settings/hooks';
 import { fullName, statutLabel, statutTone, formatDate } from './helpers';
 
 export function EmployesListPage() {
   const navigate = useNavigate();
   const [filters, setFilters] = useState<EmployeFilters>({ search: '', departement: '', statut: '' });
   const { data: employes, isLoading, isError } = useEmployes(filters);
+  const departments = useDepartmentNames();
   const count = employes?.length ?? 0;
 
   return (
@@ -45,7 +46,7 @@ export function EmployesListPage() {
             onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
           />
           <Select
-            options={DEPARTEMENTS.map((d) => ({ value: d, label: d }))}
+            options={departments.map((d) => ({ value: d, label: d }))}
             placeholder="Tous les départements"
             value={filters.departement}
             onChange={(e) => setFilters((f) => ({ ...f, departement: e.target.value }))}
@@ -113,7 +114,7 @@ export function EmployesListPage() {
                         <Avatar name={fullName(e)} size="md" />
                         <div className="min-w-0">
                           <div className="truncate font-medium text-ink">{fullName(e)}</div>
-                          <div className="text-xs text-ink-subtle">{e.matricule}</div>
+                          <div className="truncate text-xs text-ink-subtle">{e.email}</div>
                         </div>
                       </div>
                     </td>

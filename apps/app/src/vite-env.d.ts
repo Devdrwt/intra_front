@@ -14,6 +14,8 @@ interface ImportMetaEnv {
   readonly VITE_MOCK_ESPACES?: string;
   readonly VITE_MOCK_RECRUTEMENT?: string;
   readonly VITE_MOCK_USERS?: string;
+  /** Référentiels (départements/services). Défaut : mock (pas encore de backend). */
+  readonly VITE_MOCK_SETTINGS?: string;
   /** 'true' → active l'upload de fichiers via presign S3. Défaut : off. */
   readonly VITE_UPLOADS_ENABLED?: string;
   /** URL de l'image de fond du login (défaut : photo Pexels). */

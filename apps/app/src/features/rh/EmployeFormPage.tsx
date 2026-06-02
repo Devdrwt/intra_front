@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button, Card, Input, Select, Spinner } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
-import { DEPARTEMENTS } from './mock';
+import { useDepartmentNames } from '@/features/settings/hooks';
 import { STATUT_OPTIONS, TYPE_CONTRAT_OPTIONS, type EmployeInput } from './types';
 import { useCreateEmploye, useEmploye, useUpdateEmploye } from './hooks';
 
@@ -14,7 +14,7 @@ const EMPTY: EmployeInput = {
   email: '',
   telephone: '',
   poste: '',
-  departement: DEPARTEMENTS[0] ?? '',
+  departement: '',
   service: '',
   typeContrat: 'CDI',
   statut: 'ACTIF',
@@ -32,6 +32,10 @@ export function EmployeFormPage() {
   const update = useUpdateEmploye(id ?? '');
   const [form, setForm] = useState<EmployeInput>(EMPTY);
   const [error, setError] = useState<string | null>(null);
+  const departments = useDepartmentNames();
+  const deptOptions = Array.from(new Set([...departments, form.departement].filter(Boolean))).map(
+    (d) => ({ value: d, label: d }),
+  );
 
   useEffect(() => {
     if (existing) {
@@ -39,6 +43,13 @@ export function EmployeFormPage() {
       setForm({ ...EMPTY, ...rest });
     }
   }, [existing]);
+
+  // Pré-sélectionne le 1er département pour une nouvelle fiche.
+  useEffect(() => {
+    if (!isEdit && departments.length) {
+      setForm((f) => (f.departement ? f : { ...f, departement: departments[0]! }));
+    }
+  }, [isEdit, departments]);
 
   const set = <K extends keyof EmployeInput>(key: K, value: EmployeInput[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
@@ -48,6 +59,9 @@ export function EmployeFormPage() {
     setError(null);
     const payload: EmployeInput = {
       ...form,
+      // Matricule retiré de l'UI : auto-généré à la création (le backend l'exige,
+      // unique par tenant). Conservé tel quel en édition.
+      matricule: form.matricule || `MAT-${Date.now().toString(36).toUpperCase()}`,
       telephone: form.telephone || undefined,
       service: form.service || undefined,
       dateFinContrat: form.dateFinContrat || undefined,
@@ -88,14 +102,6 @@ export function EmployeFormPage() {
         <Card>
           <div className="grid gap-4 sm:grid-cols-2">
             <Input
-              id="matricule"
-              label="Matricule *"
-              value={form.matricule}
-              onChange={(e) => set('matricule', e.target.value)}
-              required
-            />
-            <div />
-            <Input
               id="prenom"
               label="Prénom *"
               value={form.prenom}
@@ -133,7 +139,7 @@ export function EmployeFormPage() {
             <Select
               id="departement"
               label="Département *"
-              options={DEPARTEMENTS.map((d) => ({ value: d, label: d }))}
+              options={deptOptions}
               value={form.departement}
               onChange={(e) => set('departement', e.target.value)}
             />

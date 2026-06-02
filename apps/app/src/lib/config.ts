@@ -46,4 +46,7 @@ export const USE_MOCKS = {
   espaces: flag(import.meta.env.VITE_MOCK_ESPACES, globalMock),
   recrutement: flag(import.meta.env.VITE_MOCK_RECRUTEMENT, globalMock),
   users: flag(import.meta.env.VITE_MOCK_USERS, globalMock),
+  // Référentiels : pas encore de backend → mock par défaut (passer 'false' quand
+  // /departments & /services existent, cf. docs/contracts/referentiels.md).
+  settings: flag(import.meta.env.VITE_MOCK_SETTINGS, true),
 } as const;

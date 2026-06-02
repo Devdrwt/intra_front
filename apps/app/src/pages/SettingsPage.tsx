@@ -1,8 +1,9 @@
-import { Laptop, LogOut, Moon, ShieldCheck, Sun, type LucideIcon } from 'lucide-react';
+import { Laptop, LogOut, Moon, ShieldCheck, SlidersHorizontal, Sun, type LucideIcon } from 'lucide-react';
 import { Avatar, Badge, Button, Callout, Card, CardDescription, CardTitle, cn } from '@drwindesk/ui';
-import { displayName, useAuth } from '@/auth/AuthContext';
+import { displayName, hasPermission, useAuth } from '@/auth/AuthContext';
 import { ORG_NAME } from '@/lib/config';
 import { useTheme } from '@/theme/ThemeProvider';
+import { ReferentielsSection } from '@/features/settings/ReferentielsSection';
 
 const THEMES: { value: 'light' | 'dark' | 'system'; label: string; icon: LucideIcon }[] = [
   { value: 'light', label: 'Clair', icon: Sun },
@@ -16,6 +17,7 @@ export function SettingsPage() {
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const name = user ? displayName(user) : 'Collaborateur';
+  const canManageOrg = hasPermission(user, 'settings:manage');
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -82,6 +84,23 @@ export function SettingsPage() {
           })}
         </div>
       </Card>
+
+      {/* Organisation — référentiels (admin) */}
+      {canManageOrg && (
+        <section className="space-y-4">
+          <div className="flex items-center gap-2 pt-2">
+            <SlidersHorizontal size={18} className="text-ink-subtle" />
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-subtle">
+              Organisation
+            </h3>
+          </div>
+          <Callout tone="info">
+            Définissez les départements et services de votre organisation. Ils alimentent les
+            formulaires RH, les présences et la consolidation des rapports.
+          </Callout>
+          <ReferentielsSection />
+        </section>
+      )}
 
       {/* Sécurité */}
       <Card>

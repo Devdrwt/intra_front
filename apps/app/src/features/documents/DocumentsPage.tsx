@@ -71,7 +71,7 @@ export function DocumentsPage() {
                   <div className="min-w-0">
                     <div className="truncate text-sm font-medium text-ink">{fullName(e)}</div>
                     <div className="truncate text-xs text-ink-subtle">
-                      {e.poste} · {e.matricule}
+                      {e.poste} · {e.departement}
                     </div>
                   </div>
                 </button>

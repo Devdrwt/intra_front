@@ -73,7 +73,7 @@ export function EmployeDetailPage() {
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-ink">{fullName(employe)}</h1>
             <p className="text-ink-muted">
-              {employe.poste} · {employe.matricule}
+              {employe.poste} · {employe.departement}
             </p>
           </div>
         </div>
