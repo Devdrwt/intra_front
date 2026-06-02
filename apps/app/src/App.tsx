@@ -3,6 +3,7 @@ import { AuthProvider } from '@/auth/AuthContext';
 import { RequireAuth } from '@/routes/RequireAuth';
 import { AppLayout } from '@/layouts/AppLayout';
 import { LoginPage } from '@/pages/LoginPage';
+import { SetPasswordPage } from '@/pages/SetPasswordPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { ModulePlaceholder } from '@/pages/ModulePlaceholder';
 import { EmployesListPage } from '@/features/rh/EmployesListPage';
@@ -22,6 +23,7 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/set-password" element={<SetPasswordPage />} />
           <Route
             element={
               <RequireAuth>

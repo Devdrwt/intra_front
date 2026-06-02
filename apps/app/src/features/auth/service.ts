@@ -46,6 +46,7 @@ const mockAuth = {
     localStorage.removeItem(MOCK_FLAG);
     return delay(undefined);
   },
+  setPassword: (_token: string, _password: string) => delay({ ok: true as const }),
 };
 
 // --- HTTP (NestJS) ------------------------------------------------------------
@@ -54,6 +55,9 @@ const httpAuth = {
     api.post<LoginResult>('/auth/login', payload).then((r) => r.data),
   me: () => api.get<User>('/auth/me').then((r) => r.data),
   logout: () => api.post('/auth/logout').then(() => undefined),
+  /** Définition du mot de passe via le token d'invitation (lien email). Public. */
+  setPassword: (token: string, password: string) =>
+    api.post<{ ok: true }>('/auth/set-password', { token, password }).then((r) => r.data),
 };
 
 export const authService = USE_MOCKS.auth ? mockAuth : httpAuth;
