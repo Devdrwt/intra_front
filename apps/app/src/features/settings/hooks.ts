@@ -38,6 +38,19 @@ export function useServices() {
   return useQuery({ queryKey: SERVICES, queryFn: settingsService.listServices });
 }
 
+/**
+ * Noms de services, optionnellement filtrés sur un département (par son nom).
+ * Inclut les services globaux (sans département).
+ */
+export function useServiceNames(departmentName?: string): string[] {
+  const { data: services } = useServices();
+  const { data: departments } = useDepartments();
+  const deptId = departments?.find((d) => d.name === departmentName)?.id;
+  return (services ?? [])
+    .filter((s) => !departmentName || !s.departmentId || s.departmentId === deptId)
+    .map((s) => s.name);
+}
+
 export function useCreateService() {
   const qc = useQueryClient();
   return useMutation({

@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button, Card, Input, Select, Spinner } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
-import { useDepartmentNames } from '@/features/settings/hooks';
+import { useDepartmentNames, useServiceNames } from '@/features/settings/hooks';
 import { STATUT_OPTIONS, TYPE_CONTRAT_OPTIONS, type EmployeInput } from './types';
 import { useCreateEmploye, useEmploye, useUpdateEmploye } from './hooks';
 
@@ -36,6 +36,10 @@ export function EmployeFormPage() {
   const deptOptions = Array.from(new Set([...departments, form.departement].filter(Boolean))).map(
     (d) => ({ value: d, label: d }),
   );
+  const serviceNames = useServiceNames(form.departement);
+  const serviceOptions = Array.from(
+    new Set([...serviceNames, form.service].filter(Boolean) as string[]),
+  ).map((s) => ({ value: s, label: s }));
 
   useEffect(() => {
     if (existing) {
@@ -143,9 +147,11 @@ export function EmployeFormPage() {
               value={form.departement}
               onChange={(e) => set('departement', e.target.value)}
             />
-            <Input
+            <Select
               id="service"
               label="Service"
+              options={serviceOptions}
+              placeholder="Aucun / sélectionner"
               value={form.service ?? ''}
               onChange={(e) => set('service', e.target.value)}
             />
