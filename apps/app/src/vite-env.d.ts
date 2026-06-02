@@ -18,6 +18,8 @@ interface ImportMetaEnv {
   readonly VITE_UPLOADS_ENABLED?: string;
   /** URL de l'image de fond du login (défaut : photo Pexels). */
   readonly VITE_LOGIN_BG?: string;
+  /** Nom d'affichage de l'organisation (défaut : « Drwintech Inc »). */
+  readonly VITE_ORG_NAME?: string;
 }
 
 interface ImportMeta {

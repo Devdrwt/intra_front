@@ -14,6 +14,10 @@
  * `VITE_USE_MOCKS=false` bascule d'un coup tous les domaines « métier » en réel ;
  * chaque `VITE_MOCK_<domaine>` reste prioritaire sur ce global.
  */
+
+/** Nom d'affichage de l'organisation (le slug technique de connexion reste « drwintech »). */
+export const ORG_NAME = import.meta.env.VITE_ORG_NAME || 'Drwintech Inc';
+
 const globalMock = import.meta.env.VITE_USE_MOCKS !== 'false';
 
 /** 'true' → mock, 'false' → réel, sinon valeur par défaut du domaine. */

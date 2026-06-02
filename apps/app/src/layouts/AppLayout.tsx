@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
+  Building2,
   ChevronDown,
   ChevronRight,
   LogOut,
@@ -12,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Avatar, cn } from '@drwindesk/ui';
 import { MODULES, MODULE_GROUPS } from '@/config/modules';
+import { ORG_NAME } from '@/lib/config';
 import { displayName, hasPermission, useAuth } from '@/auth/AuthContext';
 import { NotificationBell } from '@/features/espaces/NotificationBell';
 import { ThemeToggle } from '@/theme/ThemeToggle';
@@ -227,7 +229,24 @@ function SidebarContent({
 
 function SidebarFooter({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
   return (
-    <div className="border-t border-surface-border p-3">
+    <div className="space-y-1 border-t border-surface-border p-3">
+      <div
+        className={cn(
+          'flex items-center gap-2.5 rounded-xl bg-surface-muted px-3 py-2',
+          collapsed && 'justify-center px-0',
+        )}
+        title={collapsed ? ORG_NAME : undefined}
+      >
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-brand-soft-fg">
+          <Building2 size={15} />
+        </span>
+        {!collapsed && (
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium text-ink">{ORG_NAME}</p>
+            <p className="text-[11px] text-ink-subtle">Organisation</p>
+          </div>
+        )}
+      </div>
       <button
         onClick={onToggle}
         className={cn(
@@ -268,11 +287,17 @@ function UserMenu({ name, email, onLogout }: { name: string; email: string; onLo
 
       {open && (
         <div className="absolute right-0 z-30 mt-2 w-60 origin-top-right animate-slide-up overflow-hidden rounded-2xl border border-surface-border bg-surface-elevated shadow-pop">
-          <div className="flex items-center gap-3 border-b border-surface-border px-4 py-3">
-            <Avatar name={name} size="md" />
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-ink">{name}</p>
-              <p className="truncate text-xs text-ink-subtle">{email}</p>
+          <div className="border-b border-surface-border px-4 py-3">
+            <div className="flex items-center gap-3">
+              <Avatar name={name} size="md" />
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-ink">{name}</p>
+                <p className="truncate text-xs text-ink-subtle">{email}</p>
+              </div>
+            </div>
+            <div className="mt-3 flex items-center gap-2 rounded-lg bg-surface-muted px-2.5 py-1.5">
+              <Building2 size={14} className="text-ink-subtle" />
+              <span className="truncate text-xs font-medium text-ink-muted">{ORG_NAME}</span>
             </div>
           </div>
           <div className="p-1.5">
