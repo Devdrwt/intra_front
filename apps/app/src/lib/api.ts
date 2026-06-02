@@ -27,6 +27,20 @@ export const api = axios.create({
   withCredentials: true,
 });
 
+/**
+ * Extrait le message d'erreur renvoyé par l'API NestJS (`{ message, error, statusCode }`).
+ * `message` peut être une chaîne (ex. domaine email non autorisé) ou un tableau
+ * (erreurs de validation class-validator). Repli sur `fallback` sinon.
+ */
+export function apiErrorMessage(err: unknown, fallback = 'Une erreur est survenue.'): string {
+  if (axios.isAxiosError(err)) {
+    const message = (err.response?.data as { message?: string | string[] } | undefined)?.message;
+    if (Array.isArray(message) && message.length) return message.join(' ');
+    if (typeof message === 'string' && message) return message;
+  }
+  return fallback;
+}
+
 api.interceptors.request.use((config) => {
   const method = (config.method ?? 'get').toUpperCase();
   if (!SAFE_METHODS.has(method)) {

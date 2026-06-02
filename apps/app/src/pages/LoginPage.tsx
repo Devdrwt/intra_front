@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Card, Input } from '@drwindesk/ui';
 import { useAuth } from '@/auth/AuthContext';
+import { apiErrorMessage } from '@/lib/api';
 import { USE_MOCKS } from '@/lib/config';
 
 export function LoginPage() {
@@ -18,8 +19,9 @@ export function LoginPage() {
     try {
       await login(tenantSlug, email, password);
       navigate('/', { replace: true });
-    } catch {
-      setError('Identifiants invalides ou service indisponible.');
+    } catch (err) {
+      // Message précis du backend (ex. domaine email non autorisé pour l'organisation).
+      setError(apiErrorMessage(err, 'Identifiants invalides ou service indisponible.'));
     }
   };
 
@@ -61,8 +63,12 @@ export function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
             required
-            error={error ?? undefined}
           />
+          {error && (
+            <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-danger">
+              {error}
+            </p>
+          )}
           <Button type="submit" disabled={loading} className="mt-2">
             {loading ? 'Connexion…' : 'Se connecter'}
           </Button>
