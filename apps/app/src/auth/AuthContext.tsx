@@ -31,7 +31,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let active = true;
     authService
       .me()
-      .then((u) => active && setUser(u))
+      // Un token périmé peut renvoyer un profil incomplet → on le rejette
+      // (redirection login → re-login → JWT à jour). Évite un crash sur user partiel.
+      .then((u) => active && setUser(isValidUser(u) ? u : null))
       .catch(() => active && setUser(null))
       .finally(() => active && setBooting(false));
     return () => {
@@ -78,11 +80,23 @@ export function hasPermission(user: User | null, perm: string): boolean {
   return perms.includes('*') || perms.includes(perm);
 }
 
-/** Libellé d'affichage dérivé de l'email (tant qu'aucun nom de profil n'existe). */
-export function displayName(u: Pick<User, 'email'>): string {
-  const local = u.email.split('@')[0] ?? u.email;
+/** Libellé d'affichage dérivé de l'email (tant qu'aucun nom de profil n'existe). Null-safe. */
+export function displayName(u?: Pick<User, 'email'> | null): string {
+  const email = u?.email;
+  if (!email) return 'Collaborateur';
+  const local = email.split('@')[0] || email;
   return local
     .replace(/[._-]+/g, ' ')
     .replace(/\b\w/g, (c) => c.toUpperCase())
     .trim();
+}
+
+/** Un profil de session est exploitable seulement s'il porte au moins userId + email. */
+function isValidUser(u: unknown): u is User {
+  return (
+    typeof u === 'object' &&
+    u !== null &&
+    typeof (u as User).email === 'string' &&
+    typeof (u as User).userId === 'string'
+  );
 }
