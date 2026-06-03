@@ -1,0 +1,13 @@
+# Production — SPA interne DrwinDesk (app.drwintech.com).
+# Image nginx statique ; le nginx du VPS proxie app.drwintech.com -> 127.0.0.1:${HOST_PORT}.
+# Activé via COMPOSE_FILE=docker-compose.app.prod.yml dans le .env du VPS.
+services:
+  app:
+    image: ${APP_IMAGE}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${HOST_PORT}:80"   # loopback only + port UNIQUE (api=3100, app=3200)
+    networks: [web]
+
+networks:
+  web:
