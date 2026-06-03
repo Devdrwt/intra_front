@@ -11,7 +11,7 @@ Même chaîne que l'API : image **GHCR** + **GitHub Actions** (push `main` → b
 | Image | `ghcr.io/devdrwt/intra_front` |
 | `SUBDOMAIN` | `app.drwintech.com` |
 | `APP_DIR` (VPS) | `/opt/intra-app` |
-| `HOST_PORT` (loopback unique) | `3200` (api = 3100) |
+| `HOST_PORT` (loopback unique) | `3300` (api = 3100) |
 | API appelée | `https://api.drwintech.com/api/v1` (inlinée au build via `VITE_API_URL`) |
 
 > La SPA appelle l'API en cross-subdomain : ça marche car le backend autorise déjà
@@ -50,13 +50,13 @@ mkdir -p /opt/intra-app
 git clone https://github.com/Devdrwt/intra_front.git /opt/intra-app
 cd /opt/intra-app && git checkout main
 
-cp .env.app.production.example .env      # APP_IMAGE + COMPOSE_FILE + HOST_PORT=3200
+cp .env.app.production.example .env      # APP_IMAGE + COMPOSE_FILE + HOST_PORT=3300
 chmod 600 .env
 
 docker compose pull
 docker compose up -d
 docker compose ps
-curl -i http://127.0.0.1:3200            # attendu : HTTP 200 + HTML de la SPA
+curl -i http://127.0.0.1:3300            # attendu : HTTP 200 + HTML de la SPA
 ```
 
 ## 5. Reverse proxy nginx + HTTPS
@@ -67,7 +67,7 @@ server {
     listen 80;
     server_name app.drwintech.com;
     location / {
-        proxy_pass http://127.0.0.1:3200;
+        proxy_pass http://127.0.0.1:3300;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
