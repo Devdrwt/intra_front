@@ -62,7 +62,10 @@ api.interceptors.response.use(
     const config = error.config as RetriableConfig | undefined;
     const status = error.response?.status;
     const url = config?.url ?? '';
-    const isAuthRoute = url.includes('/auth/login') || url.includes('/auth/refresh');
+    const isAuthRoute =
+      url.includes('/auth/login') ||
+      url.includes('/auth/refresh') ||
+      url.includes('/auth/set-password');
 
     if (status === 401 && config && !config._retried && !isAuthRoute) {
       config._retried = true;
@@ -71,7 +74,12 @@ api.interceptors.response.use(
         await refreshing;
         return api(config);
       } catch (refreshError) {
-        if (!location.pathname.startsWith('/login')) location.assign('/login');
+        // Ne pas éjecter vers /login depuis une page PUBLIQUE (set-password, login) :
+        // le boot y appelle /auth/me qui prend un 401 normal pour un visiteur anonyme.
+        const onPublicPage = ['/login', '/set-password'].some((p) =>
+          location.pathname.startsWith(p),
+        );
+        if (!onPublicPage) location.assign('/login');
         return Promise.reject(refreshError);
       } finally {
         refreshing = null;
