@@ -21,6 +21,9 @@ import { AlertesPage } from '@/features/espaces/AlertesPage';
 import { RecrutementPage } from '@/features/recrutement/RecrutementPage';
 import { UsersPage } from '@/features/users/UsersPage';
 import { AuditPage } from '@/features/audit/AuditPage';
+import { ProjectsPage } from '@/features/projects/ProjectsPage';
+import { ProjectDetailPage } from '@/features/projects/ProjectDetailPage';
+import { ProjectFormPage } from '@/features/projects/ProjectFormPage';
 import { DocumentsPage } from '@/features/documents/DocumentsPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { GuidePage } from '@/pages/GuidePage';
@@ -69,6 +72,15 @@ export default function App() {
             <Route element={<RequirePermission perm="rapport:manage" />}>
               <Route path="rapports" element={<RapportsPage />} />
               <Route path="rapports/nouveau" element={<RapportFormPage />} />
+            </Route>
+
+            <Route element={<RequirePermission perm="project:read" />}>
+              <Route path="projets" element={<ProjectsPage />} />
+              <Route path="projets/:id" element={<ProjectDetailPage />} />
+            </Route>
+            <Route element={<RequirePermission perm="project:manage" />}>
+              <Route path="projets/nouveau" element={<ProjectFormPage />} />
+              <Route path="projets/:id/editer" element={<ProjectFormPage />} />
             </Route>
 
             <Route element={<RequirePermission perm="recrutement:read" />}>

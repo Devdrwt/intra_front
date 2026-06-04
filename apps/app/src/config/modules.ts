@@ -13,6 +13,7 @@ import {
   Settings,
   Clock,
   Activity,
+  FolderKanban,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -64,6 +65,13 @@ export const MODULES: ModuleRoute[] = [
     icon: FileBarChart,
     group: 'Administration',
     requires: 'rapport:manage',
+  },
+  {
+    path: '/projets',
+    label: 'Projets',
+    icon: FolderKanban,
+    group: 'Administration',
+    requires: 'project:read',
   },
   {
     path: '/documents',
