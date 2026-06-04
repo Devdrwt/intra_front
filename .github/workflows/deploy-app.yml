@@ -52,21 +52,14 @@ jobs:
 
   deploy:
     needs: build
-    runs-on: ubuntu-latest
+    # Runner auto-hébergé SUR le VPS → déploiement local, sans SSH entrant.
+    runs-on: self-hosted
     steps:
-      - name: Deploy over SSH
-        env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_PORT: ${{ secrets.VPS_PORT }}
-          VPS_APP_DIR: ${{ secrets.VPS_APP_DIR }}
-          SSH_KEY_B64: ${{ secrets.VPS_SSH_KEY }}
+      - name: Deploy on VPS (local)
         run: |
-          mkdir -p ~/.ssh
-          printf '%s' "$SSH_KEY_B64" | base64 -d > ~/.ssh/id_deploy
-          chmod 600 ~/.ssh/id_deploy
-          PORT="${VPS_PORT:-22}"
-          ssh-keyscan -p "$PORT" "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
-          ssh -i ~/.ssh/id_deploy -p "$PORT" -o StrictHostKeyChecking=accept-new \
-            "$VPS_USER@$VPS_HOST" \
-            "set -e; cd '$VPS_APP_DIR'; git pull --ff-only; docker compose pull app; docker compose up -d; docker image prune -f"
+          set -e
+          cd /opt/intra-app
+          git pull --ff-only
+          docker compose pull app
+          docker compose up -d
+          docker image prune -f
