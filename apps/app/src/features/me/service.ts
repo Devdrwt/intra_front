@@ -2,7 +2,7 @@ import { api } from '@/lib/api';
 import { USE_MOCKS } from '@/lib/config';
 import type { Employe } from '@/features/rh/types';
 import type { DemandeConge, Pointage, TypeConge } from '@/features/presences/types';
-import type { Rapport, StatutRapport } from '@/features/rapports/types';
+import type { AttachmentRef, Rapport, StatutRapport } from '@/features/rapports/types';
 import type { Document } from '@/features/documents/types';
 
 /**
@@ -28,6 +28,10 @@ export interface MeRapportInput {
   date?: string;
   contenu: string;
   statut?: StatutRapport;
+  attachmentKey?: string;
+  attachmentName?: string;
+  attachmentSize?: number;
+  attachmentType?: string;
 }
 
 // --- MOCK (repli hors-ligne) --------------------------------------------------
@@ -95,6 +99,9 @@ const mockApi = {
     return delay(saved);
   },
   myDocuments: () => delay([] as Document[]),
+  uploadAttachment: (file: File) =>
+    delay({ key: `rapports/mock-${++seq}`, name: file.name, size: file.size, type: file.type }),
+  downloadRapportAttachment: (_id: string) => delay(new Blob(['mock'])),
 };
 
 // --- HTTP (NestJS) ------------------------------------------------------------
@@ -110,6 +117,13 @@ const httpApi = {
   upsertRapport: (input: MeRapportInput) =>
     api.put<Rapport>('/me/rapports', input).then((r) => r.data),
   myDocuments: () => api.get<Document[]>('/me/documents').then((r) => r.data),
+  uploadAttachment: (file: File) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    return api.post<AttachmentRef>('/me/rapports/attachment', fd).then((r) => r.data);
+  },
+  downloadRapportAttachment: (id: string) =>
+    api.get(`/me/rapports/${id}/attachment`, { responseType: 'blob' }).then((r) => r.data as Blob),
 };
 
 export const meService = USE_MOCKS.me ? mockApi : httpApi;

@@ -1,6 +1,18 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BellRing, CalendarDays, Clock, FileBarChart, PieChart, Plus, X } from 'lucide-react';
+import {
+  BellRing,
+  CalendarDays,
+  Clock,
+  Download,
+  FileBarChart,
+  PieChart,
+  Plus,
+  X,
+} from 'lucide-react';
+import { triggerDownload, humanSize } from '@/lib/download';
+import { toast } from '@/lib/toast';
+import { rapportsService } from './service';
 import {
   Avatar,
   Badge,
@@ -213,6 +225,19 @@ function RapportDetail({
   onClose: () => void;
 }) {
   const name = emp ? fullName(emp) : rapport.employeId;
+  const [dl, setDl] = useState(false);
+  const download = async () => {
+    if (!rapport.attachment) return;
+    setDl(true);
+    try {
+      const blob = await rapportsService.downloadAttachment(rapport.id);
+      triggerDownload(blob, rapport.attachment.name);
+    } catch {
+      toast.error('Téléchargement impossible.');
+    } finally {
+      setDl(false);
+    }
+  };
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-[8vh]">
       <div className="absolute inset-0 animate-fade-in bg-ink/40 backdrop-blur-sm" onClick={onClose} />
@@ -261,6 +286,19 @@ function RapportDetail({
 
         <div className="overflow-y-auto p-5">
           <p className="whitespace-pre-wrap text-sm leading-relaxed text-ink">{rapport.contenu}</p>
+
+          {rapport.attachment && (
+            <button
+              type="button"
+              onClick={() => void download()}
+              disabled={dl}
+              className="mt-5 inline-flex items-center gap-2 rounded-xl border border-surface-border px-3 py-2 text-sm font-medium text-ink transition-colors hover:border-brand-300 hover:bg-brand-soft"
+            >
+              <Download size={16} className="text-brand-600" />
+              {rapport.attachment.name}
+              <span className="text-xs text-ink-subtle">· {humanSize(rapport.attachment.size)}</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

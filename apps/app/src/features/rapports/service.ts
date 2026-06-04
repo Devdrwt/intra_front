@@ -2,6 +2,7 @@ import { api } from '@/lib/api';
 import { USE_MOCKS } from '@/lib/config';
 import { MOCK_EMPLOYES } from '@/features/rh/mock';
 import type {
+  AttachmentRef,
   CheckMissingResult,
   ConsolidationLigne,
   ConsolidationQuery,
@@ -113,6 +114,9 @@ const mockApi = {
     const manquants = MOCK_EMPLOYES.filter((e) => e.statut === 'ACTIF' && !soumis.has(e.id)).length;
     return delay({ date: d, manquants });
   },
+  uploadAttachment: (file: File): Promise<AttachmentRef> =>
+    delay({ key: `rapports/mock-${++seq}`, name: file.name, size: file.size, type: file.type }),
+  downloadAttachment: (_id: string): Promise<Blob> => delay(new Blob(['mock'])),
 };
 
 // --- HTTP (NestJS) ------------------------------------------------------------
@@ -130,6 +134,13 @@ const httpApi = {
     api.get<ConsolidationLigne[]>('/rapports/consolidation', { params: q }).then((r) => r.data),
   checkMissing: (date?: string) =>
     api.post<CheckMissingResult>('/rapports/check-missing', { date }).then((r) => r.data),
+  uploadAttachment: (file: File) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    return api.post<AttachmentRef>('/rapports/attachment', fd).then((r) => r.data);
+  },
+  downloadAttachment: (id: string) =>
+    api.get(`/rapports/${id}/attachment`, { responseType: 'blob' }).then((r) => r.data as Blob),
 };
 
 export const rapportsService = USE_MOCKS.rapports ? mockApi : httpApi;

@@ -1,5 +1,12 @@
 export type StatutRapport = 'BROUILLON' | 'SOUMIS';
 
+/** Métadonnées de pièce jointe (clé interne non exposée). */
+export interface AttachmentMeta {
+  name: string;
+  size: number;
+  type: string;
+}
+
 /** Réponse backend (rapport.entity.ts → RapportDto). */
 export interface Rapport {
   id: string;
@@ -8,6 +15,15 @@ export interface Rapport {
   contenu: string;
   statut: StatutRapport;
   submittedAt?: string; // ISO
+  attachment?: AttachmentMeta;
+}
+
+/** Référence renvoyée par l'upload d'une pièce jointe. */
+export interface AttachmentRef {
+  key: string;
+  name: string;
+  size: number;
+  type: string;
 }
 
 /** Corps de PUT /rapports (UpsertRapportDto). */
@@ -16,6 +32,10 @@ export interface RapportInput {
   date?: string;
   contenu: string;
   statut?: StatutRapport;
+  attachmentKey?: string;
+  attachmentName?: string;
+  attachmentSize?: number;
+  attachmentType?: string;
 }
 
 export interface RapportFilters {

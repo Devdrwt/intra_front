@@ -1,11 +1,13 @@
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, Send } from 'lucide-react';
+import { ArrowLeft, Paperclip, Save, Send, X } from 'lucide-react';
 import { Button, Callout, Card, Input, Select, Spinner, Textarea } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
+import { humanSize } from '@/lib/download';
 import { useEmployes } from '@/features/rh/hooks';
 import { fullName } from '@/features/rh/helpers';
 import { useUpsertRapport } from './hooks';
+import { rapportsService } from './service';
 import type { StatutRapport } from './types';
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -24,8 +26,11 @@ export function RapportFormPage() {
   const [employeId, setEmployeId] = useState('');
   const [date, setDate] = useState(today());
   const [contenu, setContenu] = useState('');
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
   const [error, setError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const submit = async (statut: StatutRapport) => {
     const errs: Errors = {};
@@ -38,8 +43,28 @@ export function RapportFormPage() {
       return;
     }
     setError(null);
+
+    let attach = {};
+    if (file) {
+      setUploading(true);
+      try {
+        const ref = await rapportsService.uploadAttachment(file);
+        attach = {
+          attachmentKey: ref.key,
+          attachmentName: ref.name,
+          attachmentSize: ref.size,
+          attachmentType: ref.type,
+        };
+      } catch (err) {
+        setUploading(false);
+        setError(apiErrorMessage(err, 'Échec du téléversement du fichier.'));
+        return;
+      }
+      setUploading(false);
+    }
+
     try {
-      await upsert.mutateAsync({ employeId, date, contenu: contenu.trim(), statut });
+      await upsert.mutateAsync({ employeId, date, contenu: contenu.trim(), statut, ...attach });
       navigate('/rapports');
     } catch (err) {
       setError(apiErrorMessage(err, 'Enregistrement impossible.'));
@@ -108,19 +133,57 @@ export function RapportFormPage() {
             error={errors.contenu}
           />
 
+          {/* Pièce jointe */}
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-ink">Pièce jointe (optionnel)</label>
+            {file ? (
+              <div className="flex items-center gap-3 rounded-xl border border-surface-border bg-surface-muted px-3 py-2">
+                <Paperclip size={16} className="text-ink-subtle" />
+                <span className="min-w-0 flex-1 truncate text-sm text-ink">{file.name}</span>
+                <span className="text-xs text-ink-subtle">{humanSize(file.size)}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFile(null);
+                    if (fileRef.current) fileRef.current.value = '';
+                  }}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg text-ink-muted hover:bg-surface hover:text-danger"
+                  aria-label="Retirer le fichier"
+                >
+                  <X size={15} />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                className="flex w-full items-center gap-2 rounded-xl border border-dashed border-surface-border px-3 py-2.5 text-sm text-ink-muted transition-colors hover:border-brand-300 hover:text-ink"
+              >
+                <Paperclip size={16} /> Joindre un fichier (PDF, image, Office — max 10 Mo)
+              </button>
+            )}
+            <input
+              ref={fileRef}
+              type="file"
+              className="hidden"
+              accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
+          </div>
+
           {error && <Callout tone="danger">{error}</Callout>}
 
           <div className="flex flex-wrap justify-end gap-3">
             <Button
               type="button"
               variant="secondary"
-              disabled={upsert.isPending}
+              disabled={upsert.isPending || uploading}
               onClick={() => void submit('BROUILLON')}
             >
               <Save size={16} /> Enregistrer le brouillon
             </Button>
-            <Button type="submit" loading={upsert.isPending}>
-              <Send size={16} /> Soumettre
+            <Button type="submit" loading={upsert.isPending || uploading}>
+              <Send size={16} /> {uploading ? 'Téléversement…' : 'Soumettre'}
             </Button>
           </div>
         </Card>
