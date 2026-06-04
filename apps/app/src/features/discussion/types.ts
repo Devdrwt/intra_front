@@ -1,3 +1,19 @@
+export type ConversationType = 'COMPANY' | 'DIRECT' | 'GROUP';
+
+export interface ConversationSummary {
+  id: string;
+  type: ConversationType;
+  title: string;
+  lastMessage: { body: string; authorName: string; createdAt: string } | null;
+  updatedAt: string;
+  participantsCount: number;
+}
+
+export interface Contact {
+  id: string;
+  name: string;
+}
+
 export interface MessageAuthor {
   id: string;
   name: string;
