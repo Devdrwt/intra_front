@@ -12,6 +12,7 @@ import {
   HelpCircle,
   Settings,
   Clock,
+  Activity,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -84,6 +85,13 @@ export const MODULES: ModuleRoute[] = [
     icon: ShieldCheck,
     group: 'Administration',
     requires: 'user:read',
+  },
+  {
+    path: '/activite',
+    label: 'Activité',
+    icon: Activity,
+    group: 'Administration',
+    requires: 'audit:read',
   },
   {
     path: '/parametres',

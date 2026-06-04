@@ -20,6 +20,7 @@ import { RapportFormPage } from '@/features/rapports/RapportFormPage';
 import { AlertesPage } from '@/features/espaces/AlertesPage';
 import { RecrutementPage } from '@/features/recrutement/RecrutementPage';
 import { UsersPage } from '@/features/users/UsersPage';
+import { AuditPage } from '@/features/audit/AuditPage';
 import { DocumentsPage } from '@/features/documents/DocumentsPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { GuidePage } from '@/pages/GuidePage';
@@ -76,6 +77,10 @@ export default function App() {
 
             <Route element={<RequirePermission perm="user:read" />}>
               <Route path="utilisateurs" element={<UsersPage />} />
+            </Route>
+
+            <Route element={<RequirePermission perm="audit:read" />}>
+              <Route path="activite" element={<AuditPage />} />
             </Route>
 
             <Route element={<RequirePermission perm="settings:manage" />}>

@@ -51,4 +51,6 @@ export const USE_MOCKS = {
   settings: flag(import.meta.env.VITE_MOCK_SETTINGS, globalMock),
   // Espace collaborateur (endpoints /me/...) : backend en place.
   me: flag(import.meta.env.VITE_MOCK_ME, globalMock),
+  // Journal d'activité (audit) : endpoint GET /audit-logs.
+  audit: flag(import.meta.env.VITE_MOCK_AUDIT, globalMock),
 } as const;
