@@ -55,4 +55,6 @@ export const USE_MOCKS = {
   audit: flag(import.meta.env.VITE_MOCK_AUDIT, globalMock),
   // Projets : endpoints /projects.
   projects: flag(import.meta.env.VITE_MOCK_PROJECTS, globalMock),
+  // Discussion d'entreprise : endpoints /discussion.
+  discussion: flag(import.meta.env.VITE_MOCK_DISCUSSION, globalMock),
 } as const;

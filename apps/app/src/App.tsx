@@ -10,6 +10,7 @@ import { MonPointagePage } from '@/features/me/MonPointagePage';
 import { MesCongesPage } from '@/features/me/MesCongesPage';
 import { MesRapportsPage } from '@/features/me/MesRapportsPage';
 import { MesDocumentsPage } from '@/features/me/MesDocumentsPage';
+import { DiscussionPage } from '@/features/discussion/DiscussionPage';
 import { EmployesListPage } from '@/features/rh/EmployesListPage';
 import { EmployeFormPage } from '@/features/rh/EmployeFormPage';
 import { EmployeDetailPage } from '@/features/rh/EmployeDetailPage';
@@ -49,6 +50,7 @@ export default function App() {
             <Route path="mes-conges" element={<MesCongesPage />} />
             <Route path="mes-rapports" element={<MesRapportsPage />} />
             <Route path="mes-documents" element={<MesDocumentsPage />} />
+            <Route path="discussion" element={<DiscussionPage />} />
             <Route path="alertes" element={<AlertesPage />} />
 
             {/* --- Aide & réglages (transverse) ----------------------------- */}

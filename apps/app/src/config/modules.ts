@@ -14,6 +14,7 @@ import {
   Clock,
   Activity,
   FolderKanban,
+  MessagesSquare,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -42,6 +43,7 @@ export const MODULES: ModuleRoute[] = [
   { path: '/mes-conges', label: 'Mes congés', icon: CalendarClock, group: 'Mon espace' },
   { path: '/mes-rapports', label: 'Mes rapports', icon: FileBarChart, group: 'Mon espace' },
   { path: '/mes-documents', label: 'Mes documents', icon: FolderArchive, group: 'Mon espace' },
+  { path: '/discussion', label: 'Discussion', icon: MessagesSquare, group: 'Mon espace' },
   { path: '/alertes', label: 'Mes alertes', icon: Bell, group: 'Mon espace' },
 
   // --- Administration (gestion) ---------------------------------------------
