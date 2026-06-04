@@ -73,6 +73,10 @@ const mockApi = {
     conges = conges.map((c) => (c.id === id ? { ...c, statut } : c));
     return delay(conges.find((c) => c.id === id)!);
   },
+  cancelConge: (id: string) => {
+    conges = conges.filter((c) => c.id !== id);
+    return delay(undefined);
+  },
 };
 
 // --- HTTP (NestJS) ------------------------------------------------------------
@@ -86,6 +90,7 @@ const httpApi = {
     api.post<DemandeConge>('/conges', input).then((r) => r.data),
   setStatutConge: (id: string, statut: StatutConge) =>
     api.patch<DemandeConge>(`/conges/${id}/statut`, { statut }).then((r) => r.data),
+  cancelConge: (id: string) => api.delete(`/conges/${id}`).then(() => undefined),
 };
 
 export const presencesService = USE_MOCKS.presences ? mockApi : httpApi;

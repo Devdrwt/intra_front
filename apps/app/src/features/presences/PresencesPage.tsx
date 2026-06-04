@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CalendarOff, Check, Clock, LogIn, LogOut, Plus, X } from 'lucide-react';
+import { CalendarOff, Check, Clock, LogIn, LogOut, Plus, Trash2, X } from 'lucide-react';
 import {
   Avatar,
   Badge,
@@ -12,7 +12,13 @@ import {
 } from '@drwindesk/ui';
 import { useEmployeLookup } from '@/features/rh/hooks';
 import { fullName } from '@/features/rh/helpers';
-import { useConges, usePointagesDuJour, usePointer, useSetStatutConge } from './hooks';
+import {
+  useCancelConge,
+  useConges,
+  usePointagesDuJour,
+  usePointer,
+  useSetStatutConge,
+} from './hooks';
 import { STATUT_CONGE_LABEL, TYPE_CONGE_LABEL, nbJours, type StatutConge } from './types';
 
 type Tab = 'pointage' | 'conges';
@@ -143,6 +149,7 @@ function CongesPanel() {
   const { byId } = useEmployeLookup();
   const { data: conges, isLoading } = useConges();
   const setStatut = useSetStatutConge();
+  const cancel = useCancelConge();
 
   return (
     <div className="space-y-4">
@@ -222,6 +229,15 @@ function CongesPanel() {
                             onClick={() => setStatut.mutate({ id: c.id, statut: 'REFUSE' })}
                           >
                             <X size={15} /> Refuser
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            disabled={cancel.isPending}
+                            title="Annuler / supprimer la demande"
+                            onClick={() => cancel.mutate(c.id)}
+                          >
+                            <Trash2 size={15} />
                           </Button>
                         </div>
                       ) : (

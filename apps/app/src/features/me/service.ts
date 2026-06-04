@@ -102,6 +102,14 @@ const mockApi = {
   uploadAttachment: (file: File) =>
     delay({ key: `rapports/mock-${++seq}`, name: file.name, size: file.size, type: file.type }),
   downloadRapportAttachment: (_id: string) => delay(new Blob(['mock'])),
+  cancelConge: (id: string) => {
+    mConges = mConges.filter((c) => c.id !== id);
+    return delay(undefined);
+  },
+  deleteRapport: (id: string) => {
+    mRapports = mRapports.filter((r) => r.id !== id);
+    return delay(undefined);
+  },
 };
 
 // --- HTTP (NestJS) ------------------------------------------------------------
@@ -124,6 +132,8 @@ const httpApi = {
   },
   downloadRapportAttachment: (id: string) =>
     api.get(`/me/rapports/${id}/attachment`, { responseType: 'blob' }).then((r) => r.data as Blob),
+  cancelConge: (id: string) => api.delete(`/me/conges/${id}`).then(() => undefined),
+  deleteRapport: (id: string) => api.delete(`/me/rapports/${id}`).then(() => undefined),
 };
 
 export const meService = USE_MOCKS.me ? mockApi : httpApi;

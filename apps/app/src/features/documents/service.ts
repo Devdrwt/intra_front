@@ -1,6 +1,12 @@
 import { api } from '@/lib/api';
 import { USE_MOCKS } from '@/lib/config';
-import type { Document, DocumentInput } from './types';
+import type { Document, DocumentInput, TypeDocument } from './types';
+
+/** Champs éditables d'un document (renommer / reclasser). */
+export interface DocumentUpdate {
+  nom?: string;
+  type?: TypeDocument;
+}
 
 /**
  * Service GED — documents rattachés à un collaborateur.
@@ -53,6 +59,10 @@ const mockApi = {
     store = [created, ...store];
     return delay(created);
   },
+  update: (id: string, input: DocumentUpdate) => {
+    store = store.map((d) => (d.id === id ? { ...d, ...input } : d));
+    return delay(store.find((d) => d.id === id)!);
+  },
   remove: (id: string) => {
     store = store.filter((d) => d.id !== id);
     return delay(undefined);
@@ -74,6 +84,8 @@ const httpApi = {
       })
       .then((r) => r.data);
   },
+  update: (id: string, input: DocumentUpdate) =>
+    api.patch<Document>(`/documents/${id}`, input).then((r) => r.data),
   remove: (id: string) => api.delete(`/documents/${id}`).then(() => undefined),
 };
 

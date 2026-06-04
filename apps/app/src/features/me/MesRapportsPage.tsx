@@ -1,11 +1,11 @@
 import { useRef, useState, type FormEvent } from 'react';
-import { Download, FileBarChart, Paperclip, Save, Send, X } from 'lucide-react';
+import { Download, FileBarChart, Paperclip, Save, Send, Trash2, X } from 'lucide-react';
 import { Badge, Button, Callout, Card, CardTitle, EmptyState, Input, Skeleton, Textarea } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
 import { triggerDownload, humanSize } from '@/lib/download';
 import { toast } from '@/lib/toast';
 import { STATUT_RAPPORT_LABEL, type Rapport, type StatutRapport } from '@/features/rapports/types';
-import { useMyRapports, useUpsertMyRapport } from './hooks';
+import { useDeleteMyRapport, useMyRapports, useUpsertMyRapport } from './hooks';
 import { meService } from './service';
 import { MeNotLinked } from './MeNotLinked';
 
@@ -16,6 +16,7 @@ const fmt = (iso: string) =>
 export function MesRapportsPage() {
   const { data: rapports, isLoading, error } = useMyRapports();
   const upsert = useUpsertMyRapport();
+  const del = useDeleteMyRapport();
 
   const [date, setDate] = useState(today());
   const [contenu, setContenu] = useState('');
@@ -189,11 +190,22 @@ export function MesRapportsPage() {
           <ul className="mt-3 divide-y divide-surface-border">
             {list.map((r) => (
               <li key={r.id} className="px-5 py-3">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2">
                   <span className="text-sm font-medium capitalize text-ink">{fmt(r.date)}</span>
-                  <Badge tone={r.statut === 'SOUMIS' ? 'success' : 'warning'} dot>
-                    {STATUT_RAPPORT_LABEL[r.statut]}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge tone={r.statut === 'SOUMIS' ? 'success' : 'warning'} dot>
+                      {STATUT_RAPPORT_LABEL[r.statut]}
+                    </Badge>
+                    <button
+                      type="button"
+                      onClick={() => del.mutate(r.id)}
+                      disabled={del.isPending}
+                      title="Supprimer ce rapport"
+                      className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-subtle transition-colors hover:bg-surface-muted hover:text-danger"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
                 </div>
                 <p className="mt-1 line-clamp-2 text-sm text-ink-muted">{r.contenu}</p>
                 {r.attachment && (

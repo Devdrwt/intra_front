@@ -8,6 +8,7 @@ import {
   FileBarChart,
   PieChart,
   Plus,
+  Trash2,
   X,
 } from 'lucide-react';
 import { triggerDownload, humanSize } from '@/lib/download';
@@ -28,7 +29,7 @@ import {
 import { useAuth } from '@/auth/AuthContext';
 import { useEmployeLookup } from '@/features/rh/hooks';
 import { fullName } from '@/features/rh/helpers';
-import { useCheckMissing, useConsolidation, useRapports } from './hooks';
+import { useCheckMissing, useConsolidation, useDeleteRapport, useRapports } from './hooks';
 import {
   STATUT_RAPPORT_LABEL,
   STATUT_RAPPORT_OPTIONS,
@@ -207,6 +208,7 @@ function RapportsPanel() {
         <RapportDetail
           rapport={selected}
           emp={byId.get(selected.employeId)}
+          canDelete={canManage}
           onClose={() => setSelected(null)}
         />
       )}
@@ -218,14 +220,22 @@ function RapportsPanel() {
 function RapportDetail({
   rapport,
   emp,
+  canDelete,
   onClose,
 }: {
   rapport: Rapport;
   emp?: Employe;
+  canDelete: boolean;
   onClose: () => void;
 }) {
   const name = emp ? fullName(emp) : rapport.employeId;
+  const del = useDeleteRapport();
   const [dl, setDl] = useState(false);
+  const remove = () => {
+    if (window.confirm('Supprimer ce rapport définitivement ?')) {
+      del.mutate(rapport.id, { onSuccess: onClose });
+    }
+  };
   const download = async () => {
     if (!rapport.attachment) return;
     setDl(true);
@@ -300,6 +310,19 @@ function RapportDetail({
             </button>
           )}
         </div>
+
+        {canDelete && (
+          <div className="flex justify-end border-t border-surface-border p-4">
+            <button
+              type="button"
+              onClick={remove}
+              disabled={del.isPending}
+              className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-danger transition-colors hover:bg-danger-soft"
+            >
+              <Trash2 size={16} /> Supprimer le rapport
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

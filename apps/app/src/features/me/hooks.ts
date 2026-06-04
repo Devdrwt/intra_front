@@ -37,6 +37,15 @@ export function useCreateMyConge() {
   });
 }
 
+export function useCancelMyConge() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => meService.cancelConge(id),
+    meta: { successMessage: 'Demande de congé annulée' },
+    onSuccess: () => qc.invalidateQueries({ queryKey: [ME, 'conges'] }),
+  });
+}
+
 export function useMyRapports() {
   return useQuery({ queryKey: [ME, 'rapports'], queryFn: meService.myRapports });
 }
@@ -46,6 +55,15 @@ export function useUpsertMyRapport() {
   return useMutation({
     mutationFn: (input: MeRapportInput) => meService.upsertRapport(input),
     meta: { successMessage: 'Rapport enregistré' },
+    onSuccess: () => qc.invalidateQueries({ queryKey: [ME, 'rapports'] }),
+  });
+}
+
+export function useDeleteMyRapport() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => meService.deleteRapport(id),
+    meta: { successMessage: 'Rapport supprimé' },
     onSuccess: () => qc.invalidateQueries({ queryKey: [ME, 'rapports'] }),
   });
 }

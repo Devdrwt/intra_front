@@ -28,6 +28,15 @@ export function useUpsertRapport() {
   });
 }
 
+export function useDeleteRapport() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => rapportsService.remove(id),
+    meta: { successMessage: 'Rapport supprimé' },
+    onSuccess: () => qc.invalidateQueries({ queryKey: [KEY] }),
+  });
+}
+
 export function useConsolidation(query: ConsolidationQuery, enabled = true) {
   return useQuery({
     queryKey: [KEY, 'consolidation', query],

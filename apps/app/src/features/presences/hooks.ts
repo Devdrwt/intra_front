@@ -41,3 +41,12 @@ export function useSetStatutConge() {
     onSuccess: () => qc.invalidateQueries({ queryKey: [CONGES] }),
   });
 }
+
+export function useCancelConge() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => presencesService.cancelConge(id),
+    meta: { successMessage: 'Demande annulée' },
+    onSuccess: () => qc.invalidateQueries({ queryKey: [CONGES] }),
+  });
+}

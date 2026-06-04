@@ -117,6 +117,10 @@ const mockApi = {
   uploadAttachment: (file: File): Promise<AttachmentRef> =>
     delay({ key: `rapports/mock-${++seq}`, name: file.name, size: file.size, type: file.type }),
   downloadAttachment: (_id: string): Promise<Blob> => delay(new Blob(['mock'])),
+  remove: (id: string): Promise<void> => {
+    store = store.filter((r) => r.id !== id);
+    return delay(undefined);
+  },
 };
 
 // --- HTTP (NestJS) ------------------------------------------------------------
@@ -141,6 +145,7 @@ const httpApi = {
   },
   downloadAttachment: (id: string) =>
     api.get(`/rapports/${id}/attachment`, { responseType: 'blob' }).then((r) => r.data as Blob),
+  remove: (id: string) => api.delete(`/rapports/${id}`).then(() => undefined),
 };
 
 export const rapportsService = USE_MOCKS.rapports ? mockApi : httpApi;

@@ -1,10 +1,15 @@
 import { useState, type FormEvent } from 'react';
-import { FileText, Plus, Trash2, X } from 'lucide-react';
+import { Check, FileText, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { Badge, Button, EmptyState, Input, Select, Skeleton } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
 import { UPLOADS_ENABLED } from '@/lib/config';
 import { uploadViaPresign } from '@/lib/upload';
-import { useAddDocument, useDocumentsEmploye, useRemoveDocument } from './hooks';
+import {
+  useAddDocument,
+  useDocumentsEmploye,
+  useRemoveDocument,
+  useUpdateDocument,
+} from './hooks';
 import {
   TYPE_DOCUMENT_LABEL,
   TYPE_DOCUMENT_OPTIONS,
@@ -23,6 +28,23 @@ export function EmployeDocuments({ employeId }: { employeId: string }) {
   const { data: docs, isLoading } = useDocumentsEmploye(employeId);
   const add = useAddDocument(employeId);
   const remove = useRemoveDocument(employeId);
+  const update = useUpdateDocument(employeId);
+
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editNom, setEditNom] = useState('');
+  const [editType, setEditType] = useState<TypeDocument>('CONTRAT');
+  const startEdit = (id: string, nom: string, type: TypeDocument) => {
+    setEditId(id);
+    setEditNom(nom);
+    setEditType(type);
+  };
+  const saveEdit = () => {
+    if (!editId || !editNom.trim()) return;
+    update.mutate(
+      { id: editId, input: { nom: editNom.trim(), type: editType } },
+      { onSuccess: () => setEditId(null) },
+    );
+  };
 
   const [open, setOpen] = useState(false);
   const [nom, setNom] = useState('');
@@ -134,28 +156,65 @@ export function EmployeDocuments({ employeId }: { employeId: string }) {
           />
         ) : (
           <ul className="divide-y divide-surface-border">
-            {docs.map((d) => (
-              <li key={d.id} className="flex items-center gap-3 py-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-ink-subtle">
-                  <FileText size={16} />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-medium text-ink">{d.nom}</div>
-                  <div className="text-xs text-ink-subtle">
-                    Ajouté le {formatDate(d.dateAjout)}
-                    {d.tailleKo > 0 && ` · ${d.tailleKo} Ko`}
+            {docs.map((d) =>
+              editId === d.id ? (
+                <li key={d.id} className="flex flex-wrap items-center gap-2 py-3">
+                  <Input
+                    className="min-w-0 flex-1"
+                    value={editNom}
+                    onChange={(e) => setEditNom(e.target.value)}
+                  />
+                  <Select
+                    options={TYPE_DOCUMENT_OPTIONS}
+                    value={editType}
+                    onChange={(e) => setEditType(e.target.value as TypeDocument)}
+                  />
+                  <button
+                    onClick={saveEdit}
+                    disabled={update.isPending || !editNom.trim()}
+                    className="rounded-lg p-1.5 text-ink-subtle hover:bg-surface-muted hover:text-success"
+                    aria-label="Enregistrer"
+                  >
+                    <Check size={16} />
+                  </button>
+                  <button
+                    onClick={() => setEditId(null)}
+                    className="rounded-lg p-1.5 text-ink-subtle hover:bg-surface-muted"
+                    aria-label="Annuler"
+                  >
+                    <X size={16} />
+                  </button>
+                </li>
+              ) : (
+                <li key={d.id} className="flex items-center gap-3 py-3">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-ink-subtle">
+                    <FileText size={16} />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-medium text-ink">{d.nom}</div>
+                    <div className="text-xs text-ink-subtle">
+                      Ajouté le {formatDate(d.dateAjout)}
+                      {d.tailleKo > 0 && ` · ${d.tailleKo} Ko`}
+                    </div>
                   </div>
-                </div>
-                <Badge tone="neutral">{TYPE_DOCUMENT_LABEL[d.type]}</Badge>
-                <button
-                  onClick={() => remove.mutate(d.id)}
-                  className="rounded-lg p-1.5 text-ink-subtle hover:bg-surface-muted hover:text-danger"
-                  aria-label="Supprimer"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </li>
-            ))}
+                  <Badge tone="neutral">{TYPE_DOCUMENT_LABEL[d.type]}</Badge>
+                  <button
+                    onClick={() => startEdit(d.id, d.nom, d.type)}
+                    className="rounded-lg p-1.5 text-ink-subtle hover:bg-surface-muted hover:text-brand-600"
+                    aria-label="Modifier"
+                  >
+                    <Pencil size={16} />
+                  </button>
+                  <button
+                    onClick={() => remove.mutate(d.id)}
+                    className="rounded-lg p-1.5 text-ink-subtle hover:bg-surface-muted hover:text-danger"
+                    aria-label="Supprimer"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </li>
+              ),
+            )}
           </ul>
         )}
       </div>

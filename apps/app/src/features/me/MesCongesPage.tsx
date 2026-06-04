@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { CalendarClock, Plus } from 'lucide-react';
+import { CalendarClock, Plus, X } from 'lucide-react';
 import { Badge, Button, Callout, Card, CardTitle, EmptyState, Input, Select, Skeleton } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
 import {
@@ -10,7 +10,7 @@ import {
   type StatutConge,
   type TypeConge,
 } from '@/features/presences/types';
-import { useCreateMyConge, useMyConges } from './hooks';
+import { useCancelMyConge, useCreateMyConge, useMyConges } from './hooks';
 import type { MeCongeInput } from './service';
 import { MeNotLinked } from './MeNotLinked';
 
@@ -27,6 +27,7 @@ const EMPTY: MeCongeInput = { type: 'ANNUEL', dateDebut: '', dateFin: '', motif:
 export function MesCongesPage() {
   const { data: conges, isLoading, error } = useMyConges();
   const create = useCreateMyConge();
+  const cancel = useCancelMyConge();
 
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<MeCongeInput>(EMPTY);
@@ -160,9 +161,22 @@ export function MesCongesPage() {
                     {c.motif ? ` · ${c.motif}` : ''}
                   </p>
                 </div>
-                <Badge tone={STATUT_TONE[c.statut]} dot>
-                  {STATUT_CONGE_LABEL[c.statut]}
-                </Badge>
+                <div className="flex shrink-0 items-center gap-2">
+                  <Badge tone={STATUT_TONE[c.statut]} dot>
+                    {STATUT_CONGE_LABEL[c.statut]}
+                  </Badge>
+                  {c.statut === 'EN_ATTENTE' && (
+                    <button
+                      type="button"
+                      onClick={() => cancel.mutate(c.id)}
+                      disabled={cancel.isPending}
+                      title="Annuler la demande"
+                      className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-subtle transition-colors hover:bg-surface-muted hover:text-danger"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
               </li>
             ))}
           </ul>
