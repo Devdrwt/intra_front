@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { BarChart3, CalendarCheck, ShieldCheck } from 'lucide-react';
 import { Button, Callout, Input } from '@drwindesk/ui';
 import { useAuth } from '@/auth/AuthContext';
@@ -128,6 +128,14 @@ export function LoginPage() {
               autoComplete="current-password"
               required
             />
+            <div className="-mt-1 text-right">
+              <Link
+                to="/forgot-password"
+                className="text-sm text-ink-muted hover:text-brand-600 hover:underline"
+              >
+                Mot de passe oublié ?
+              </Link>
+            </div>
             {error && <Callout tone="danger">{error}</Callout>}
             <Button type="submit" loading={loading} size="lg" className="mt-1 w-full">
               Se connecter

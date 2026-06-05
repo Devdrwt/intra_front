@@ -65,7 +65,8 @@ api.interceptors.response.use(
     const isAuthRoute =
       url.includes('/auth/login') ||
       url.includes('/auth/refresh') ||
-      url.includes('/auth/set-password');
+      url.includes('/auth/set-password') ||
+      url.includes('/auth/forgot-password');
 
     if (status === 401 && config && !config._retried && !isAuthRoute) {
       config._retried = true;
@@ -76,7 +77,7 @@ api.interceptors.response.use(
       } catch (refreshError) {
         // Ne pas éjecter vers /login depuis une page PUBLIQUE (set-password, login) :
         // le boot y appelle /auth/me qui prend un 401 normal pour un visiteur anonyme.
-        const onPublicPage = ['/login', '/set-password'].some((p) =>
+        const onPublicPage = ['/login', '/set-password', '/forgot-password'].some((p) =>
           location.pathname.startsWith(p),
         );
         if (!onPublicPage) location.assign('/login');

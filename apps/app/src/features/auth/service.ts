@@ -47,6 +47,7 @@ const mockAuth = {
     return delay(undefined);
   },
   setPassword: (_token: string, _password: string) => delay({ ok: true as const }),
+  forgotPassword: (_tenantSlug: string, _email: string) => delay({ ok: true as const }),
 };
 
 // --- HTTP (NestJS) ------------------------------------------------------------
@@ -58,6 +59,9 @@ const httpAuth = {
   /** Définition du mot de passe via le token d'invitation (lien email). Public. */
   setPassword: (token: string, password: string) =>
     api.post<{ ok: true }>('/auth/set-password', { token, password }).then((r) => r.data),
+  /** Mot de passe oublié : déclenche l'envoi d'un lien. Réponse toujours générique. Public. */
+  forgotPassword: (tenantSlug: string, email: string) =>
+    api.post<{ ok: true }>('/auth/forgot-password', { tenantSlug, email }).then((r) => r.data),
 };
 
 export const authService = USE_MOCKS.auth ? mockAuth : httpAuth;
