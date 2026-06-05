@@ -40,6 +40,7 @@ const company: ConversationSummary = {
   id: 'company',
   type: 'COMPANY',
   title: "Toute l'entreprise",
+  avatar: null,
   lastMessage: null,
   updatedAt: new Date().toISOString(),
   participantsCount: 0,
@@ -53,7 +54,7 @@ const mockApi = {
   createGroup: (_name: string, _userIds: string[]) => delay(company),
   messages: (convId: string) => delay([...(msgStore[convId] ?? [])]),
   post: (convId: string, input: MessageInput) => {
-    const m: Message = { id: `m${++seq}`, author: { id: 'me', name: 'Moi' }, body: input.body, createdAt: new Date().toISOString() };
+    const m: Message = { id: `m${++seq}`, author: { id: 'me', name: 'Moi', hasAvatar: false }, body: input.body, createdAt: new Date().toISOString() };
     msgStore[convId] = [...(msgStore[convId] ?? []), m];
     return delay(m);
   },

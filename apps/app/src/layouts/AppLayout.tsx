@@ -16,7 +16,9 @@ import {
 import { Avatar, cn } from '@drwindesk/ui';
 import { MODULES, MODULE_GROUPS } from '@/config/modules';
 import { ORG_NAME } from '@/lib/config';
+import { avatarUrl } from '@/lib/avatar';
 import { displayName, hasPermission, useAuth } from '@/auth/AuthContext';
+import { useMyProfile } from '@/features/me/hooks';
 import { NotificationBell } from '@/features/espaces/NotificationBell';
 import { ThemeToggle } from '@/theme/ThemeToggle';
 import { CommandPalette } from '@/components/CommandPalette';
@@ -25,6 +27,8 @@ const COLLAPSE_KEY = 'drwindesk.sidebar.collapsed';
 
 export function AppLayout() {
   const { user, logout } = useAuth();
+  const { data: profile } = useMyProfile();
+  const avatarSrc = user ? avatarUrl(user.userId, profile?.hasAvatar ?? false) : undefined;
   const location = useLocation();
 
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSE_KEY) === '1');
@@ -137,6 +141,7 @@ export function AppLayout() {
           <UserMenu
             name={user ? displayName(user) : 'Collaborateur'}
             email={user?.email ?? ''}
+            avatarSrc={avatarSrc}
             canSettings={hasPermission(user, 'settings:manage')}
             onLogout={logout}
           />
@@ -272,11 +277,13 @@ function SidebarFooter({ collapsed, onToggle }: { collapsed: boolean; onToggle: 
 function UserMenu({
   name,
   email,
+  avatarSrc,
   canSettings,
   onLogout,
 }: {
   name: string;
   email: string;
+  avatarSrc?: string;
   canSettings: boolean;
   onLogout: () => void;
 }) {
@@ -297,7 +304,7 @@ function UserMenu({
         onClick={() => setOpen((v) => !v)}
         className="flex items-center gap-2 rounded-xl py-1 pl-1 pr-2 transition-colors hover:bg-surface-muted"
       >
-        <Avatar name={name} size="sm" />
+        <Avatar name={name} src={avatarSrc} size="sm" />
         <span className="hidden text-sm font-medium text-ink sm:block">{name}</span>
         <ChevronDown size={15} className="hidden text-ink-subtle sm:block" />
       </button>
@@ -306,7 +313,7 @@ function UserMenu({
         <div className="absolute right-0 z-30 mt-2 w-60 origin-top-right animate-slide-up overflow-hidden rounded-2xl border border-surface-border bg-surface-elevated shadow-pop">
           <div className="border-b border-surface-border px-4 py-3">
             <div className="flex items-center gap-3">
-              <Avatar name={name} size="md" />
+              <Avatar name={name} src={avatarSrc} size="md" />
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium text-ink">{name}</p>
                 <p className="truncate text-xs text-ink-subtle">{email}</p>

@@ -15,6 +15,7 @@ import {
 import { Avatar, Button, Card, EmptyState, Input, Skeleton, cn } from '@drwindesk/ui';
 import { hasPermission, useAuth } from '@/auth/AuthContext';
 import { apiErrorMessage } from '@/lib/api';
+import { avatarUrl } from '@/lib/avatar';
 import { triggerDownload, humanSize } from '@/lib/download';
 import { toast } from '@/lib/toast';
 import {
@@ -38,7 +39,14 @@ const time = (iso: string) => {
 
 function ConvAvatar({ conv, size = 'md' }: { conv: ConversationSummary; size?: 'sm' | 'md' }) {
   const cls = size === 'sm' ? 'h-9 w-9' : 'h-10 w-10';
-  if (conv.type === 'DIRECT') return <Avatar name={conv.title} size={size} />;
+  if (conv.type === 'DIRECT')
+    return (
+      <Avatar
+        name={conv.title}
+        src={conv.avatar ? avatarUrl(conv.avatar.userId, conv.avatar.hasAvatar) : undefined}
+        size={size}
+      />
+    );
   const Icon = conv.type === 'COMPANY' ? Building2 : Users;
   return (
     <span className={cn('flex shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand-soft-fg', cls)}>
@@ -253,7 +261,7 @@ function ConversationView({ conv, onBack }: { conv: ConversationSummary; onBack:
             const canDelete = isOwn || canModerate;
             return (
               <div key={m.id} className={cn('flex gap-2.5', isOwn && 'flex-row-reverse')}>
-                <Avatar name={m.author.name} size="sm" />
+                <Avatar name={m.author.name} src={avatarUrl(m.author.id, m.author.hasAvatar)} size="sm" />
                 <div className={cn('group max-w-[78%]', isOwn && 'flex flex-col items-end')}>
                   <div className="mb-0.5 flex items-center gap-2 text-xs text-ink-subtle">
                     <span className="font-medium text-ink">{isOwn ? 'Vous' : m.author.name}</span>
@@ -409,7 +417,7 @@ function NewConversationModal({
                   disabled={createDirect.isPending}
                   className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm hover:bg-surface-muted"
                 >
-                  <Avatar name={c.name} size="sm" />
+                  <Avatar name={c.name} src={avatarUrl(c.id, c.hasAvatar)} size="sm" />
                   <span className="text-ink">{c.name}</span>
                 </button>
               ) : (
@@ -422,7 +430,7 @@ function NewConversationModal({
                       setSelected((s) => (s.includes(c.id) ? s.filter((x) => x !== c.id) : [...s, c.id]))
                     }
                   />
-                  <Avatar name={c.name} size="sm" />
+                  <Avatar name={c.name} src={avatarUrl(c.id, c.hasAvatar)} size="sm" />
                   <span className="text-ink">{c.name}</span>
                 </label>
               ),

@@ -4,6 +4,7 @@ export interface ConversationSummary {
   id: string;
   type: ConversationType;
   title: string;
+  avatar: { userId: string; hasAvatar: boolean } | null;
   lastMessage: { body: string; authorName: string; createdAt: string } | null;
   updatedAt: string;
   participantsCount: number;
@@ -12,11 +13,13 @@ export interface ConversationSummary {
 export interface Contact {
   id: string;
   name: string;
+  hasAvatar: boolean;
 }
 
 export interface MessageAuthor {
   id: string;
   name: string;
+  hasAvatar: boolean;
 }
 
 export interface MessageAttachment {

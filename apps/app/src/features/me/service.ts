@@ -23,6 +23,26 @@ export interface MeCongeInput {
   motif?: string;
 }
 
+/** Mon profil. */
+export interface MyProfile {
+  firstName: string | null;
+  lastName: string | null;
+  email: string;
+  telephone: string | null;
+  poste: string | null;
+  departement: string | null;
+  hasAvatar: boolean;
+}
+export interface ProfileUpdate {
+  firstName?: string;
+  lastName?: string;
+  telephone?: string;
+}
+export interface PasswordChange {
+  currentPassword: string;
+  newPassword: string;
+}
+
 /** Rapport journalier pour SOI (upsert). */
 export interface MeRapportInput {
   date?: string;
@@ -110,6 +130,13 @@ const mockApi = {
     mRapports = mRapports.filter((r) => r.id !== id);
     return delay(undefined);
   },
+  getProfile: () =>
+    delay<MyProfile>({ firstName: 'Démo', lastName: 'Collaborateur', email: 'demo@drwintech.com', telephone: null, poste: 'Collaborateur', departement: 'Général', hasAvatar: false }),
+  updateProfile: (input: ProfileUpdate) =>
+    delay<MyProfile>({ firstName: input.firstName ?? null, lastName: input.lastName ?? null, email: 'demo@drwintech.com', telephone: input.telephone ?? null, poste: null, departement: null, hasAvatar: false }),
+  changePassword: (_input: PasswordChange) => delay(undefined),
+  uploadAvatar: (_file: File) => delay(undefined),
+  removeAvatar: () => delay(undefined),
 };
 
 // --- HTTP (NestJS) ------------------------------------------------------------
@@ -134,6 +161,16 @@ const httpApi = {
     api.get(`/me/rapports/${id}/attachment`, { responseType: 'blob' }).then((r) => r.data as Blob),
   cancelConge: (id: string) => api.delete(`/me/conges/${id}`).then(() => undefined),
   deleteRapport: (id: string) => api.delete(`/me/rapports/${id}`).then(() => undefined),
+  getProfile: () => api.get<MyProfile>('/me/profile').then((r) => r.data),
+  updateProfile: (input: ProfileUpdate) => api.put<MyProfile>('/me/profile', input).then((r) => r.data),
+  changePassword: (input: PasswordChange) =>
+    api.post('/me/password', input).then(() => undefined),
+  uploadAvatar: (file: File) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    return api.post('/me/avatar', fd).then(() => undefined);
+  },
+  removeAvatar: () => api.delete('/me/avatar').then(() => undefined),
 };
 
 export const meService = USE_MOCKS.me ? mockApi : httpApi;

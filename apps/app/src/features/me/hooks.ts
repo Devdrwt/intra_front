@@ -1,7 +1,51 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { meService, type MeCongeInput, type MeRapportInput } from './service';
+import {
+  meService,
+  type MeCongeInput,
+  type MeRapportInput,
+  type PasswordChange,
+  type ProfileUpdate,
+} from './service';
 
 const ME = 'me';
+
+export function useMyProfile() {
+  return useQuery({ queryKey: [ME, 'profile'], queryFn: meService.getProfile });
+}
+
+export function useUpdateProfile() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: ProfileUpdate) => meService.updateProfile(input),
+    meta: { successMessage: 'Profil mis à jour' },
+    onSuccess: () => qc.invalidateQueries({ queryKey: [ME, 'profile'] }),
+  });
+}
+
+export function useChangePassword() {
+  return useMutation({
+    mutationFn: (input: PasswordChange) => meService.changePassword(input),
+    meta: { successMessage: 'Mot de passe modifié' },
+  });
+}
+
+export function useUploadAvatar() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (file: File) => meService.uploadAvatar(file),
+    meta: { successMessage: 'Photo de profil mise à jour' },
+    onSuccess: () => qc.invalidateQueries({ queryKey: [ME, 'profile'] }),
+  });
+}
+
+export function useRemoveAvatar() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => meService.removeAvatar(),
+    meta: { successMessage: 'Photo de profil retirée' },
+    onSuccess: () => qc.invalidateQueries({ queryKey: [ME, 'profile'] }),
+  });
+}
 
 export function useMyEmploye() {
   return useQuery({
