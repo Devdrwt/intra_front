@@ -16,6 +16,7 @@ import { apiErrorMessage } from '@/lib/api';
 import { ORG_NAME } from '@/lib/config';
 import { useTheme } from '@/theme/ThemeProvider';
 import { ReferentielsSection } from '@/features/settings/ReferentielsSection';
+import { MailAccountSection } from '@/features/webmail/MailAccountSection';
 import { avatarUrl } from '@/lib/avatar';
 import { toast } from '@/lib/toast';
 import {
@@ -88,6 +89,8 @@ export function SettingsPage() {
           <ReferentielsSection />
         </section>
       )}
+
+      <MailAccountSection />
 
       <PasswordCard />
 

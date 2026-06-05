@@ -57,4 +57,6 @@ export const USE_MOCKS = {
   projects: flag(import.meta.env.VITE_MOCK_PROJECTS, globalMock),
   // Discussion d'entreprise : endpoints /discussion.
   discussion: flag(import.meta.env.VITE_MOCK_DISCUSSION, globalMock),
+  // Webmail : endpoints /webmail.
+  webmail: flag(import.meta.env.VITE_MOCK_WEBMAIL, globalMock),
 } as const;

@@ -15,6 +15,7 @@ import {
   Activity,
   FolderKanban,
   MessagesSquare,
+  Mail,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -44,6 +45,7 @@ export const MODULES: ModuleRoute[] = [
   { path: '/mes-rapports', label: 'Mes rapports', icon: FileBarChart, group: 'Mon espace' },
   { path: '/mes-documents', label: 'Mes documents', icon: FolderArchive, group: 'Mon espace' },
   { path: '/discussion', label: 'Discussion', icon: MessagesSquare, group: 'Mon espace' },
+  { path: '/mail', label: 'Mail', icon: Mail, group: 'Mon espace' },
   { path: '/alertes', label: 'Mes alertes', icon: Bell, group: 'Mon espace' },
 
   // --- Administration (gestion) ---------------------------------------------
@@ -103,15 +105,11 @@ export const MODULES: ModuleRoute[] = [
     group: 'Administration',
     requires: 'audit:read',
   },
-  {
-    path: '/parametres',
-    label: 'Paramètres',
-    icon: Settings,
-    group: 'Administration',
-    requires: 'settings:manage',
-  },
 
-  // --- Aide & réglages -------------------------------------------------------
+  // --- Aide & réglages (tout utilisateur) -----------------------------------
+  // Paramètres = self-service (profil, mot de passe, messagerie, thème) ; la
+  // section « Organisation » à l'intérieur reste réservée aux admins.
+  { path: '/parametres', label: 'Paramètres', icon: Settings, group: 'Aide & réglages' },
   { path: '/guide', label: 'Guide', icon: BookOpen, group: 'Aide & réglages' },
   { path: '/faq', label: 'FAQ', icon: HelpCircle, group: 'Aide & réglages' },
 ];

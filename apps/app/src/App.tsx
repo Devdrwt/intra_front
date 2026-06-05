@@ -11,6 +11,7 @@ import { MesCongesPage } from '@/features/me/MesCongesPage';
 import { MesRapportsPage } from '@/features/me/MesRapportsPage';
 import { MesDocumentsPage } from '@/features/me/MesDocumentsPage';
 import { DiscussionPage } from '@/features/discussion/DiscussionPage';
+import { MailPage } from '@/features/webmail/MailPage';
 import { EmployesListPage } from '@/features/rh/EmployesListPage';
 import { EmployeFormPage } from '@/features/rh/EmployeFormPage';
 import { EmployeDetailPage } from '@/features/rh/EmployeDetailPage';
@@ -51,9 +52,11 @@ export default function App() {
             <Route path="mes-rapports" element={<MesRapportsPage />} />
             <Route path="mes-documents" element={<MesDocumentsPage />} />
             <Route path="discussion" element={<DiscussionPage />} />
+            <Route path="mail" element={<MailPage />} />
             <Route path="alertes" element={<AlertesPage />} />
 
             {/* --- Aide & réglages (transverse) ----------------------------- */}
+            <Route path="parametres" element={<SettingsPage />} />
             <Route path="guide" element={<GuidePage />} />
             <Route path="faq" element={<FaqPage />} />
 
@@ -95,10 +98,6 @@ export default function App() {
 
             <Route element={<RequirePermission perm="audit:read" />}>
               <Route path="activite" element={<AuditPage />} />
-            </Route>
-
-            <Route element={<RequirePermission perm="settings:manage" />}>
-              <Route path="parametres" element={<SettingsPage />} />
             </Route>
           </Route>
         </Routes>
