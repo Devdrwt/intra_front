@@ -19,6 +19,7 @@ import { ORG_NAME } from '@/lib/config';
 import { avatarUrl } from '@/lib/avatar';
 import { displayName, hasPermission, useAuth } from '@/auth/AuthContext';
 import { useMyProfile } from '@/features/me/hooks';
+import { useUnreadCount } from '@/features/discussion/hooks';
 import { NotificationBell } from '@/features/espaces/NotificationBell';
 import { ThemeToggle } from '@/theme/ThemeToggle';
 import { CommandPalette } from '@/components/CommandPalette';
@@ -185,6 +186,7 @@ function SidebarContent({
   location: string;
   hideBrand?: boolean;
 }) {
+  const { data: unreadMessages = 0 } = useUnreadCount();
   const groups = MODULE_GROUPS.map((g) => ({
     group: g,
     items: modules.filter((m) => m.group === g),
@@ -209,6 +211,7 @@ function SidebarContent({
               {items.map(({ path, label, icon: Icon }) => {
                 const active =
                   path === '/' ? location === '/' : location.startsWith(path);
+                const badge = path === '/discussion' ? unreadMessages : 0;
                 return (
                   <NavLink
                     key={path}
@@ -226,8 +229,18 @@ function SidebarContent({
                     {active && (
                       <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-brand-600" />
                     )}
-                    <Icon size={18} className={active ? '' : 'text-ink-subtle group-hover:text-ink'} />
-                    {!collapsed && label}
+                    <span className="relative">
+                      <Icon size={18} className={active ? '' : 'text-ink-subtle group-hover:text-ink'} />
+                      {badge > 0 && collapsed && (
+                        <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-brand-600 ring-2 ring-surface" />
+                      )}
+                    </span>
+                    {!collapsed && <span className="flex-1">{label}</span>}
+                    {!collapsed && badge > 0 && (
+                      <span className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-brand-600 px-1.5 text-[11px] font-semibold text-white">
+                        {badge > 99 ? '99+' : badge}
+                      </span>
+                    )}
                   </NavLink>
                 );
               })}

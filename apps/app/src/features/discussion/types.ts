@@ -8,6 +8,7 @@ export interface ConversationSummary {
   lastMessage: { body: string; authorName: string; createdAt: string } | null;
   updatedAt: string;
   participantsCount: number;
+  unread: number;
 }
 
 export interface Contact {

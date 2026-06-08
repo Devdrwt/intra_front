@@ -13,6 +13,16 @@ export function useConversations() {
   });
 }
 
+/** Total des messages non lus (badge du menu). Sondé régulièrement. */
+export function useUnreadCount() {
+  return useQuery({
+    queryKey: [KEY, 'unread'],
+    queryFn: discussionService.unreadCount,
+    refetchInterval: 20000,
+    refetchOnWindowFocus: true,
+  });
+}
+
 export function useContacts() {
   return useQuery({ queryKey: [KEY, 'contacts'], queryFn: discussionService.contacts });
 }
@@ -35,6 +45,7 @@ export function usePostMessage(convId: string) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [KEY, 'msgs', convId] });
       qc.invalidateQueries({ queryKey: [KEY, 'convs'] });
+      qc.invalidateQueries({ queryKey: [KEY, 'unread'] });
     },
   });
 }

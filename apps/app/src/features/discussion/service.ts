@@ -11,6 +11,8 @@ import type {
 /** Messagerie d'entreprise — endpoints /conversations. */
 const httpApi = {
   conversations: () => api.get<ConversationSummary[]>('/conversations').then((r) => r.data),
+  unreadCount: () =>
+    api.get<{ total: number }>('/conversations/unread-count').then((r) => r.data.total),
   contacts: () => api.get<Contact[]>('/conversations/contacts').then((r) => r.data),
   createDirect: (userId: string) =>
     api.post<ConversationSummary>('/conversations/direct', { userId }).then((r) => r.data),
@@ -44,11 +46,13 @@ const company: ConversationSummary = {
   lastMessage: null,
   updatedAt: new Date().toISOString(),
   participantsCount: 0,
+  unread: 0,
 };
 const msgStore: Record<string, Message[]> = { company: [] };
 let seq = 0;
 const mockApi = {
   conversations: () => delay([company]),
+  unreadCount: () => delay(0),
   contacts: () => delay([] as Contact[]),
   createDirect: (_userId: string) => delay(company),
   createGroup: (_name: string, _userIds: string[]) => delay(company),

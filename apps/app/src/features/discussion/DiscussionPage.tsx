@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   ArrowLeft,
   Building2,
@@ -56,6 +57,7 @@ function ConvAvatar({ conv, size = 'md' }: { conv: ConversationSummary; size?: '
 }
 
 export function DiscussionPage() {
+  const qc = useQueryClient();
   const { data: conversations, isLoading } = useConversations();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mobileConv, setMobileConv] = useState(false);
@@ -75,6 +77,16 @@ export function DiscussionPage() {
   const select = (id: string) => {
     setSelectedId(id);
     setMobileConv(true);
+    // Marquage lu immédiat côté UI (le serveur le fait via getMessages).
+    const conv = list.find((c) => c.id === id);
+    if (conv && conv.unread > 0) {
+      qc.setQueryData<ConversationSummary[]>(['discussion', 'convs'], (old) =>
+        old?.map((c) => (c.id === id ? { ...c, unread: 0 } : c)),
+      );
+      qc.setQueryData<number>(['discussion', 'unread'], (old) =>
+        Math.max(0, (old ?? 0) - conv.unread),
+      );
+    }
   };
 
   return (
@@ -122,12 +134,21 @@ export function DiscussionPage() {
                   <ConvAvatar conv={c} size="sm" />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="truncate text-sm font-medium text-ink">{c.title}</span>
-                      {c.lastMessage && (
-                        <span className="shrink-0 text-[11px] text-ink-subtle">{time(c.lastMessage.createdAt)}</span>
-                      )}
+                      <span className={cn('truncate text-sm text-ink', c.unread > 0 ? 'font-bold' : 'font-medium')}>
+                        {c.title}
+                      </span>
+                      <div className="flex shrink-0 items-center gap-1.5">
+                        {c.lastMessage && (
+                          <span className="text-[11px] text-ink-subtle">{time(c.lastMessage.createdAt)}</span>
+                        )}
+                        {c.unread > 0 && (
+                          <span className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-brand-600 px-1.5 text-[11px] font-semibold text-white">
+                            {c.unread > 99 ? '99+' : c.unread}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <p className="truncate text-xs text-ink-subtle">
+                    <p className={cn('truncate text-xs', c.unread > 0 ? 'font-medium text-ink' : 'text-ink-subtle')}>
                       {c.lastMessage ? `${c.lastMessage.authorName}: ${c.lastMessage.body}` : 'Aucun message'}
                     </p>
                   </div>
