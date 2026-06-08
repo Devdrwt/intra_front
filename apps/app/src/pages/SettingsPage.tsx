@@ -16,6 +16,7 @@ import { apiErrorMessage } from '@/lib/api';
 import { ORG_NAME } from '@/lib/config';
 import { useTheme } from '@/theme/ThemeProvider';
 import { ReferentielsSection } from '@/features/settings/ReferentielsSection';
+import { OrgLogoCard } from '@/features/settings/OrgLogoCard';
 import { MailAccountSection } from '@/features/webmail/MailAccountSection';
 import { avatarUrl } from '@/lib/avatar';
 import { toast } from '@/lib/toast';
@@ -82,6 +83,7 @@ export function SettingsPage() {
             <SlidersHorizontal size={18} className="text-ink-subtle" />
             <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-subtle">Organisation</h3>
           </div>
+          <OrgLogoCard />
           <Callout tone="info">
             Définissez les départements et services de votre organisation. Ils alimentent les
             formulaires RH, les présences et la consolidation des rapports.

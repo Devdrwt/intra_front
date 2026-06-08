@@ -17,6 +17,7 @@ import { Avatar, cn } from '@drwindesk/ui';
 import { MODULES, MODULE_GROUPS } from '@/config/modules';
 import { ORG_NAME } from '@/lib/config';
 import { avatarUrl } from '@/lib/avatar';
+import { orgLogoUrl } from '@/lib/branding';
 import { displayName, hasPermission, useAuth } from '@/auth/AuthContext';
 import { useMyProfile } from '@/features/me/hooks';
 import { useUnreadCount } from '@/features/discussion/hooks';
@@ -161,11 +162,21 @@ export function AppLayout() {
 }
 
 function Brand({ collapsed }: { collapsed?: boolean }) {
+  const [noLogo, setNoLogo] = useState(false);
   return (
     <div className="flex items-center gap-2.5">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-sm font-bold text-white shadow-sm">
-        D
-      </span>
+      {noLogo ? (
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-sm font-bold text-white shadow-sm">
+          D
+        </span>
+      ) : (
+        <img
+          src={orgLogoUrl()}
+          alt="Logo"
+          onError={() => setNoLogo(true)}
+          className="h-9 w-9 shrink-0 rounded-xl object-contain"
+        />
+      )}
       {!collapsed && (
         <span className="text-lg font-semibold tracking-tight">
           Drwin<span className="text-brand-600">Desk</span>
