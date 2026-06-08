@@ -2,8 +2,9 @@ import { Link } from 'react-router-dom';
 import {
   Bell,
   CalendarClock,
+  Clock,
   FileBarChart,
-  FileSignature,
+  MessagesSquare,
   Plus,
   UserPlus,
   type LucideIcon,
@@ -12,6 +13,8 @@ import { Card, CardTitle, EmptyState, Skeleton, cn } from '@drwindesk/ui';
 import { displayName, hasPermission, useAuth } from '@/auth/AuthContext';
 import { useEspaceMoi } from '@/features/espaces/hooks';
 import { severityDot, timeAgo } from '@/features/espaces/helpers';
+import { useMyConges, useMyPointages, useMyRapports } from '@/features/me/hooks';
+import { useUnreadCount } from '@/features/discussion/hooks';
 
 /** Salutation selon l'heure locale de connexion. */
 function greeting(h: number = new Date().getHours()): { hello: string; emoji: string } {
@@ -20,6 +23,8 @@ function greeting(h: number = new Date().getHours()): { hello: string; emoji: st
   if (h >= 18 && h < 22) return { hello: 'Bonsoir', emoji: '🌆' };
   return { hello: 'Bonne nuit', emoji: '🌙' };
 }
+
+const todayStr = () => new Date().toISOString().slice(0, 10);
 
 type Tone = 'brand' | 'success' | 'warning' | 'danger';
 const TONE: Record<Tone, string> = {
@@ -33,43 +38,61 @@ function StatCard({
   icon: Icon,
   label,
   value,
+  hint,
   tone,
   loading,
+  to,
 }: {
   icon: LucideIcon;
   label: string;
   value: string | number;
+  hint?: string;
   tone: Tone;
   loading?: boolean;
+  to?: string;
 }) {
-  return (
-    <Card className="flex items-center gap-4">
-      <span className={cn('flex h-11 w-11 items-center justify-center rounded-xl', TONE[tone])}>
+  const inner = (
+    <Card className={cn('flex items-center gap-4', to && 'transition-colors hover:border-brand-300')}>
+      <span className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-xl', TONE[tone])}>
         <Icon size={20} />
       </span>
       <div className="min-w-0">
         <p className="text-xs font-medium uppercase tracking-wide text-ink-subtle">{label}</p>
         {loading ? (
-          <Skeleton className="mt-1.5 h-7 w-12" />
+          <Skeleton className="mt-1.5 h-7 w-16" />
         ) : (
-          <p className="text-2xl font-bold text-ink">{value}</p>
+          <p className="truncate text-xl font-bold text-ink">{value}</p>
         )}
+        {hint && !loading && <p className="truncate text-xs text-ink-subtle">{hint}</p>}
       </div>
     </Card>
   );
+  return to ? <Link to={to}>{inner}</Link> : inner;
 }
 
 export function DashboardPage() {
   const { user } = useAuth();
   const { data: espace, isLoading } = useEspaceMoi();
-  const unread = espace?.notifications.unread ?? 0;
   const recent = espace?.notifications.recent ?? [];
 
+  const pointages = useMyPointages();
+  const rapports = useMyRapports();
+  const conges = useMyConges();
+  const { data: unreadMsg = 0 } = useUnreadCount();
+
+  const today = todayStr();
+  const todayP = (pointages.data ?? []).find((p) => p.date === today);
+  const pointageValue = todayP?.heureSortie
+    ? `Sortie ${todayP.heureSortie}`
+    : todayP?.heureEntree
+      ? `Entrée ${todayP.heureEntree}`
+      : 'Non pointé';
+  const todayR = (rapports.data ?? []).find((r) => r.date === today);
+  const pendingDemandes = (conges.data ?? []).filter((c) => c.statut === 'EN_ATTENTE').length;
+
   const actions = [
-    // Self-service (espace collaborateur) — visibles par tous.
-    { to: '/mes-conges', label: 'Demander un congé', icon: CalendarClock, perm: undefined },
+    { to: '/mes-demandes', label: 'Faire une demande', icon: CalendarClock, perm: undefined },
     { to: '/mes-rapports', label: 'Saisir un rapport', icon: FileBarChart, perm: undefined },
-    // Gestion — gardées par permission (admin / RH-manager).
     { to: '/rh/nouveau', label: 'Nouvel employé', icon: Plus, perm: 'rh.employe:read' },
     { to: '/utilisateurs', label: 'Inviter un membre', icon: UserPlus, perm: 'user:read' },
   ].filter((a) => !a.perm || hasPermission(user, a.perm));
@@ -83,18 +106,39 @@ export function DashboardPage() {
         <p className="text-ink-muted">Voici l’état de votre espace aujourd’hui.</p>
       </header>
 
-      {/* Stats */}
+      {/* Stats self-service */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          icon={Bell}
-          label="Notifications non lues"
-          value={unread}
-          tone={unread > 0 ? 'warning' : 'success'}
-          loading={isLoading}
+          icon={Clock}
+          label="Pointage du jour"
+          value={pointageValue}
+          tone={todayP?.heureEntree ? 'success' : 'warning'}
+          loading={pointages.isLoading}
+          to="/mon-pointage"
         />
-        <StatCard icon={FileSignature} label="Contrats à échéance" value="—" tone="danger" />
-        <StatCard icon={FileBarChart} label="Rapports du jour" value="—" tone="brand" />
-        <StatCard icon={CalendarClock} label="Congés en attente" value="—" tone="success" />
+        <StatCard
+          icon={FileBarChart}
+          label="Rapport du jour"
+          value={todayR ? 'Remis' : 'À faire'}
+          tone={todayR ? 'success' : 'warning'}
+          loading={rapports.isLoading}
+          to="/mes-rapports"
+        />
+        <StatCard
+          icon={CalendarClock}
+          label="Demandes en attente"
+          value={pendingDemandes}
+          tone={pendingDemandes > 0 ? 'warning' : 'success'}
+          loading={conges.isLoading}
+          to="/mes-demandes"
+        />
+        <StatCard
+          icon={MessagesSquare}
+          label="Messages non lus"
+          value={unreadMsg}
+          tone={unreadMsg > 0 ? 'brand' : 'success'}
+          to="/discussion"
+        />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">

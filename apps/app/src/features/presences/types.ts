@@ -7,13 +7,15 @@ export interface Pointage {
   heureSortie?: string; // HH:mm
 }
 
-// --- Congés -------------------------------------------------------------------
+// --- Demandes (permissions / repos / congés) ---------------------------------
+export type CategorieDemande = 'PERMISSION' | 'REPOS' | 'CONGE';
 export type TypeConge = 'ANNUEL' | 'MALADIE' | 'SANS_SOLDE' | 'EXCEPTIONNEL';
 export type StatutConge = 'EN_ATTENTE' | 'APPROUVE' | 'REFUSE';
 
 export interface DemandeConge {
   id: string;
   employeId: string;
+  categorie: CategorieDemande;
   type: TypeConge;
   dateDebut: string; // ISO
   dateFin: string; // ISO
@@ -24,8 +26,14 @@ export interface DemandeConge {
 
 export type DemandeCongeInput = Pick<
   DemandeConge,
-  'employeId' | 'type' | 'dateDebut' | 'dateFin' | 'motif'
+  'employeId' | 'categorie' | 'type' | 'dateDebut' | 'dateFin' | 'motif'
 >;
+
+export const CATEGORIE_LABEL: Record<CategorieDemande, string> = {
+  PERMISSION: 'Permission',
+  REPOS: 'Repos',
+  CONGE: 'Congé',
+};
 
 export const TYPE_CONGE_LABEL: Record<TypeConge, string> = {
   ANNUEL: 'Congé annuel',

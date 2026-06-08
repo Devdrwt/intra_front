@@ -17,6 +17,7 @@ export function CongeFormPage() {
 
   const [form, setForm] = useState<DemandeCongeInput>({
     employeId: '',
+    categorie: 'CONGE',
     type: 'ANNUEL',
     dateDebut: '',
     dateFin: '',

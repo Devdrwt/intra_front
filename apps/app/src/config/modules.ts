@@ -41,7 +41,7 @@ export const MODULES: ModuleRoute[] = [
   // --- Mon espace (collaborateur) -------------------------------------------
   { path: '/', label: 'Tableau de bord', icon: LayoutDashboard, group: 'Mon espace' },
   { path: '/mon-pointage', label: 'Mon pointage', icon: Clock, group: 'Mon espace' },
-  { path: '/mes-conges', label: 'Mes congés', icon: CalendarClock, group: 'Mon espace' },
+  { path: '/mes-demandes', label: 'Mes demandes', icon: CalendarClock, group: 'Mon espace' },
   { path: '/mes-rapports', label: 'Mes rapports', icon: FileBarChart, group: 'Mon espace' },
   { path: '/mes-documents', label: 'Mes documents', icon: FolderArchive, group: 'Mon espace' },
   { path: '/discussion', label: 'Discussion', icon: MessagesSquare, group: 'Mon espace' },

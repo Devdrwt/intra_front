@@ -26,6 +26,7 @@ let conges: DemandeConge[] = [
   {
     id: 'c1',
     employeId: 'e3',
+    categorie: 'CONGE',
     type: 'ANNUEL',
     dateDebut: today(),
     dateFin: today(),
@@ -36,6 +37,7 @@ let conges: DemandeConge[] = [
   {
     id: 'c2',
     employeId: 'e2',
+    categorie: 'CONGE',
     type: 'MALADIE',
     dateDebut: '2026-05-20',
     dateFin: '2026-05-22',

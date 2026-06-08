@@ -1,7 +1,7 @@
 import { api } from '@/lib/api';
 import { USE_MOCKS } from '@/lib/config';
 import type { Employe } from '@/features/rh/types';
-import type { DemandeConge, Pointage, TypeConge } from '@/features/presences/types';
+import type { CategorieDemande, DemandeConge, Pointage, TypeConge } from '@/features/presences/types';
 import type { AttachmentRef, Rapport, StatutRapport } from '@/features/rapports/types';
 import type { Document } from '@/features/documents/types';
 
@@ -15,9 +15,10 @@ import type { Document } from '@/features/documents/types';
  *   GET  /me/documents
  */
 
-/** Demande de congé pour SOI (pas d'employeId : déduit du token). */
+/** Demande d'absence pour SOI (pas d'employeId : déduit du token). */
 export interface MeCongeInput {
-  type: TypeConge;
+  categorie: CategorieDemande;
+  type?: TypeConge;
   dateDebut: string;
   dateFin: string;
   motif?: string;
@@ -95,6 +96,7 @@ const mockApi = {
   createConge: (input: MeCongeInput) => {
     const created: DemandeConge = {
       ...input,
+      type: input.type ?? 'EXCEPTIONNEL',
       id: `mc${++seq}`,
       employeId: MOCK_ID,
       statut: 'EN_ATTENTE',

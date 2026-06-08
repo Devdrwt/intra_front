@@ -11,6 +11,7 @@ import {
   Avatar,
 } from '@drwindesk/ui';
 import { useAuditLogs } from './hooks';
+import { describeAudit } from './describe';
 import { METHOD_OPTIONS, METHOD_TONE, type AuditFilters } from './types';
 
 const fmtDateTime = (iso: string) =>
@@ -114,14 +115,16 @@ export function AuditPage() {
                     {log.method && (
                       <Badge tone={METHOD_TONE[log.method] ?? 'neutral'}>{log.method}</Badge>
                     )}
-                    <span className="truncate font-mono text-sm text-ink">
-                      {shortPath(log.path, log.action)}
+                    <span className="truncate text-sm font-medium text-ink">
+                      {describeAudit(log.method, log.path, log.action)}
                     </span>
                   </div>
                   <p className="truncate text-xs text-ink-subtle">
-                    {log.actorEmail ?? 'Système'}
+                    <span className="text-ink-muted">{log.actorEmail ?? 'Système'}</span>
+                    {' · '}
+                    <span className="font-mono">{shortPath(log.path, log.action)}</span>
                     {log.ip ? ` · ${log.ip}` : ''}
-                    {log.statusCode ? ` · HTTP ${log.statusCode}` : ''}
+                    {log.statusCode ? ` · ${log.statusCode}` : ''}
                   </p>
                 </div>
                 <span className="shrink-0 text-xs text-ink-subtle">{fmtDateTime(log.createdAt)}</span>

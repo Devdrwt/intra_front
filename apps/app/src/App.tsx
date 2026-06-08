@@ -8,7 +8,7 @@ import { SetPasswordPage } from '@/pages/SetPasswordPage';
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { MonPointagePage } from '@/features/me/MonPointagePage';
-import { MesCongesPage } from '@/features/me/MesCongesPage';
+import { MesDemandesPage } from '@/features/me/MesDemandesPage';
 import { MesRapportsPage } from '@/features/me/MesRapportsPage';
 import { MesDocumentsPage } from '@/features/me/MesDocumentsPage';
 import { DiscussionPage } from '@/features/discussion/DiscussionPage';
@@ -50,7 +50,7 @@ export default function App() {
             {/* --- Mon espace (tout utilisateur connecté) ------------------- */}
             <Route index element={<DashboardPage />} />
             <Route path="mon-pointage" element={<MonPointagePage />} />
-            <Route path="mes-conges" element={<MesCongesPage />} />
+            <Route path="mes-demandes" element={<MesDemandesPage />} />
             <Route path="mes-rapports" element={<MesRapportsPage />} />
             <Route path="mes-documents" element={<MesDocumentsPage />} />
             <Route path="discussion" element={<DiscussionPage />} />
