@@ -19,7 +19,14 @@ import {
   usePointer,
   useSetStatutConge,
 } from './hooks';
-import { STATUT_CONGE_LABEL, TYPE_CONGE_LABEL, nbJours, type StatutConge } from './types';
+import {
+  CATEGORIE_LABEL,
+  STATUT_CONGE_LABEL,
+  TYPE_CONGE_LABEL,
+  nbJours,
+  type CategorieDemande,
+  type StatutConge,
+} from './types';
 
 type Tab = 'pointage' | 'conges';
 
@@ -28,6 +35,19 @@ const STATUT_TONE: Record<StatutConge, 'success' | 'warning' | 'danger'> = {
   EN_ATTENTE: 'warning',
   REFUSE: 'danger',
 };
+
+const CATEGORIE_TONE: Record<CategorieDemande, 'brand' | 'neutral' | 'success'> = {
+  PERMISSION: 'brand',
+  REPOS: 'neutral',
+  CONGE: 'success',
+};
+
+const CAT_FILTERS: [CategorieDemande | 'ALL', string][] = [
+  ['ALL', 'Toutes'],
+  ['PERMISSION', 'Permissions'],
+  ['REPOS', 'Repos'],
+  ['CONGE', 'Congés'],
+];
 
 function fmt(iso: string): string {
   const d = new Date(iso);
@@ -59,7 +79,7 @@ export function PresencesPage() {
         {(
           [
             ['pointage', 'Pointage du jour'],
-            ['conges', 'Congés'],
+            ['conges', 'Demandes'],
           ] as [Tab, string][]
         ).map(([key, label]) => (
           <button
@@ -150,10 +170,35 @@ function CongesPanel() {
   const { data: conges, isLoading } = useConges();
   const setStatut = useSetStatutConge();
   const cancel = useCancelConge();
+  const [cat, setCat] = useState<CategorieDemande | 'ALL'>('ALL');
+
+  const all = conges ?? [];
+  const catOf = (c: (typeof all)[number]) => c.categorie ?? 'CONGE';
+  const filtered = cat === 'ALL' ? all : all.filter((c) => catOf(c) === cat);
+  const countOf = (k: CategorieDemande | 'ALL') =>
+    k === 'ALL' ? all.length : all.filter((c) => catOf(c) === k).length;
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        {/* Filtre par catégorie */}
+        <div className="flex flex-wrap gap-1.5">
+          {CAT_FILTERS.map(([key, label]) => (
+            <button
+              key={key}
+              onClick={() => setCat(key)}
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors',
+                cat === key
+                  ? 'border-brand-500 bg-brand-soft text-brand-soft-fg'
+                  : 'border-surface-border text-ink-muted hover:bg-surface-muted hover:text-ink',
+              )}
+            >
+              {label}
+              <span className="text-xs text-ink-subtle">{countOf(key)}</span>
+            </button>
+          ))}
+        </div>
         <Link to="/presences/conges/nouveau">
           <Button>
             <Plus size={18} /> Nouvelle demande
@@ -164,7 +209,7 @@ function CongesPanel() {
       <Card className="overflow-hidden p-0">
         {isLoading ? (
           <SkeletonRows rows={4} cols={5} />
-        ) : !conges || conges.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <EmptyState
             icon={<CalendarOff size={20} />}
             title="Aucune demande de congé"
@@ -182,7 +227,7 @@ function CongesPanel() {
             <thead className="border-b border-surface-border bg-surface-muted text-left text-xs uppercase tracking-wide text-ink-subtle">
               <tr>
                 <th className="px-5 py-2.5 font-medium">Collaborateur</th>
-                <th className="hidden px-5 py-2.5 font-medium sm:table-cell">Type</th>
+                <th className="px-5 py-2.5 font-medium">Catégorie</th>
                 <th className="px-5 py-2.5 font-medium">Période</th>
                 <th className="hidden px-5 py-2.5 font-medium sm:table-cell">Jours</th>
                 <th className="px-5 py-2.5 font-medium">Statut</th>
@@ -190,15 +235,23 @@ function CongesPanel() {
               </tr>
             </thead>
             <tbody>
-              {conges.map((c) => {
+              {filtered.map((c) => {
                 const emp = byId.get(c.employeId);
+                const categorie = catOf(c);
                 return (
                   <tr key={c.id} className="border-b border-surface-border last:border-0">
                     <td className="px-5 py-3">
                       <Person name={emp ? fullName(emp) : c.employeId} />
                     </td>
-                    <td className="hidden px-5 py-3 text-ink-muted sm:table-cell">
-                      {TYPE_CONGE_LABEL[c.type]}
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-2">
+                        <Badge tone={CATEGORIE_TONE[categorie]}>{CATEGORIE_LABEL[categorie]}</Badge>
+                        {categorie === 'CONGE' && (
+                          <span className="hidden text-xs text-ink-subtle sm:inline">
+                            {TYPE_CONGE_LABEL[c.type]}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-5 py-3 text-ink-muted">
                       {fmt(c.dateDebut)} → {fmt(c.dateFin)}
