@@ -11,6 +11,30 @@ import { MonPointagePage } from '@/features/me/MonPointagePage';
 import { MesDemandesPage } from '@/features/me/MesDemandesPage';
 import { MesRapportsPage } from '@/features/me/MesRapportsPage';
 import { MesDocumentsPage } from '@/features/me/MesDocumentsPage';
+import { MesValidationsPage } from '@/features/approvals/MesValidationsPage';
+import { SupportPage } from '@/features/support/SupportPage';
+import { TicketDetailPage } from '@/features/support/TicketDetailPage';
+import { TiersPage } from '@/features/finance-core/TiersPage';
+import { ComptabilitePage } from '@/features/finance-core/ComptabilitePage';
+import { NotesFraisPage } from '@/features/finance-depenses/NotesFraisPage';
+import { AchatsPage } from '@/features/finance-depenses/AchatsPage';
+import { FacturesClientPage } from '@/features/finance-recettes/FacturesClientPage';
+import { TresoreriePage } from '@/features/finance-tresorerie/TresoreriePage';
+import { PaiePage } from '@/features/finance-paie/PaiePage';
+import { PilotagePage } from '@/features/finance-pilotage/PilotagePage';
+import { EvaluationPage } from '@/features/evaluation/EvaluationPage';
+import { PerformancePage } from '@/features/evaluation/PerformancePage';
+import { OnboardingPage } from '@/features/onboarding/OnboardingPage';
+import { FormationPage } from '@/features/formation/FormationPage';
+import { MesTachesPage } from '@/features/tasks/MesTachesPage';
+import { CockpitPage } from '@/features/experience/CockpitPage';
+import { AssistantPage } from '@/features/assistant/AssistantPage';
+import { ArchivagePage } from '@/features/archivage/ArchivagePage';
+import { AppelsOffresPage } from '@/features/appels-offres/AppelsOffresPage';
+import { StudioPage } from '@/features/studio/StudioPage';
+import { InventairePage } from '@/features/inventaire/InventairePage';
+import { RentabiliteProjetsPage } from '@/features/finance-pilotage/RentabiliteProjetsPage';
+import { BibliothequePage } from '@/features/bibliotheque/BibliothequePage';
 import { DiscussionPage } from '@/features/discussion/DiscussionPage';
 import { MailPage } from '@/features/webmail/MailPage';
 import { EmployesListPage } from '@/features/rh/EmployesListPage';
@@ -51,6 +75,10 @@ export default function App() {
             <Route index element={<DashboardPage />} />
             <Route path="mon-pointage" element={<MonPointagePage />} />
             <Route path="mes-demandes" element={<MesDemandesPage />} />
+            <Route path="mes-validations" element={<MesValidationsPage />} />
+            <Route path="mes-taches" element={<MesTachesPage />} />
+            <Route path="assistant" element={<AssistantPage />} />
+            <Route path="bibliotheque" element={<BibliothequePage />} />
             <Route path="mes-rapports" element={<MesRapportsPage />} />
             <Route path="mes-documents" element={<MesDocumentsPage />} />
             <Route path="discussion" element={<DiscussionPage />} />
@@ -90,6 +118,11 @@ export default function App() {
               <Route path="projets/:id/editer" element={<ProjectFormPage />} />
             </Route>
 
+            <Route element={<RequirePermission perm="support:read" />}>
+              <Route path="support" element={<SupportPage />} />
+              <Route path="support/:id" element={<TicketDetailPage />} />
+            </Route>
+
             <Route element={<RequirePermission perm="recrutement:read" />}>
               <Route path="recrutement" element={<RecrutementPage />} />
             </Route>
@@ -100,6 +133,45 @@ export default function App() {
 
             <Route element={<RequirePermission perm="audit:read" />}>
               <Route path="activite" element={<AuditPage />} />
+            </Route>
+            <Route element={<RequirePermission perm="ged.archive:read" />}>
+              <Route path="archivage" element={<ArchivagePage />} />
+            </Route>
+
+            {/* --- Finance & Gestion -------------------------------------- */}
+            <Route element={<RequirePermission perm="finance:read" />}>
+              <Route path="finance/tiers" element={<TiersPage />} />
+              <Route path="finance/frais" element={<NotesFraisPage />} />
+              <Route path="finance/achats" element={<AchatsPage />} />
+              <Route path="finance/factures" element={<FacturesClientPage />} />
+              <Route path="finance/tresorerie" element={<TresoreriePage />} />
+              <Route path="finance/budgets" element={<PilotagePage />} />
+              <Route path="finance/inventaire" element={<InventairePage />} />
+              <Route path="finance/rentabilite" element={<RentabiliteProjetsPage />} />
+            </Route>
+            <Route element={<RequirePermission perm="direction:read" />}>
+              <Route path="cockpit" element={<CockpitPage />} />
+            </Route>
+            <Route element={<RequirePermission perm="commercial:read" />}>
+              <Route path="appels-offres" element={<AppelsOffresPage />} />
+            </Route>
+            <Route element={<RequirePermission perm="studio:read" />}>
+              <Route path="studio" element={<StudioPage />} />
+            </Route>
+            <Route element={<RequirePermission perm="rh.eval:read" />}>
+              <Route path="evaluation" element={<EvaluationPage />} />
+              <Route path="performance" element={<PerformancePage />} />
+            </Route>
+            <Route element={<RequirePermission perm="rh.onboarding:read" />}>
+              <Route path="onboarding" element={<OnboardingPage />} />
+            </Route>
+            <Route element={<RequirePermission perm="rh.formation:read" />}>
+              <Route path="formation" element={<FormationPage />} />
+            </Route>
+
+            <Route element={<RequirePermission perm="finance:manage" />}>
+              <Route path="finance/paie" element={<PaiePage />} />
+              <Route path="finance/comptabilite" element={<ComptabilitePage />} />
             </Route>
           </Route>
         </Routes>

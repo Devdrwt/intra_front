@@ -4,6 +4,7 @@ import {
   CalendarClock,
   CornerDownLeft,
   FileBarChart,
+  FileText,
   Moon,
   Plus,
   Search,
@@ -15,11 +16,12 @@ import { cn } from '@drwindesk/ui';
 import { MODULES } from '@/config/modules';
 import { hasPermission, useAuth } from '@/auth/AuthContext';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useGlobalSearch } from '@/features/search/hooks';
 
 interface Item {
   id: string;
   label: string;
-  group: 'Aller à' | 'Actions';
+  group: string;
   icon: LucideIcon;
   run: () => void;
 }
@@ -67,10 +69,29 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
     return [...nav, ...actions];
   }, [navigate, onClose, user, resolved, toggle]);
 
+  // Résultats de recherche live (employés, tickets, documents…), scopés permissions backend.
+  const { data: searchData } = useGlobalSearch(query);
+  const searchItems = useMemo<Item[]>(() => {
+    const go = (path: string) => () => {
+      navigate(path);
+      onClose();
+    };
+    return (searchData?.groups ?? []).flatMap((grp) =>
+      grp.items.map((hit) => ({
+        id: `s:${hit.type}:${hit.entityId}`,
+        label: hit.subtitle ? `${hit.title} — ${hit.subtitle}` : hit.title,
+        group: grp.label,
+        icon: FileText,
+        run: go(hit.url),
+      })),
+    );
+  }, [searchData, navigate, onClose]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return q ? items.filter((i) => i.label.toLowerCase().includes(q)) : items;
-  }, [items, query]);
+    const base = q ? items.filter((i) => i.label.toLowerCase().includes(q)) : items;
+    return [...base, ...searchItems];
+  }, [items, query, searchItems]);
 
   useEffect(() => {
     if (open) {

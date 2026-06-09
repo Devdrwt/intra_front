@@ -14,6 +14,12 @@ export interface ProjectDocument {
   createdAt: string;
 }
 
+/** Lien d'accès à une ressource du projet (drive, dépôt, environnement…). */
+export interface ProjectLien {
+  label: string;
+  url: string;
+}
+
 export interface Project {
   id: string;
   nom: string;
@@ -27,6 +33,10 @@ export interface Project {
   responsable: ProjectPerson | null;
   membres: ProjectPerson[];
   documents: ProjectDocument[];
+  /** Partenaires associés au projet (optionnel, additif). */
+  partenaires?: string[];
+  /** Liens d'accès (drive, dépôt, env de test…) (optionnel, additif). */
+  liens?: ProjectLien[];
   createdAt: string;
   updatedAt: string;
 }

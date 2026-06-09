@@ -51,6 +51,28 @@ export const USE_MOCKS = {
   settings: flag(import.meta.env.VITE_MOCK_SETTINGS, globalMock),
   // Espace collaborateur (endpoints /me/...) : backend en place.
   me: flag(import.meta.env.VITE_MOCK_ME, globalMock),
+  // Moteur d'approbations (endpoints /approvals/...). MOCK tant que le backend suit.
+  approvals: flag(import.meta.env.VITE_MOCK_APPROVALS, globalMock),
+  // Support / Helpdesk (endpoints /tickets/...).
+  support: flag(import.meta.env.VITE_MOCK_SUPPORT, globalMock),
+  // Recherche globale (endpoint /search).
+  search: flag(import.meta.env.VITE_MOCK_SEARCH, globalMock),
+  // Domaine Finance & Gestion (tiers, frais, factures, trésorerie, paie, budgets).
+  finance: flag(import.meta.env.VITE_MOCK_FINANCE, globalMock),
+  // SIRH étendu.
+  eval: flag(import.meta.env.VITE_MOCK_EVAL, globalMock),
+  onboarding: flag(import.meta.env.VITE_MOCK_ONBOARDING, globalMock),
+  formation: flag(import.meta.env.VITE_MOCK_FORMATION, globalMock),
+  // Assistant IA (endpoints /ai/...).
+  ai: flag(import.meta.env.VITE_MOCK_AI, globalMock),
+  // Archivage GED (endpoints /archivage/...).
+  archivage: flag(import.meta.env.VITE_MOCK_ARCHIVAGE, globalMock),
+  // Commercial / Appels d'offres (endpoints /aao, /soumissions).
+  commercial: flag(import.meta.env.VITE_MOCK_COMMERCIAL, globalMock),
+  // Studio (production média) (endpoints /productions, /reservations-studio).
+  studio: flag(import.meta.env.VITE_MOCK_STUDIO, globalMock),
+  // Inventaire / immobilisations (endpoints /biens).
+  inventaire: flag(import.meta.env.VITE_MOCK_INVENTAIRE, globalMock),
   // Journal d'activité (audit) : endpoint GET /audit-logs.
   audit: flag(import.meta.env.VITE_MOCK_AUDIT, globalMock),
   // Projets : endpoints /projects.

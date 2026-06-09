@@ -1,0 +1,60 @@
+import { api } from '@/lib/api';
+import { USE_MOCKS } from '@/lib/config';
+
+/**
+ * Assistant IA (cf. docs/contracts/assistant-ia.md). VITE_MOCK_AI=false → réel.
+ *   /ai/modeles · /ai/generer (stream) · /ai/assistant (stream) · /ai/generations
+ * NB : en réel, génération/Q&A sont streamés (Claude Opus 4.8). Le mock renvoie un brouillon.
+ */
+export interface ModeleDocument {
+  id: string;
+  nom: string;
+  type: 'CONTRAT' | 'ATTESTATION' | 'LETTRE' | 'RAPPORT' | 'FICHE_POSTE' | 'AUTRE';
+}
+export interface GenerationResult {
+  contenu: string;
+  modelIa: string;
+}
+
+const delay = <T>(value: T, ms = 400): Promise<T> =>
+  new Promise((resolve) => setTimeout(() => resolve(value), ms));
+
+// --- MOCK ---------------------------------------------------------------------
+const modeles: ModeleDocument[] = [
+  { id: 'm1', nom: 'Contrat de travail CDI', type: 'CONTRAT' },
+  { id: 'm2', nom: 'Attestation de travail', type: 'ATTESTATION' },
+  { id: 'm3', nom: 'Rapport mensuel d’activité', type: 'RAPPORT' },
+  { id: 'm4', nom: 'Lettre de convocation', type: 'LETTRE' },
+];
+
+const mockApi = {
+  modeles: () => delay([...modeles]),
+  generer: (modeleId: string): Promise<GenerationResult> => {
+    const modeleNom = modeles.find((m) => m.id === modeleId)?.nom ?? 'Document';
+    return delay({
+      modelIa: 'claude-opus-4-8 (simulé)',
+      contenu:
+        `**${modeleNom}** (projet — à vérifier)\n\n` +
+        `Ce document a été pré-rédigé automatiquement à partir du modèle « ${modeleNom} » et ` +
+        `des données de la fiche concernée. Une fois le backend IA branché (Claude Opus 4.8), ` +
+        `le contenu réel sera généré en streaming puis classé en GED après validation humaine.\n\n` +
+        `— Variables résolues : nom, poste, dates, montants…\n— Clauses : selon le canvas.\n`,
+    });
+  },
+  assistant: (question: string): Promise<string> =>
+    delay(
+      `Réponse simulée à : « ${question} ».\n\nUne fois l'assistant branché, je répondrai en ` +
+        `langage naturel à partir de la GED et des données auxquelles vous avez accès (citations à l'appui).`,
+    ),
+};
+
+// --- HTTP ---------------------------------------------------------------------
+const httpApi = {
+  modeles: () => api.get<ModeleDocument[]>('/ai/modeles').then((r) => r.data),
+  generer: (modeleId: string): Promise<GenerationResult> =>
+    api.post<GenerationResult>('/ai/generer', { modeleId }).then((r) => r.data),
+  assistant: (question: string): Promise<string> =>
+    api.post<{ contenu: string }>('/ai/assistant', { message: question }).then((r) => r.data.contenu),
+};
+
+export const assistantService = USE_MOCKS.ai ? mockApi : httpApi;

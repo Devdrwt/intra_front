@@ -7,6 +7,7 @@ import {
   STATUT_CONGE_LABEL,
   TYPE_CONGE_LABEL,
   TYPE_CONGE_OPTIONS,
+  dureeLabel,
   nbJours,
   type CategorieDemande,
   type StatutConge,
@@ -33,9 +34,11 @@ interface FormState {
   type: TypeConge;
   dateDebut: string;
   dateFin: string;
+  heureDebut: string;
+  heureFin: string;
   motif: string;
 }
-const EMPTY: FormState = { type: 'ANNUEL', dateDebut: '', dateFin: '', motif: '' };
+const EMPTY: FormState = { type: 'ANNUEL', dateDebut: '', dateFin: '', heureDebut: '', heureFin: '', motif: '' };
 
 export function MesDemandesPage() {
   const { data: conges, isLoading, error } = useMyConges();
@@ -77,11 +80,14 @@ export function MesDemandesPage() {
     if (Object.values(errs).some(Boolean)) return setFormError('Veuillez corriger les champs signalés.');
     setFormError(null);
     try {
+      const intraJournee = tab !== 'CONGE' && !!form.heureDebut && !!form.heureFin;
       await create.mutateAsync({
         categorie: tab,
         type: tab === 'CONGE' ? form.type : undefined,
         dateDebut: form.dateDebut,
         dateFin: form.dateFin,
+        heureDebut: intraJournee ? form.heureDebut : undefined,
+        heureFin: intraJournee ? form.heureFin : undefined,
         motif: form.motif || undefined,
       });
       setForm(EMPTY);
@@ -161,9 +167,33 @@ export function MesDemandesPage() {
                 error={errors.dateFin}
               />
             </div>
+            {tab !== 'CONGE' && (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Input
+                  type="time"
+                  label="De (heure, optionnel)"
+                  value={form.heureDebut}
+                  onChange={(e) => setForm((f) => ({ ...f, heureDebut: e.target.value }))}
+                />
+                <Input
+                  type="time"
+                  label="À (heure, optionnel)"
+                  value={form.heureFin}
+                  onChange={(e) => setForm((f) => ({ ...f, heureFin: e.target.value }))}
+                />
+              </div>
+            )}
             {jours > 0 && (
               <p className="text-sm text-ink-muted">
-                Durée : <span className="font-medium text-ink">{jours} jour(s)</span>
+                Durée :{' '}
+                <span className="font-medium text-ink">
+                  {dureeLabel({
+                    dateDebut: form.dateDebut,
+                    dateFin: form.dateFin,
+                    heureDebut: tab !== 'CONGE' ? form.heureDebut : undefined,
+                    heureFin: tab !== 'CONGE' ? form.heureFin : undefined,
+                  })}
+                </span>
               </p>
             )}
             <Input
@@ -211,7 +241,7 @@ export function MesDemandesPage() {
                     {tab === 'CONGE' ? TYPE_CONGE_LABEL[c.type] : CATEGORIE_LABEL[c.categorie ?? 'CONGE']}
                   </p>
                   <p className="text-xs text-ink-subtle">
-                    Du {fmt(c.dateDebut)} au {fmt(c.dateFin)} · {nbJours(c.dateDebut, c.dateFin)} j
+                    Du {fmt(c.dateDebut)} au {fmt(c.dateFin)} · {dureeLabel(c)}
                     {c.motif ? ` · ${c.motif}` : ''}
                   </p>
                 </div>

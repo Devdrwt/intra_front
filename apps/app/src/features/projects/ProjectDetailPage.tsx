@@ -255,6 +255,35 @@ export function ProjectDetailPage() {
               </ul>
             )}
           </Card>
+
+          {((p.partenaires?.length ?? 0) > 0 || (p.liens?.length ?? 0) > 0) && (
+            <Card>
+              <CardTitle>Partenaires & accès</CardTitle>
+              {(p.partenaires?.length ?? 0) > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {p.partenaires!.map((part) => (
+                    <Badge key={part} tone="brand">{part}</Badge>
+                  ))}
+                </div>
+              )}
+              {(p.liens?.length ?? 0) > 0 && (
+                <ul className="mt-3 space-y-1.5">
+                  {p.liens!.map((l) => (
+                    <li key={l.url}>
+                      <a
+                        href={l.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 text-sm text-brand-600 hover:underline"
+                      >
+                        <ExternalLink size={14} /> {l.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+          )}
         </div>
       </div>
     </div>

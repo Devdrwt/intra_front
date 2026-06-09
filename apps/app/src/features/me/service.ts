@@ -21,6 +21,9 @@ export interface MeCongeInput {
   type?: TypeConge;
   dateDebut: string;
   dateFin: string;
+  /** Permission / repos intra-journée (optionnel). */
+  heureDebut?: string;
+  heureFin?: string;
   motif?: string;
 }
 

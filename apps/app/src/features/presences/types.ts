@@ -19,6 +19,9 @@ export interface DemandeConge {
   type: TypeConge;
   dateDebut: string; // ISO
   dateFin: string; // ISO
+  /** Permission / repos intra-journée : heures "HH:mm" (optionnel). */
+  heureDebut?: string;
+  heureFin?: string;
   motif?: string;
   statut: StatutConge;
   demandeLe: string; // ISO
@@ -26,7 +29,14 @@ export interface DemandeConge {
 
 export type DemandeCongeInput = Pick<
   DemandeConge,
-  'employeId' | 'categorie' | 'type' | 'dateDebut' | 'dateFin' | 'motif'
+  | 'employeId'
+  | 'categorie'
+  | 'type'
+  | 'dateDebut'
+  | 'dateFin'
+  | 'heureDebut'
+  | 'heureFin'
+  | 'motif'
 >;
 
 export const CATEGORIE_LABEL: Record<CategorieDemande, string> = {
@@ -59,4 +69,31 @@ export function nbJours(dateDebut: string, dateFin: string): number {
   const d2 = new Date(dateFin);
   if (Number.isNaN(d1.getTime()) || Number.isNaN(d2.getTime())) return 0;
   return Math.max(0, Math.round((d2.getTime() - d1.getTime()) / 86_400_000) + 1);
+}
+
+/** Durée d'une plage horaire "HH:mm" → "HH:mm", en heures (0 si invalide). */
+export function dureeHeures(heureDebut?: string, heureFin?: string): number {
+  if (!heureDebut || !heureFin) return 0;
+  const toMin = (t: string): number => {
+    const parts = t.split(':');
+    const h = Number(parts[0]);
+    const m = Number(parts[1] ?? '0');
+    return Number.isNaN(h) || Number.isNaN(m) ? NaN : h * 60 + m;
+  };
+  const d = toMin(heureDebut);
+  const f = toMin(heureFin);
+  if (Number.isNaN(d) || Number.isNaN(f)) return 0;
+  return Math.max(0, (f - d) / 60);
+}
+
+/**
+ * Libellé lisible de durée : « 2 h (14:00–16:00) » pour une permission intra-journée,
+ * sinon « N jour(s) ».
+ */
+export function dureeLabel(c: Pick<DemandeConge, 'dateDebut' | 'dateFin' | 'heureDebut' | 'heureFin'>): string {
+  if (c.heureDebut && c.heureFin) {
+    const h = dureeHeures(c.heureDebut, c.heureFin);
+    return `${h.toLocaleString('fr-FR')} h (${c.heureDebut}–${c.heureFin})`;
+  }
+  return `${nbJours(c.dateDebut, c.dateFin)} j`;
 }

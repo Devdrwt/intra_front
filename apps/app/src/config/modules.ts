@@ -16,6 +16,27 @@ import {
   FolderKanban,
   MessagesSquare,
   Mail,
+  ClipboardCheck,
+  LifeBuoy,
+  Building2,
+  Calculator,
+  Receipt,
+  FileText,
+  Wallet,
+  Landmark,
+  PiggyBank,
+  Target,
+  Rocket,
+  GraduationCap,
+  Gauge,
+  Sparkles,
+  Archive,
+  Megaphone,
+  Clapperboard,
+  Boxes,
+  Library,
+  LineChart,
+  Award,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -35,15 +56,25 @@ export interface ModuleRoute {
  *  - « Administration » : gestion org-wide, réservée par permission (admin / RH-manager).
  *  - « Aide & réglages » : transverse.
  */
-export const MODULE_GROUPS = ['Mon espace', 'Administration', 'Aide & réglages'] as const;
+export const MODULE_GROUPS = ['Mon espace', 'Administration', 'Finance', 'Aide & réglages'] as const;
 
 export const MODULES: ModuleRoute[] = [
   // --- Mon espace (collaborateur) -------------------------------------------
   { path: '/', label: 'Tableau de bord', icon: LayoutDashboard, group: 'Mon espace' },
   { path: '/mon-pointage', label: 'Mon pointage', icon: Clock, group: 'Mon espace' },
   { path: '/mes-demandes', label: 'Mes demandes', icon: CalendarClock, group: 'Mon espace' },
+  {
+    path: '/mes-validations',
+    label: 'Mes validations',
+    icon: ClipboardCheck,
+    group: 'Mon espace',
+    requires: 'approval:read',
+  },
+  { path: '/mes-taches', label: 'Mes tâches', icon: FolderKanban, group: 'Mon espace' },
   { path: '/mes-rapports', label: 'Mes rapports', icon: FileBarChart, group: 'Mon espace' },
   { path: '/mes-documents', label: 'Mes documents', icon: FolderArchive, group: 'Mon espace' },
+  { path: '/bibliotheque', label: 'Bibliothèque', icon: Library, group: 'Mon espace' },
+  { path: '/assistant', label: 'Assistant IA', icon: Sparkles, group: 'Mon espace', requires: 'ai:use' },
   { path: '/discussion', label: 'Discussion', icon: MessagesSquare, group: 'Mon espace' },
   { path: '/mail', label: 'Mail', icon: Mail, group: 'Mon espace' },
   { path: '/alertes', label: 'Mes alertes', icon: Bell, group: 'Mon espace' },
@@ -78,12 +109,20 @@ export const MODULES: ModuleRoute[] = [
     requires: 'project:read',
   },
   {
+    path: '/support',
+    label: 'Support',
+    icon: LifeBuoy,
+    group: 'Administration',
+    requires: 'support:read',
+  },
+  {
     path: '/documents',
     label: 'Documents (GED)',
     icon: FolderArchive,
     group: 'Administration',
     requires: 'rh.employe:read',
   },
+  { path: '/archivage', label: 'Archivage', icon: Archive, group: 'Administration', requires: 'ged.archive:read' },
   {
     path: '/recrutement',
     label: 'Recrutement',
@@ -105,6 +144,25 @@ export const MODULES: ModuleRoute[] = [
     group: 'Administration',
     requires: 'audit:read',
   },
+  { path: '/appels-offres', label: 'Appels d\'offres', icon: Megaphone, group: 'Administration', requires: 'commercial:read' },
+  { path: '/studio', label: 'Studio', icon: Clapperboard, group: 'Administration', requires: 'studio:read' },
+  { path: '/evaluation', label: 'Évaluation & OKR', icon: Target, group: 'Administration', requires: 'rh.eval:read' },
+  { path: '/performance', label: 'Performance', icon: Award, group: 'Administration', requires: 'rh.eval:read' },
+  { path: '/onboarding', label: 'Onboarding', icon: Rocket, group: 'Administration', requires: 'rh.onboarding:read' },
+  { path: '/formation', label: 'Formation', icon: GraduationCap, group: 'Administration', requires: 'rh.formation:read' },
+
+  // --- Finance & Gestion -----------------------------------------------------
+  { path: '/finance/tiers', label: 'Tiers', icon: Building2, group: 'Finance', requires: 'finance:read' },
+  { path: '/finance/frais', label: 'Notes de frais', icon: Receipt, group: 'Finance', requires: 'finance:read' },
+  { path: '/finance/achats', label: 'Achats', icon: FileText, group: 'Finance', requires: 'finance:read' },
+  { path: '/finance/factures', label: 'Factures client', icon: FileText, group: 'Finance', requires: 'finance:read' },
+  { path: '/finance/tresorerie', label: 'Trésorerie', icon: Wallet, group: 'Finance', requires: 'finance:read' },
+  { path: '/finance/inventaire', label: 'Inventaire', icon: Boxes, group: 'Finance', requires: 'finance:read' },
+  { path: '/finance/paie', label: 'Paie', icon: Landmark, group: 'Finance', requires: 'finance:manage' },
+  { path: '/finance/budgets', label: 'Budgets & pilotage', icon: PiggyBank, group: 'Finance', requires: 'finance:read' },
+  { path: '/finance/rentabilite', label: 'Rentabilité projets', icon: LineChart, group: 'Finance', requires: 'finance:read' },
+  { path: '/finance/comptabilite', label: 'Comptabilité', icon: Calculator, group: 'Finance', requires: 'finance:manage' },
+  { path: '/cockpit', label: 'Cockpit direction', icon: Gauge, group: 'Finance', requires: 'direction:read' },
 
   // --- Aide & réglages (tout utilisateur) -----------------------------------
   // Paramètres = self-service (profil, mot de passe, messagerie, thème) ; la
