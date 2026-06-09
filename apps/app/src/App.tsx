@@ -7,6 +7,7 @@ import { LoginPage } from '@/pages/LoginPage';
 import { SetPasswordPage } from '@/pages/SetPasswordPage';
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage';
 import { DashboardPage } from '@/pages/DashboardPage';
+import { AccueilRapidePage } from '@/pages/AccueilRapidePage';
 import { MonPointagePage } from '@/features/me/MonPointagePage';
 import { MesDemandesPage } from '@/features/me/MesDemandesPage';
 import { MesRapportsPage } from '@/features/me/MesRapportsPage';
@@ -73,6 +74,7 @@ export default function App() {
           >
             {/* --- Mon espace (tout utilisateur connecté) ------------------- */}
             <Route index element={<DashboardPage />} />
+            <Route path="accueil-rapide" element={<AccueilRapidePage />} />
             <Route path="mon-pointage" element={<MonPointagePage />} />
             <Route path="mes-demandes" element={<MesDemandesPage />} />
             <Route path="mes-validations" element={<MesValidationsPage />} />

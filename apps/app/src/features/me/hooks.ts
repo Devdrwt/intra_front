@@ -6,6 +6,9 @@ import {
   type PasswordChange,
   type ProfileUpdate,
 } from './service';
+import { enqueuePointage, isNetworkError, startPointageAutoSync } from '@/lib/offlineQueue';
+import { toast } from '@/lib/toast';
+import type { Pointage } from '@/features/presences/types';
 
 const ME = 'me';
 
@@ -61,10 +64,28 @@ export function useMyPointages() {
 
 export function useMePointer() {
   const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (sens: 'ENTREE' | 'SORTIE') => meService.pointer(sens),
-    meta: { successMessage: 'Pointage enregistré' },
-    onSuccess: () => qc.invalidateQueries({ queryKey: [ME, 'pointages'] }),
+  return useMutation<Pointage | { offline: true }, Error, 'ENTREE' | 'SORTIE'>({
+    // Offline-aware : si pas de réseau, on met en file (rejouée à la reconnexion).
+    mutationFn: async (sens) => {
+      try {
+        return await meService.pointer(sens);
+      } catch (err) {
+        if (isNetworkError(err)) {
+          enqueuePointage(sens);
+          return { offline: true };
+        }
+        throw err;
+      }
+    },
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: [ME, 'pointages'] });
+      startPointageAutoSync(meService.pointer); // vide la file dès qu'on est en ligne
+      if (res && 'offline' in res) {
+        toast.success('Pointage enregistré hors-ligne — synchronisé à la reconnexion.');
+      } else {
+        toast.success('Pointage enregistré');
+      }
+    },
   });
 }
 

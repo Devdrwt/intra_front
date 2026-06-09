@@ -14,6 +14,7 @@ import {
   X,
 } from 'lucide-react';
 import { Avatar, cn } from '@drwindesk/ui';
+import { MobileBottomNav } from './MobileBottomNav';
 import { MODULES, MODULE_GROUPS } from '@/config/modules';
 import { ORG_NAME } from '@/lib/config';
 import { avatarUrl } from '@/lib/avatar';
@@ -149,13 +150,14 @@ export function AppLayout() {
           />
         </header>
 
-        <main className="flex-1">
+        <main className="flex-1 pb-20 lg:pb-0">
           <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
             <Outlet />
           </div>
         </main>
       </div>
 
+      <MobileBottomNav />
       <CommandPalette open={cmdOpen} onClose={() => setCmdOpen(false)} />
     </div>
   );
