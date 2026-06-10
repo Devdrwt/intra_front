@@ -15,6 +15,7 @@ import { useEspaceMoi } from '@/features/espaces/hooks';
 import { severityDot, timeAgo } from '@/features/espaces/helpers';
 import { useMyConges, useMyPointages, useMyRapports } from '@/features/me/hooks';
 import { useUnreadCount } from '@/features/discussion/hooks';
+import { AgendaWidget } from '@/features/agenda/AgendaWidget';
 
 /** Salutation selon l'heure locale de connexion. */
 function greeting(h: number = new Date().getHours()): { hello: string; emoji: string } {
@@ -140,6 +141,9 @@ export function DashboardPage() {
           to="/discussion"
         />
       </div>
+
+      {/* Agenda / calendrier */}
+      <AgendaWidget />
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Notifications récentes */}
