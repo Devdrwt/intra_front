@@ -3,6 +3,7 @@ import {
   Users,
   FolderArchive,
   CalendarClock,
+  CalendarDays,
   CalendarCheck,
   FileBarChart,
   Bell,
@@ -62,6 +63,7 @@ export const MODULES: ModuleRoute[] = [
   // --- Mon espace (collaborateur) -------------------------------------------
   { path: '/', label: 'Tableau de bord', icon: LayoutDashboard, group: 'Mon espace' },
   { path: '/mon-pointage', label: 'Mon pointage', icon: Clock, group: 'Mon espace' },
+  { path: '/agenda', label: 'Mon agenda', icon: CalendarDays, group: 'Mon espace' },
   { path: '/mes-demandes', label: 'Mes demandes', icon: CalendarClock, group: 'Mon espace' },
   {
     path: '/mes-validations',

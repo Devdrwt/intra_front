@@ -71,6 +71,8 @@ export const USE_MOCKS = {
   commercial: flag(import.meta.env.VITE_MOCK_COMMERCIAL, globalMock),
   // Studio (production média) (endpoints /productions, /reservations-studio).
   studio: flag(import.meta.env.VITE_MOCK_STUDIO, globalMock),
+  // Agenda du collaborateur (endpoints /agenda).
+  agenda: flag(import.meta.env.VITE_MOCK_AGENDA, globalMock),
   // Inventaire / immobilisations (endpoints /biens).
   inventaire: flag(import.meta.env.VITE_MOCK_INVENTAIRE, globalMock),
   // Journal d'activité (audit) : endpoint GET /audit-logs.

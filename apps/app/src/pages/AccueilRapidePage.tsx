@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import {
   CalendarClock,
+  CalendarDays,
   ClipboardCheck,
   Clock,
   FolderKanban,
@@ -21,6 +22,7 @@ interface Action {
 
 const ACTIONS: Action[] = [
   { to: '/mon-pointage', label: 'Pointer', hint: 'Entrée / sortie', icon: Clock, tone: 'bg-brand-soft text-brand-soft-fg' },
+  { to: '/agenda', label: 'Agenda', hint: 'Ma journée', icon: CalendarDays, tone: 'bg-brand-soft text-brand-soft-fg' },
   { to: '/mes-demandes', label: 'Demander', hint: 'Permission, congé, repos', icon: CalendarClock, tone: 'bg-success-soft text-success-soft-fg' },
   { to: '/mes-validations', label: 'Valider', hint: 'Mes validations', icon: ClipboardCheck, tone: 'bg-warning-soft text-warning-soft-fg' },
   { to: '/discussion', label: 'Discussion', hint: 'Messages internes', icon: MessagesSquare, tone: 'bg-brand-soft text-brand-soft-fg' },
