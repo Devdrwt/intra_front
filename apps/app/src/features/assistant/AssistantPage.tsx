@@ -2,6 +2,8 @@ import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Bot, FileSignature, Send, Sparkles } from 'lucide-react';
 import { Button, Callout, Card, CardTitle, Select, Spinner, Textarea, cn } from '@drwindesk/ui';
+import { useEmployes } from '@/features/rh/hooks';
+import { fullName } from '@/features/rh/helpers';
 import { assistantService } from './service';
 
 export function AssistantPage() {
@@ -44,11 +46,37 @@ function Tab({ active, onClick, label }: { active: boolean; onClick: () => void;
 function GenererTab() {
   const { data: modeles } = useQuery({ queryKey: ['ai', 'modeles'], queryFn: assistantService.modeles });
   const [modeleId, setModeleId] = useState('');
-  const generer = useMutation({ mutationFn: (id: string) => assistantService.generer(id) });
+  const [employeId, setEmployeId] = useState('');
+  const generer = useMutation({
+    mutationFn: (args: { modeleId: string; donnees?: Record<string, unknown> }) =>
+      assistantService.generer(args.modeleId, args.donnees),
+  });
+
+  const modele = (modeles ?? []).find((m) => m.id === modeleId);
+  const besoinEmploye = modele?.type === 'CONTRAT' || modele?.type === 'ATTESTATION';
+  // Liste RH (pour pré-remplir un contrat/attestation). Vide si l'utilisateur n'a pas le droit.
+  const { data: employes } = useEmployes({});
 
   const onGenerate = (e: FormEvent) => {
     e.preventDefault();
-    if (modeleId) generer.mutate(modeleId);
+    if (!modeleId) return;
+    let donnees: Record<string, unknown> | undefined;
+    if (besoinEmploye && employeId) {
+      const emp = employes?.find((x) => x.id === employeId);
+      if (emp) {
+        donnees = {
+          nom: emp.nom,
+          prenom: emp.prenom,
+          poste: emp.poste,
+          departement: emp.departement,
+          typeContrat: emp.typeContrat,
+          dateEmbauche: emp.dateEmbauche,
+          email: emp.email,
+          matricule: emp.matricule,
+        };
+      }
+    }
+    generer.mutate({ modeleId, donnees });
   };
 
   return (
@@ -59,11 +87,25 @@ function GenererTab() {
             id="modele"
             label="Modèle / canvas"
             value={modeleId}
-            onChange={(e) => setModeleId(e.target.value)}
+            onChange={(e) => {
+              setModeleId(e.target.value);
+              setEmployeId('');
+            }}
             placeholder="Choisir un modèle…"
             options={(modeles ?? []).map((m) => ({ value: m.id, label: m.nom }))}
-            className="min-w-[240px] flex-1"
+            className="min-w-[220px] flex-1"
           />
+          {besoinEmploye && (
+            <Select
+              id="employe"
+              label="Pour quel employé ? (optionnel)"
+              value={employeId}
+              onChange={(e) => setEmployeId(e.target.value)}
+              placeholder="— pré-remplir depuis une fiche —"
+              options={(employes ?? []).map((x) => ({ value: x.id, label: fullName(x) }))}
+              className="min-w-[200px] flex-1"
+            />
+          )}
           <Button type="submit" loading={generer.isPending} disabled={!modeleId}>
             <Sparkles size={16} /> Générer
           </Button>

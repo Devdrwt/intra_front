@@ -29,16 +29,19 @@ const modeles: ModeleDocument[] = [
 
 const mockApi = {
   modeles: () => delay([...modeles]),
-  generer: (modeleId: string): Promise<GenerationResult> => {
+  generer: (modeleId: string, donnees?: Record<string, unknown>): Promise<GenerationResult> => {
     const modeleNom = modeles.find((m) => m.id === modeleId)?.nom ?? 'Document';
+    const lignes = Object.entries(donnees ?? {})
+      .filter(([, v]) => v != null && v !== '')
+      .map(([k, v]) => `— ${k} : ${String(v)}`)
+      .join('\n');
     return delay({
-      modelIa: 'claude-opus-4-8 (simulé)',
+      modelIa: 'claude-haiku-4-5 (simulé)',
       contenu:
         `**${modeleNom}** (projet — à vérifier)\n\n` +
-        `Ce document a été pré-rédigé automatiquement à partir du modèle « ${modeleNom} » et ` +
-        `des données de la fiche concernée. Une fois le backend IA branché (Claude Opus 4.8), ` +
-        `le contenu réel sera généré en streaming puis classé en GED après validation humaine.\n\n` +
-        `— Variables résolues : nom, poste, dates, montants…\n— Clauses : selon le canvas.\n`,
+        `Brouillon pré-rédigé à partir du modèle « ${modeleNom} »` +
+        (lignes ? ` et des données réelles fournies :\n${lignes}\n` : '.\n') +
+        `\nUne fois le backend IA branché, le contenu réel est généré par Claude puis classé en GED après validation.\n`,
     });
   },
   assistant: (question: string): Promise<string> =>
@@ -51,8 +54,8 @@ const mockApi = {
 // --- HTTP ---------------------------------------------------------------------
 const httpApi = {
   modeles: () => api.get<ModeleDocument[]>('/ai/modeles').then((r) => r.data),
-  generer: (modeleId: string): Promise<GenerationResult> =>
-    api.post<GenerationResult>('/ai/generer', { modeleId }).then((r) => r.data),
+  generer: (modeleId: string, donnees?: Record<string, unknown>): Promise<GenerationResult> =>
+    api.post<GenerationResult>('/ai/generer', { modeleId, donnees }).then((r) => r.data),
   assistant: (question: string): Promise<string> =>
     api.post<{ contenu: string }>('/ai/assistant', { message: question }).then((r) => r.data.contenu),
 };

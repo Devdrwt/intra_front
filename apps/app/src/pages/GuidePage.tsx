@@ -3,9 +3,23 @@ import {
   Bell,
   Briefcase,
   CalendarClock,
+  CalendarDays,
+  ClipboardCheck,
   Command,
   FileBarChart,
   FolderArchive,
+  FolderKanban,
+  Sparkles,
+  LifeBuoy,
+  Calculator,
+  Boxes,
+  Target,
+  Award,
+  GraduationCap,
+  Megaphone,
+  Clapperboard,
+  Gauge,
+  Smartphone,
   Rocket,
   ShieldCheck,
   Users,
@@ -101,6 +115,151 @@ const SECTIONS: Section[] = [
       'Marquez-les comme lues individuellement ou toutes à la fois.',
     ],
   },
+
+  // --- Nouveautés -----------------------------------------------------------
+  {
+    to: '/agenda',
+    icon: CalendarDays,
+    tone: 'brand',
+    title: 'Mon agenda',
+    steps: [
+      'Vue mois + liste du jour ; créez vos rendez-vous et réunions.',
+      'Congés, formations, studio et échéances s’y affichent automatiquement (par couleur).',
+      'Bouton « S’abonner (iCal) » pour le voir dans Google Agenda / Outlook / votre téléphone.',
+    ],
+  },
+  {
+    to: '/mes-validations',
+    icon: ClipboardCheck,
+    tone: 'success',
+    title: 'Mes validations',
+    steps: [
+      'Onglet « À valider » : approuvez ou rejetez congés, frais, achats au même endroit.',
+      'Onglet « Mes demandes » : suivez l’avancement de vos propres demandes (timeline).',
+    ],
+  },
+  {
+    to: '/mes-taches',
+    icon: FolderKanban,
+    tone: 'brand',
+    title: 'Mes tâches (Kanban)',
+    steps: [
+      'Tableau À faire → En cours → En revue → Terminé.',
+      'Ajoutez une tâche, fixez la priorité, faites-la avancer d’un clic.',
+    ],
+  },
+  {
+    to: '/assistant',
+    icon: Sparkles,
+    tone: 'brand',
+    title: 'Assistant IA',
+    steps: [
+      'Onglet « Générer » : choisissez un modèle (contrat, attestation, rapport…).',
+      'Pour un contrat/attestation, sélectionnez l’employé : le document est pré-rempli.',
+      'Onglet « Assistant » : posez vos questions. Tout reste un brouillon à valider.',
+    ],
+  },
+  {
+    to: '/support',
+    icon: LifeBuoy,
+    tone: 'warning',
+    title: 'Support / Helpdesk',
+    steps: [
+      'Ouvrez un ticket (incident, demande d’accès, moyens généraux).',
+      'Suivez son statut, échangez en commentaires, surveillez le délai (SLA).',
+    ],
+  },
+  {
+    to: '/finance/tiers',
+    icon: Calculator,
+    tone: 'success',
+    title: 'Finance & Gestion',
+    steps: [
+      'Tiers (clients/fournisseurs), notes de frais, factures client, trésorerie.',
+      'Paie (bulletins), budgets et tableau de bord, comptabilité.',
+      'Exportez les écritures pour le cabinet (CSV / SYSCOHADA).',
+    ],
+  },
+  {
+    to: '/finance/inventaire',
+    icon: Boxes,
+    tone: 'warning',
+    title: 'Inventaire & immobilisations',
+    steps: [
+      'Recensez le matériel de l’entreprise (informatique, mobilier, véhicules…).',
+      'État, valeur, localisation, affectation ; totaux du patrimoine par catégorie.',
+    ],
+  },
+  {
+    to: '/evaluation',
+    icon: Target,
+    tone: 'brand',
+    title: 'Évaluation & OKR',
+    steps: [
+      'Suivez les objectifs (OKR) et leurs résultats clés.',
+      'Gérez les campagnes d’évaluation.',
+    ],
+  },
+  {
+    to: '/performance',
+    icon: Award,
+    tone: 'success',
+    title: 'Performance & recommandation',
+    steps: [
+      'Score basé sur le travail réel : rapports, missions, présence, OKR.',
+      'Rédigez la recommandation — ou laissez l’IA la pré-rédiger.',
+    ],
+  },
+  {
+    to: '/onboarding',
+    icon: Rocket,
+    tone: 'brand',
+    title: 'Onboarding / Offboarding',
+    steps: [
+      'Parcours d’arrivée et de départ ; chaque étape est une tâche assignée.',
+      'Cochez les étapes au fur et à mesure ; suivez l’avancement.',
+    ],
+  },
+  {
+    to: '/formation',
+    icon: GraduationCap,
+    tone: 'success',
+    title: 'Formation',
+    steps: [
+      'Parcourez le catalogue et demandez une formation (validée par le moteur).',
+      'Suivez vos demandes et vos compétences.',
+    ],
+  },
+  {
+    to: '/appels-offres',
+    icon: Megaphone,
+    tone: 'warning',
+    title: 'Appels d’offres',
+    steps: [
+      'Veille des avis (AAO) : décidez « on y va » ou « on passe ».',
+      'Préparez le dossier (DAO), soumettez, suivez le résultat. (Géré par le secrétariat.)',
+    ],
+  },
+  {
+    to: '/studio',
+    icon: Clapperboard,
+    tone: 'brand',
+    title: 'Studio',
+    steps: [
+      'Suivez les productions (podcasts, vidéos, enregistrements) de l’idée à la publication.',
+      'Réservez un créneau du studio dans le planning.',
+    ],
+  },
+  {
+    to: '/cockpit',
+    icon: Gauge,
+    tone: 'danger',
+    title: 'Cockpit direction',
+    steps: [
+      'Vue consolidée : trésorerie, résultat, créances, effectif, support.',
+      'Suivi des budgets en un coup d’œil.',
+    ],
+  },
 ];
 
 export function GuidePage() {
@@ -136,6 +295,14 @@ export function GuidePage() {
                   Paramètres
                 </Link>
                 .
+              </li>
+              <li className="flex gap-2">
+                <Step n={4} /> Sur mobile, installez l’app (« Ajouter à l’écran d’accueil »){' '}
+                <Smartphone size={13} className="inline" /> et utilisez l’
+                <Link to="/accueil-rapide" className="font-medium text-brand-600 hover:underline">
+                  Accueil rapide
+                </Link>{' '}
+                pour pointer / demander hors-ligne.
               </li>
             </ol>
           </div>
