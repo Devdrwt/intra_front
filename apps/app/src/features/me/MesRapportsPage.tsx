@@ -1,5 +1,5 @@
 import { useRef, useState, type FormEvent } from 'react';
-import { Download, FileBarChart, Paperclip, Save, Send, Trash2, X } from 'lucide-react';
+import { Download, FileBarChart, Paperclip, PenLine, Save, Send, Trash2, X } from 'lucide-react';
 import { Badge, Button, Callout, Card, CardTitle, EmptyState, Input, Skeleton, Textarea } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
 import { triggerDownload, humanSize } from '@/lib/download';
@@ -72,6 +72,22 @@ export function MesRapportsPage() {
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
     void submit('SOUMIS');
+  };
+
+  /** Recharge un rapport (brouillon ou soumis) dans le formulaire pour le compléter/soumettre. */
+  const openRapport = (r: Rapport) => {
+    setDate(r.date);
+    setContenu(r.contenu);
+    setFile(null);
+    if (fileRef.current) fileRef.current.value = '';
+    setFieldError(null);
+    setFormError(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    toast.success(
+      r.statut === 'BROUILLON'
+        ? 'Brouillon chargé — complétez puis cliquez « Soumettre ».'
+        : 'Rapport chargé.',
+    );
   };
 
   const download = async (r: Rapport) => {
@@ -196,6 +212,9 @@ export function MesRapportsPage() {
                     <Badge tone={r.statut === 'SOUMIS' ? 'success' : 'warning'} dot>
                       {STATUT_RAPPORT_LABEL[r.statut]}
                     </Badge>
+                    <Button size="sm" variant="secondary" onClick={() => openRapport(r)}>
+                      <PenLine size={14} /> {r.statut === 'BROUILLON' ? 'Reprendre' : 'Ouvrir'}
+                    </Button>
                     <button
                       type="button"
                       onClick={() => del.mutate(r.id)}
