@@ -4,6 +4,7 @@ import type { Employe } from '@/features/rh/types';
 import type { CategorieDemande, DemandeConge, Pointage, TypeConge } from '@/features/presences/types';
 import type { AttachmentRef, Rapport, StatutRapport } from '@/features/rapports/types';
 import type { Document } from '@/features/documents/types';
+import type { Project } from '@/features/projects/types';
 
 /**
  * Espace collaborateur — endpoints « self » du backend (auto-scopés sur le token).
@@ -142,6 +143,8 @@ const mockApi = {
   changePassword: (_input: PasswordChange) => delay(undefined),
   uploadAvatar: (_file: File) => delay(undefined),
   removeAvatar: () => delay(undefined),
+  myProjects: () => delay([] as Project[]),
+  downloadProjectDoc: (_projectId: string, _docId: string) => delay(new Blob(['mock'])),
 };
 
 // --- HTTP (NestJS) ------------------------------------------------------------
@@ -176,6 +179,11 @@ const httpApi = {
     return api.post('/me/avatar', fd).then(() => undefined);
   },
   removeAvatar: () => api.delete('/me/avatar').then(() => undefined),
+  myProjects: () => api.get<Project[]>('/me/projects').then((r) => r.data),
+  downloadProjectDoc: (projectId: string, docId: string) =>
+    api
+      .get(`/me/projects/${projectId}/documents/${docId}/download`, { responseType: 'blob' })
+      .then((r) => r.data as Blob),
 };
 
 export const meService = USE_MOCKS.me ? mockApi : httpApi;

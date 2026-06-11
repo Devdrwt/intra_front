@@ -50,6 +50,10 @@ export function useRemoveAvatar() {
   });
 }
 
+export function useMyProjects() {
+  return useQuery({ queryKey: [ME, 'projects'], queryFn: meService.myProjects });
+}
+
 export function useMyEmploye() {
   return useQuery({
     queryKey: [ME, 'employe'],

@@ -75,6 +75,7 @@ export const MODULES: ModuleRoute[] = [
   { path: '/mes-taches', label: 'Mes tâches', icon: FolderKanban, group: 'Mon espace' },
   { path: '/mes-rapports', label: 'Mes rapports', icon: FileBarChart, group: 'Mon espace' },
   { path: '/mes-documents', label: 'Mes documents', icon: FolderArchive, group: 'Mon espace' },
+  { path: '/mes-projets', label: 'Mes projets', icon: FolderKanban, group: 'Mon espace' },
   { path: '/bibliotheque', label: 'Bibliothèque', icon: Library, group: 'Mon espace' },
   { path: '/assistant', label: 'Assistant IA', icon: Sparkles, group: 'Mon espace', requires: 'ai:use' },
   { path: '/discussion', label: 'Discussion', icon: MessagesSquare, group: 'Mon espace' },

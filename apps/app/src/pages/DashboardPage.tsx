@@ -13,7 +13,7 @@ import { Card, CardTitle, EmptyState, Skeleton, cn } from '@drwindesk/ui';
 import { displayName, hasPermission, useAuth } from '@/auth/AuthContext';
 import { useEspaceMoi } from '@/features/espaces/hooks';
 import { severityDot, timeAgo } from '@/features/espaces/helpers';
-import { useMyConges, useMyPointages, useMyRapports } from '@/features/me/hooks';
+import { useMyConges, useMyPointages, useMyProfile, useMyRapports } from '@/features/me/hooks';
 import { useUnreadCount } from '@/features/discussion/hooks';
 import { AgendaWidget } from '@/features/agenda/AgendaWidget';
 
@@ -74,7 +74,11 @@ function StatCard({
 export function DashboardPage() {
   const { user } = useAuth();
   const { data: espace, isLoading } = useEspaceMoi();
+  const { data: profile } = useMyProfile();
   const recent = espace?.notifications.recent ?? [];
+  // Prénom réel (le JWT ne le porte pas → on prend la fiche profil, repli sur l'email).
+  const firstName =
+    profile?.firstName?.trim() || (user ? displayName(user).split(' ')[0] : '');
 
   const pointages = useMyPointages();
   const rapports = useMyRapports();
@@ -102,7 +106,7 @@ export function DashboardPage() {
     <div className="space-y-6">
       <header>
         <h2 className="text-2xl font-bold tracking-tight text-ink">
-          {greeting().hello} {user ? displayName(user).split(' ')[0] : ''} {greeting().emoji}
+          {greeting().hello} {firstName} {greeting().emoji}
         </h2>
         <p className="text-ink-muted">Voici l’état de votre espace aujourd’hui.</p>
       </header>

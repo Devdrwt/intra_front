@@ -13,6 +13,7 @@ import { MonPointagePage } from '@/features/me/MonPointagePage';
 import { MesDemandesPage } from '@/features/me/MesDemandesPage';
 import { MesRapportsPage } from '@/features/me/MesRapportsPage';
 import { MesDocumentsPage } from '@/features/me/MesDocumentsPage';
+import { MesProjetsPage } from '@/features/me/MesProjetsPage';
 import { MesValidationsPage } from '@/features/approvals/MesValidationsPage';
 import { SupportPage } from '@/features/support/SupportPage';
 import { TicketDetailPage } from '@/features/support/TicketDetailPage';
@@ -85,6 +86,7 @@ export default function App() {
             <Route path="bibliotheque" element={<BibliothequePage />} />
             <Route path="mes-rapports" element={<MesRapportsPage />} />
             <Route path="mes-documents" element={<MesDocumentsPage />} />
+            <Route path="mes-projets" element={<MesProjetsPage />} />
             <Route path="discussion" element={<DiscussionPage />} />
             <Route path="mail" element={<MailPage />} />
             <Route path="alertes" element={<AlertesPage />} />
