@@ -26,6 +26,7 @@ import { useUnreadCount } from '@/features/discussion/hooks';
 import { NotificationBell } from '@/features/espaces/NotificationBell';
 import { ThemeToggle } from '@/theme/ThemeToggle';
 import { CommandPalette } from '@/components/CommandPalette';
+import { useNotificationSound } from '@/hooks/useNotificationSound';
 
 const COLLAPSE_KEY = 'drwindesk.sidebar.collapsed';
 
@@ -34,6 +35,8 @@ export function AppLayout() {
   const { data: profile } = useMyProfile();
   const avatarSrc = user ? avatarUrl(user.userId, profile?.hasAvatar ?? false) : undefined;
   const location = useLocation();
+
+  useNotificationSound();
 
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSE_KEY) === '1');
   const [mobileOpen, setMobileOpen] = useState(false);

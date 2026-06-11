@@ -18,7 +18,7 @@ export function useUnreadCount() {
   return useQuery({
     queryKey: [KEY, 'unread'],
     queryFn: discussionService.unreadCount,
-    refetchInterval: 20000,
+    refetchInterval: 12000,
     refetchOnWindowFocus: true,
   });
 }
