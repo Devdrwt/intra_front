@@ -12,7 +12,7 @@ export interface EmptyStateProps {
 /** État vide soigné : icône, titre, description, action optionnelle. */
 export function EmptyState({ icon, title, description, action, className }: EmptyStateProps) {
   return (
-    <div className={cn('flex flex-col items-center justify-center px-6 py-16 text-center', className)}>
+    <div className={cn('flex animate-fade-in flex-col items-center justify-center px-6 py-16 text-center', className)}>
       {icon && (
         <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-muted text-ink-subtle ring-1 ring-inset ring-surface-border">
           {icon}

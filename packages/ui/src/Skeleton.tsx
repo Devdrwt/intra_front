@@ -1,13 +1,15 @@
 import type { HTMLAttributes } from 'react';
 import { cn } from './cn';
 
-/** Placeholder animé pour les états de chargement. */
+/** Placeholder de chargement avec balayage (shimmer). */
 export function Skeleton({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('animate-pulse rounded-md bg-surface-muted', className)}
+      className={cn('relative overflow-hidden rounded-md bg-surface-muted', className)}
       {...props}
-    />
+    >
+      <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.6s_infinite] bg-gradient-to-r from-transparent via-white/25 to-transparent dark:via-white/5" />
+    </div>
   );
 }
 
