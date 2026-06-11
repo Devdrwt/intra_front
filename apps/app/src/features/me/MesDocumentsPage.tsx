@@ -1,6 +1,7 @@
 import { Download, FileText, FolderArchive } from 'lucide-react';
-import { Badge, Card, CardTitle, EmptyState, Skeleton } from '@drwindesk/ui';
+import { Badge, Card, CardTitle, EmptyState, PageHeader, Skeleton } from '@drwindesk/ui';
 import { TYPE_DOCUMENT_LABEL } from '@/features/documents/types';
+import { Stagger, StaggerItem } from '@/components/motion';
 import { useMyDocuments } from './hooks';
 import { MeNotLinked } from './MeNotLinked';
 
@@ -15,10 +16,10 @@ export function MesDocumentsPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-ink">Mes documents</h2>
-        <p className="text-ink-muted">Bulletins, contrats et attestations qui vous sont rattachés.</p>
-      </header>
+      <PageHeader
+        title="Mes documents"
+        subtitle="Bulletins, contrats et attestations qui vous sont rattachés."
+      />
 
       <Card className="p-0">
         <div className="p-5 pb-0">
@@ -38,9 +39,9 @@ export function MesDocumentsPage() {
             className="py-10"
           />
         ) : (
-          <ul className="mt-3 divide-y divide-surface-border">
+          <Stagger className="mt-3 divide-y divide-surface-border">
             {list.map((d) => (
-              <li key={d.id} className="flex items-center gap-3 px-5 py-3">
+              <StaggerItem key={d.id} className="flex items-center gap-3 px-5 py-3">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-ink-muted">
                   <FileText size={16} />
                 </span>
@@ -63,9 +64,9 @@ export function MesDocumentsPage() {
                     <Download size={16} />
                   </a>
                 )}
-              </li>
+              </StaggerItem>
             ))}
-          </ul>
+          </Stagger>
         )}
       </Card>
     </div>

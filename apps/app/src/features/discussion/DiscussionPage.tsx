@@ -13,7 +13,7 @@ import {
   Users,
   X,
 } from 'lucide-react';
-import { Avatar, Button, Card, EmptyState, Input, Modal, Skeleton, cn } from '@drwindesk/ui';
+import { Avatar, Button, Card, EmptyState, Input, Modal, PageHeader, Skeleton, cn } from '@drwindesk/ui';
 import { hasPermission, useAuth } from '@/auth/AuthContext';
 import { apiErrorMessage } from '@/lib/api';
 import { avatarUrl } from '@/lib/avatar';
@@ -91,10 +91,7 @@ export function DiscussionPage() {
 
   return (
     <div className="space-y-4">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-ink">Messages</h2>
-        <p className="text-ink-muted">Canal de l'entreprise et conversations privées.</p>
-      </header>
+      <PageHeader title="Messages" subtitle="Canal de l'entreprise et conversations privées." />
 
       <Card className="flex h-[68vh] overflow-hidden p-0">
         {/* Liste des conversations */}

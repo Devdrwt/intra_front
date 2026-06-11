@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Download, ExternalLink, FolderKanban, Paperclip, Users } from 'lucide-react';
-import { Badge, Button, Card, EmptyState, Modal, Skeleton, cn } from '@drwindesk/ui';
+import { Badge, Button, Card, EmptyState, Modal, PageHeader, Skeleton, cn } from '@drwindesk/ui';
 import { triggerDownload, humanSize } from '@/lib/download';
 import { toast } from '@/lib/toast';
 import { Stagger, StaggerItem } from '@/components/motion';
@@ -26,10 +26,10 @@ export function MesProjetsPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-ink">Mes projets</h2>
-        <p className="text-ink-muted">Les projets sur lesquels vous êtes responsable ou membre.</p>
-      </header>
+      <PageHeader
+        title="Mes projets"
+        subtitle="Les projets sur lesquels vous êtes responsable ou membre."
+      />
 
       {isLoading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

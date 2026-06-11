@@ -1,6 +1,6 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { Clock, Coffee, Plane, Plus, X, type LucideIcon } from 'lucide-react';
-import { Badge, Button, Callout, Card, CardTitle, EmptyState, Input, Select, Skeleton, cn } from '@drwindesk/ui';
+import { Badge, Button, Callout, Card, CardTitle, EmptyState, Input, PageHeader, Select, Skeleton, cn } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
 import {
   CATEGORIE_LABEL,
@@ -117,10 +117,10 @@ export function MesDemandesPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-ink">Mes demandes</h2>
-        <p className="text-ink-muted">Permissions, repos et congés — déposez et suivez vos demandes.</p>
-      </header>
+      <PageHeader
+        title="Mes demandes"
+        subtitle="Permissions, repos et congés — déposez et suivez vos demandes."
+      />
 
       {/* Onglets */}
       <div className="flex flex-wrap gap-2">

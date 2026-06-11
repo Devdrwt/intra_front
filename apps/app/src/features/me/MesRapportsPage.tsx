@@ -1,6 +1,6 @@
 import { useRef, useState, type FormEvent } from 'react';
 import { Download, FileBarChart, Paperclip, PenLine, Save, Send, Trash2, X } from 'lucide-react';
-import { Badge, Button, Callout, Card, CardTitle, EmptyState, Input, Skeleton, Textarea } from '@drwindesk/ui';
+import { Badge, Button, Callout, Card, CardTitle, EmptyState, Input, PageHeader, Skeleton, Textarea } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
 import { triggerDownload, humanSize } from '@/lib/download';
 import { toast } from '@/lib/toast';
@@ -108,10 +108,7 @@ export function MesRapportsPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-ink">Mes rapports</h2>
-        <p className="text-ink-muted">Rédigez et envoyez votre rapport journalier.</p>
-      </header>
+      <PageHeader title="Mes rapports" subtitle="Rédigez et envoyez votre rapport journalier." />
 
       <Card>
         <CardTitle>Rapport du jour</CardTitle>

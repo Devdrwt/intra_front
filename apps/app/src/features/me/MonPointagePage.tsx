@@ -1,5 +1,5 @@
 import { CalendarDays, Clock, Coffee, LogIn, LogOut, Play, Timer } from 'lucide-react';
-import { Badge, Button, Card, CardTitle, EmptyState, Skeleton, cn } from '@drwindesk/ui';
+import { Badge, Button, Card, CardTitle, EmptyState, PageHeader, Skeleton, cn } from '@drwindesk/ui';
 import type { Pointage } from '@/features/presences/types';
 import { useMePointer, useMyPointages } from './hooks';
 import { MeNotLinked } from './MeNotLinked';
@@ -62,10 +62,7 @@ export function MonPointagePage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-ink">Mon pointage</h2>
-        <p className="text-ink-muted">Entrée, pause, reprise et sortie — suivez votre temps.</p>
-      </header>
+      <PageHeader title="Mon pointage" subtitle="Entrée, pause, reprise et sortie — suivez votre temps." />
 
       {/* Aujourd'hui */}
       <Card>

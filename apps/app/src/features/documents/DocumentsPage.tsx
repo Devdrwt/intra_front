@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FolderArchive, Search } from 'lucide-react';
-import { Avatar, Card, EmptyState, Input, Skeleton, cn } from '@drwindesk/ui';
+import { Avatar, Card, EmptyState, Input, PageHeader, Skeleton, cn } from '@drwindesk/ui';
 import { useEmployes } from '@/features/rh/hooks';
 import { fullName } from '@/features/rh/helpers';
 import { EmployeDocuments } from './EmployeDocuments';
@@ -17,12 +17,10 @@ export function DocumentsPage() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-ink">Documents &amp; Contrats</h2>
-        <p className="text-ink-muted">
-          Gestion électronique des documents (GED), par collaborateur.
-        </p>
-      </header>
+      <PageHeader
+        title="Documents & Contrats"
+        subtitle="Gestion électronique des documents (GED), par collaborateur."
+      />
 
       <div className="grid gap-5 lg:grid-cols-3">
         {/* Collaborateurs */}

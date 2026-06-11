@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { BellOff, Check } from 'lucide-react';
-import { Badge, Button, Card, EmptyState, Skeleton, cn } from '@drwindesk/ui';
+import { Badge, Button, Card, EmptyState, PageHeader, Skeleton, cn } from '@drwindesk/ui';
+import { Stagger, StaggerItem } from '@/components/motion';
 import { useMarkAllRead, useMarkRead, useNotifications } from './hooks';
 import { SEVERITY_LABEL } from './types';
 import { severityTone, timeAgo } from './helpers';
@@ -13,19 +14,19 @@ export function AlertesPage() {
 
   return (
     <div className="space-y-5">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-ink">Alertes</h2>
-          <p className="text-ink-muted">Notifications de votre espace personnel.</p>
-        </div>
-        <Button
-          variant="secondary"
-          onClick={() => markAllRead.mutate()}
-          disabled={markAllRead.isPending}
-        >
-          <Check size={16} /> Tout marquer lu
-        </Button>
-      </header>
+      <PageHeader
+        title="Alertes"
+        subtitle="Notifications de votre espace personnel."
+        actions={
+          <Button
+            variant="secondary"
+            onClick={() => markAllRead.mutate()}
+            disabled={markAllRead.isPending}
+          >
+            <Check size={16} /> Tout marquer lu
+          </Button>
+        }
+      />
 
       <div className="flex w-full max-w-xs gap-1 rounded-xl bg-surface-muted p-1">
         {(
@@ -67,9 +68,9 @@ export function AlertesPage() {
             description={unreadOnly ? 'Tout est lu. 🎉' : 'Vous n’avez aucune alerte pour le moment.'}
           />
         ) : (
-          <ul className="divide-y divide-surface-border">
+          <Stagger className="divide-y divide-surface-border">
             {notifications.map((n) => (
-              <li
+              <StaggerItem
                 key={n.id}
                 className={cn('flex items-start gap-4 px-5 py-4', !n.read && 'bg-brand-50/40')}
               >
@@ -87,9 +88,9 @@ export function AlertesPage() {
                     Marquer lu
                   </Button>
                 )}
-              </li>
+              </StaggerItem>
             ))}
-          </ul>
+          </Stagger>
         )}
       </Card>
     </div>
