@@ -13,6 +13,7 @@
     "@drwindesk/ui": "*",
     "@tanstack/react-query": "^5.62.0",
     "axios": "^1.7.9",
+    "framer-motion": "^12.40.0",
     "lucide-react": "^0.468.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.0.0",

@@ -10,3 +10,4 @@ export { Skeleton, SkeletonRows } from './Skeleton';
 export { EmptyState, type EmptyStateProps } from './EmptyState';
 export { Avatar, type AvatarProps } from './Avatar';
 export { Callout, type CalloutProps } from './Callout';
+export { Modal, type ModalProps } from './Modal';

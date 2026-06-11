@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Plus, Power, ShieldCheck, SlidersHorizontal, Trash2, X } from 'lucide-react';
-import { Avatar, Badge, Button, Callout, Card, EmptyState, Input, SkeletonRows, cn } from '@drwindesk/ui';
+import { Avatar, Badge, Button, Callout, Card, EmptyState, Input, Modal, SkeletonRows, cn } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
 import { useDeleteUser, useInviteUser, useSetUserAccess, useUpdateUser, useUsers } from './hooks';
@@ -164,70 +164,64 @@ function AccessModal({ user, onClose }: { user: User; onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-[8vh]">
-      <div className="absolute inset-0 animate-fade-in bg-ink/40 backdrop-blur-sm" onClick={onClose} />
-      <Card className="relative w-full max-w-md">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h3 className="text-base font-semibold text-ink">Accès aux modules</h3>
-            <p className="text-sm text-ink-subtle">{userLabel(user)}</p>
-          </div>
-          <button onClick={onClose} className="text-ink-muted hover:text-ink">
-            <X size={18} />
-          </button>
-        </div>
-
-        {isAdmin ? (
-          <Callout tone="info" className="mt-4">
-            Cet utilisateur est <strong>administrateur</strong> : il a déjà accès à tout.
-          </Callout>
-        ) : (
-          <p className="mt-3 text-sm text-ink-muted">
-            Activez les modules d’administration auxquels {userLabel(user)} doit accéder, en plus de
-            son rôle.
-          </p>
-        )}
-
-        <div className="mt-4 space-y-1.5">
-          {MODULE_GRANTS.map((m) => {
-            const on = granted.includes(m.permission);
-            return (
-              <button
-                key={m.permission}
-                type="button"
-                disabled={isAdmin}
-                onClick={() => toggle(m.permission)}
-                className={cn(
-                  'flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-sm font-medium transition-colors disabled:opacity-50',
-                  on
-                    ? 'border-brand-500 bg-brand-soft text-brand-soft-fg'
-                    : 'border-surface-border text-ink-muted hover:bg-surface-muted hover:text-ink',
-                )}
-              >
-                {m.label}
-                <span
-                  className={cn(
-                    'flex h-5 w-9 items-center rounded-full p-0.5 transition-colors',
-                    on ? 'justify-end bg-brand-600' : 'justify-start bg-surface-border',
-                  )}
-                >
-                  <span className="h-4 w-4 rounded-full bg-white" />
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="mt-5 flex justify-end gap-3">
+    <Modal
+      open
+      onClose={onClose}
+      size="md"
+      title="Accès aux modules"
+      description={userLabel(user)}
+      footer={
+        <>
           <Button variant="secondary" onClick={onClose}>
             Annuler
           </Button>
           <Button onClick={() => void save()} loading={setAccess.isPending} disabled={isAdmin}>
             Enregistrer
           </Button>
-        </div>
-      </Card>
-    </div>
+        </>
+      }
+    >
+      {isAdmin ? (
+        <Callout tone="info">
+          Cet utilisateur est <strong>administrateur</strong> : il a déjà accès à tout.
+        </Callout>
+      ) : (
+        <p className="text-sm text-ink-muted">
+          Activez les modules d’administration auxquels {userLabel(user)} doit accéder, en plus de
+          son rôle.
+        </p>
+      )}
+
+      <div className="mt-4 space-y-1.5">
+        {MODULE_GRANTS.map((m) => {
+          const on = granted.includes(m.permission);
+          return (
+            <button
+              key={m.permission}
+              type="button"
+              disabled={isAdmin}
+              onClick={() => toggle(m.permission)}
+              className={cn(
+                'flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-sm font-medium transition-colors disabled:opacity-50',
+                on
+                  ? 'border-brand-500 bg-brand-soft text-brand-soft-fg'
+                  : 'border-surface-border text-ink-muted hover:bg-surface-muted hover:text-ink',
+              )}
+            >
+              {m.label}
+              <span
+                className={cn(
+                  'flex h-5 w-9 items-center rounded-full p-0.5 transition-colors',
+                  on ? 'justify-end bg-brand-600' : 'justify-start bg-surface-border',
+                )}
+              >
+                <span className="h-4 w-4 rounded-full bg-white" />
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </Modal>
   );
 }
 

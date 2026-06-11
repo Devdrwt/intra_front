@@ -62,11 +62,15 @@ module.exports = {
         lg: '0.625rem',
         xl: '0.875rem',
         '2xl': '1.125rem',
+        '3xl': '1.5rem',
       },
       boxShadow: {
-        card: '0 1px 2px rgb(16 24 40 / 0.04), 0 1px 3px rgb(16 24 40 / 0.06)',
-        elevated: '0 4px 12px rgb(16 24 40 / 0.08), 0 2px 4px rgb(16 24 40 / 0.04)',
-        pop: '0 8px 28px rgb(16 24 40 / 0.12)',
+        // Ombres douces en couches — rendu calme & premium.
+        soft: '0 1px 2px rgb(16 24 40 / 0.04)',
+        card: '0 1px 2px rgb(16 24 40 / 0.03), 0 2px 6px -1px rgb(16 24 40 / 0.05)',
+        elevated:
+          '0 2px 4px rgb(16 24 40 / 0.04), 0 8px 20px -4px rgb(16 24 40 / 0.08)',
+        pop: '0 10px 38px -8px rgb(16 24 40 / 0.16), 0 4px 12px -4px rgb(16 24 40 / 0.08)',
       },
       keyframes: {
         'fade-in': { from: { opacity: '0' }, to: { opacity: '1' } },

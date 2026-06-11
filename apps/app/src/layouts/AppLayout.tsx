@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
   Building2,
   ChevronDown,
@@ -152,7 +153,14 @@ export function AppLayout() {
 
         <main className="flex-1 pb-20 lg:pb-0">
           <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
-            <Outlet />
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <Outlet />
+            </motion.div>
           </div>
         </main>
       </div>
