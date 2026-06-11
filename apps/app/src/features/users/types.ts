@@ -75,6 +75,7 @@ export const STATUT_LABEL: Record<UserStatus, string> = {
 export const ROLE_OPTIONS: { key: string; label: string }[] = [
   { key: 'admin', label: 'Administrateur' },
   { key: 'employee', label: 'Collaborateur' },
+  { key: 'solution', label: 'Personnel de solution' },
 ];
 
 export function userLabel(u: Pick<User, 'firstName' | 'lastName' | 'email'>): string {
