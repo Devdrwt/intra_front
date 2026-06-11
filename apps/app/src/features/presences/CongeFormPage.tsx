@@ -6,7 +6,19 @@ import { apiErrorMessage } from '@/lib/api';
 import { useEmployes } from '@/features/rh/hooks';
 import { fullName } from '@/features/rh/helpers';
 import { useCreateConge } from './hooks';
-import { TYPE_CONGE_OPTIONS, nbJours, type DemandeCongeInput, type TypeConge } from './types';
+import {
+  CATEGORIE_LABEL,
+  TYPE_CONGE_OPTIONS,
+  nbJours,
+  type CategorieDemande,
+  type DemandeCongeInput,
+  type TypeConge,
+} from './types';
+
+const CATEGORIE_OPTIONS = (['PERMISSION', 'REPOS', 'CONGE'] as CategorieDemande[]).map((c) => ({
+  value: c,
+  label: CATEGORIE_LABEL[c],
+}));
 
 type Errors = Partial<Record<keyof DemandeCongeInput, string>>;
 
@@ -75,7 +87,7 @@ export function CongeFormPage() {
       >
         <ArrowLeft size={16} /> Retour
       </Link>
-      <h1 className="mb-6 mt-3 text-2xl font-bold tracking-tight text-ink">Nouvelle demande de congé</h1>
+      <h1 className="mb-6 mt-3 text-2xl font-bold tracking-tight text-ink">Nouvelle demande</h1>
 
       <form onSubmit={onSubmit} noValidate>
         <Card className="space-y-4">
@@ -88,11 +100,19 @@ export function CongeFormPage() {
             error={errors.employeId}
           />
           <Select
-            label="Type *"
-            options={TYPE_CONGE_OPTIONS}
-            value={form.type}
-            onChange={(e) => set('type', e.target.value as TypeConge)}
+            label="Catégorie *"
+            options={CATEGORIE_OPTIONS}
+            value={form.categorie}
+            onChange={(e) => set('categorie', e.target.value as CategorieDemande)}
           />
+          {form.categorie === 'CONGE' && (
+            <Select
+              label="Type de congé *"
+              options={TYPE_CONGE_OPTIONS}
+              value={form.type}
+              onChange={(e) => set('type', e.target.value as TypeConge)}
+            />
+          )}
           <div className="grid gap-4 sm:grid-cols-2">
             <Input
               type="date"
