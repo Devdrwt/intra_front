@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   CalendarClock,
@@ -103,8 +104,6 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
 
   useEffect(() => setActive(0), [query]);
 
-  if (!open) return null;
-
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
@@ -123,12 +122,25 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
   let lastGroup = '';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-[12vh]">
-      <div className="absolute inset-0 animate-fade-in bg-ink/40 backdrop-blur-sm" onClick={onClose} />
-      <div
-        className="relative w-full max-w-lg animate-slide-up overflow-hidden rounded-2xl border border-surface-border bg-surface-elevated shadow-pop"
-        onKeyDown={onKeyDown}
-      >
+    <AnimatePresence>
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-[12vh]">
+          <motion.div
+            className="absolute inset-0 bg-ink/40 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            onClick={onClose}
+          />
+          <motion.div
+            className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-surface-border bg-surface-elevated shadow-pop"
+            initial={{ opacity: 0, y: -12, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.98 }}
+            transition={{ type: 'spring', stiffness: 360, damping: 30 }}
+            onKeyDown={onKeyDown}
+          >
         <div className="flex items-center gap-3 border-b border-surface-border px-4">
           <Search size={18} className="text-ink-subtle" />
           <input
@@ -174,7 +186,9 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
             })
           )}
         </div>
-      </div>
-    </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 }

@@ -14,6 +14,7 @@ import {
 import { STATUT_OPTIONS, type EmployeFilters } from './types';
 import { useEmployes } from './hooks';
 import { useDepartmentNames } from '@/features/settings/hooks';
+import { Stagger, StaggerItem } from '@/components/motion';
 import { fullName, statutLabel, statutTone, formatDate } from './helpers';
 
 export function EmployesListPage() {
@@ -62,16 +63,20 @@ export function EmployesListPage() {
         </div>
       </Card>
 
-      <Card className="overflow-hidden p-0">
-        {isLoading ? (
+      {isLoading ? (
+        <Card className="overflow-hidden p-0">
           <SkeletonRows rows={6} cols={5} />
-        ) : isError ? (
+        </Card>
+      ) : isError ? (
+        <Card>
           <EmptyState
             icon={<Users size={20} />}
             title="Erreur de chargement"
             description="Impossible de récupérer la liste. Réessayez."
           />
-        ) : count === 0 ? (
+        </Card>
+      ) : count === 0 ? (
+        <Card>
           <EmptyState
             icon={<Users size={20} />}
             title="Aucun collaborateur"
@@ -84,58 +89,45 @@ export function EmployesListPage() {
               </Link>
             }
           />
-        ) : (
-          <>
-            <div className="flex items-center justify-between border-b border-surface-border px-5 py-2.5 text-xs text-ink-subtle">
-              <span>
-                {count} collaborateur{count > 1 ? 's' : ''}
-              </span>
-            </div>
-            <table className="w-full text-sm">
-              <thead className="border-b border-surface-border bg-surface-muted text-left text-xs uppercase tracking-wide text-ink-subtle">
-                <tr>
-                  <th className="px-5 py-2.5 font-medium">Collaborateur</th>
-                  <th className="px-5 py-2.5 font-medium">Poste</th>
-                  <th className="hidden px-5 py-2.5 font-medium md:table-cell">Département</th>
-                  <th className="hidden px-5 py-2.5 font-medium lg:table-cell">Contrat</th>
-                  <th className="hidden px-5 py-2.5 font-medium lg:table-cell">Embauche</th>
-                  <th className="px-5 py-2.5 font-medium">Statut</th>
-                </tr>
-              </thead>
-              <tbody>
-                {employes!.map((e) => (
-                  <tr
-                    key={e.id}
-                    onClick={() => navigate(`/rh/${e.id}`)}
-                    className="cursor-pointer border-b border-surface-border transition-colors last:border-0 hover:bg-surface-muted"
-                  >
-                    <td className="px-5 py-3">
-                      <div className="flex items-center gap-3">
-                        <Avatar name={fullName(e)} size="md" />
-                        <div className="min-w-0">
-                          <div className="truncate font-medium text-ink">{fullName(e)}</div>
-                          <div className="truncate text-xs text-ink-subtle">{e.email}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-5 py-3 text-ink-muted">{e.poste}</td>
-                    <td className="hidden px-5 py-3 text-ink-muted md:table-cell">{e.departement}</td>
-                    <td className="hidden px-5 py-3 text-ink-muted lg:table-cell">{e.typeContrat}</td>
-                    <td className="hidden px-5 py-3 text-ink-muted lg:table-cell">
-                      {formatDate(e.dateEmbauche)}
-                    </td>
-                    <td className="px-5 py-3">
-                      <Badge tone={statutTone(e.statut)} dot>
-                        {statutLabel(e.statut)}
-                      </Badge>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </>
-        )}
-      </Card>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          <p className="px-1 text-xs text-ink-subtle">
+            {count} collaborateur{count > 1 ? 's' : ''}
+          </p>
+          <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {employes!.map((e) => (
+              <StaggerItem key={e.id} className="h-full">
+                <Card
+                  interactive
+                  onClick={() => navigate(`/rh/${e.id}`)}
+                  className="flex h-full flex-col gap-3"
+                >
+                  <div className="flex items-start gap-3">
+                    <Avatar name={fullName(e)} size="md" />
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate font-medium text-ink">{fullName(e)}</div>
+                      <div className="truncate text-xs text-ink-subtle">{e.email}</div>
+                    </div>
+                    <Badge tone={statutTone(e.statut)} dot>
+                      {statutLabel(e.statut)}
+                    </Badge>
+                  </div>
+                  <div className="mt-auto space-y-0.5">
+                    <p className="truncate text-sm text-ink-muted">
+                      {e.poste}
+                      {e.departement ? ` · ${e.departement}` : ''}
+                    </p>
+                    <p className="text-xs text-ink-subtle">
+                      {e.typeContrat} · depuis {formatDate(e.dateEmbauche)}
+                    </p>
+                  </div>
+                </Card>
+              </StaggerItem>
+            ))}
+          </Stagger>
+        </div>
+      )}
     </div>
   );
 }
