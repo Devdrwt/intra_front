@@ -104,6 +104,7 @@ export function MonPointagePage() {
             <LogOut size={16} /> Sortie
           </Button>
         </div>
+        <p className="mt-2 text-xs text-ink-subtle">La pause est facultative : vous pouvez sortir sans l’avoir pointée.</p>
       </Card>
 
       {/* Stats du mois */}

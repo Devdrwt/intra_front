@@ -1,6 +1,6 @@
 import { api } from '@/lib/api';
 import { USE_MOCKS } from '@/lib/config';
-import type { Project, ProjectDocument, ProjectFilters, ProjectInput } from './types';
+import type { Project, ProjectDocument, ProjectFilters, ProjectInput, ProjectPerson } from './types';
 
 /**
  * Service Projets — endpoints /projects (intra_back module projects).
@@ -17,6 +17,7 @@ function clean(f: ProjectFilters): Record<string, string> {
 
 const httpApi = {
   list: (f: ProjectFilters) => api.get<Project[]>('/projects', { params: clean(f) }).then((r) => r.data),
+  assignables: () => api.get<ProjectPerson[]>('/projects/assignables').then((r) => r.data),
   get: (id: string) => api.get<Project>(`/projects/${id}`).then((r) => r.data),
   create: (input: ProjectInput) => api.post<Project>('/projects', input).then((r) => r.data),
   update: (id: string, input: ProjectInput) => api.put<Project>(`/projects/${id}`, input).then((r) => r.data),
@@ -55,6 +56,7 @@ const blank = (input: ProjectInput): Project => ({
 });
 const mockApi = {
   list: (_f: ProjectFilters) => delay([...store]),
+  assignables: () => delay([] as ProjectPerson[]),
   get: (id: string) => delay(store.find((p) => p.id === id)!),
   create: (input: ProjectInput) => {
     const p = blank(input);

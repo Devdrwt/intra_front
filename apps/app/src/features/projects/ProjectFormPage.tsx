@@ -3,9 +3,10 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button, Callout, Card, Input, Select, Spinner, Textarea } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
-import { useEmployes } from '@/features/rh/hooks';
-import { fullName } from '@/features/rh/helpers';
-import { useCreateProject, useProject, useUpdateProject } from './hooks';
+import { useAssignablePeople, useCreateProject, useProject, useUpdateProject } from './hooks';
+import type { ProjectPerson } from './types';
+
+const personName = (p: ProjectPerson) => `${p.prenom} ${p.nom}`.trim() || '—';
 import {
   STATUT_PROJET_OPTIONS,
   type ProjectInput,
@@ -19,7 +20,7 @@ export function ProjectFormPage() {
   const isEdit = Boolean(id);
   const navigate = useNavigate();
 
-  const { data: employes } = useEmployes({});
+  const { data: employes } = useAssignablePeople();
   const { data: existing, isLoading } = useProject(id);
   const create = useCreateProject();
   const update = useUpdateProject(id ?? '');
@@ -71,7 +72,7 @@ export function ProjectFormPage() {
   const empOptions = useMemo(
     () => [
       { value: '', label: 'Aucun' },
-      ...(employes ?? []).map((e) => ({ value: e.id, label: fullName(e) })),
+      ...(employes ?? []).map((e) => ({ value: e.id, label: personName(e) })),
     ],
     [employes],
   );
@@ -210,7 +211,7 @@ export function ProjectFormPage() {
                       checked={(form.membreIds ?? []).includes(e.id)}
                       onChange={() => toggleMembre(e.id)}
                     />
-                    <span className="text-ink">{fullName(e)}</span>
+                    <span className="text-ink">{personName(e)}</span>
                   </label>
                 ))
               )}

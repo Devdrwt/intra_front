@@ -8,6 +8,10 @@ export function useProjects(filters: ProjectFilters) {
   return useQuery({ queryKey: [KEY, 'list', filters], queryFn: () => projectsService.list(filters) });
 }
 
+export function useAssignablePeople() {
+  return useQuery({ queryKey: [KEY, 'assignables'], queryFn: projectsService.assignables });
+}
+
 export function useProject(id: string | undefined) {
   return useQuery({
     queryKey: [KEY, 'detail', id],
