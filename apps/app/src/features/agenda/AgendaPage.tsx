@@ -23,12 +23,24 @@ const WEEKDAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 const ymd = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const heure = (iso: string) => new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 const firstOfMonth = (d: Date) => new Date(d.getFullYear(), d.getMonth(), 1);
+const addDays = (d: Date, n: number) => {
+  const x = new Date(d);
+  x.setDate(x.getDate() + n);
+  return x;
+};
+const mondayOf = (d: Date) => {
+  const x = new Date(d);
+  x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+  x.setHours(0, 0, 0, 0);
+  return x;
+};
 const longDate = (key: string) =>
   new Date(key).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
 
 export function AgendaPage() {
-  const [view, setView] = useState<'mois' | 'agenda'>('mois');
+  const [view, setView] = useState<'mois' | 'semaine' | 'agenda'>('mois');
   const [cursor, setCursor] = useState(() => firstOfMonth(new Date()));
+  const [weekRef, setWeekRef] = useState(() => new Date());
   const [dir, setDir] = useState(0);
   const [selected, setSelected] = useState(() => ymd(new Date()));
   const [openForm, setOpenForm] = useState(false);
@@ -92,7 +104,7 @@ export function AgendaPage() {
         actions={
           <>
             <div className="flex rounded-xl bg-surface-muted p-1">
-              {(['mois', 'agenda'] as const).map((v) => (
+              {(['mois', 'semaine', 'agenda'] as const).map((v) => (
                 <button
                   key={v}
                   onClick={() => setView(v)}
@@ -227,6 +239,15 @@ export function AgendaPage() {
             </ul>
           </Card>
         </div>
+      ) : view === 'semaine' ? (
+        <WeekView
+          byDay={byDay}
+          weekStart={mondayOf(weekRef)}
+          isLoading={isLoading}
+          onPrev={() => setWeekRef((w) => addDays(w, -7))}
+          onNext={() => setWeekRef((w) => addDays(w, 7))}
+          onToday={() => setWeekRef(new Date())}
+        />
       ) : (
         <AgendaListView items={items} isLoading={isLoading} />
       )}
@@ -286,6 +307,104 @@ function AgendaListView({ items, isLoading }: { items?: AgendaItem[]; isLoading:
         </StaggerItem>
       ))}
     </Stagger>
+  );
+}
+
+function WeekView({
+  byDay,
+  weekStart,
+  isLoading,
+  onPrev,
+  onNext,
+  onToday,
+}: {
+  byDay: Map<string, AgendaItem[]>;
+  weekStart: Date;
+  isLoading: boolean;
+  onPrev: () => void;
+  onNext: () => void;
+  onToday: () => void;
+}) {
+  const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+  const todayKey = ymd(new Date());
+  const weekEnd = addDays(weekStart, 6);
+  const range = `${weekStart.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} – ${weekEnd.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}`;
+
+  return (
+    <Card className="p-3">
+      <div className="mb-3 flex items-center justify-between gap-2 px-1">
+        <div className="flex items-center gap-1">
+          <button onClick={onPrev} className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-muted hover:bg-surface-muted">
+            <ChevronLeft size={18} />
+          </button>
+          <button onClick={onNext} className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-muted hover:bg-surface-muted">
+            <ChevronRight size={18} />
+          </button>
+          <button onClick={onToday} className="ml-1 rounded-lg px-2.5 py-1 text-sm font-medium text-ink-muted hover:bg-surface-muted hover:text-ink">
+            Cette semaine
+          </button>
+        </div>
+        <span className="font-semibold text-ink">{range}</span>
+      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center py-12">
+          <Spinner />
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <div className="grid min-w-[700px] grid-cols-7 gap-2">
+            {days.map((d) => {
+              const key = ymd(d);
+              const list = byDay.get(key) ?? [];
+              const isToday = key === todayKey;
+              return (
+                <div
+                  key={key}
+                  className={cn(
+                    'overflow-hidden rounded-xl border',
+                    isToday ? 'border-brand-300 bg-brand-soft/30' : 'border-surface-border',
+                  )}
+                >
+                  <div className={cn('border-b px-2 py-1.5 text-center', isToday ? 'border-brand-200' : 'border-surface-border')}>
+                    <div className="text-[11px] uppercase text-ink-subtle">{d.toLocaleDateString('fr-FR', { weekday: 'short' })}</div>
+                    <div className={cn('text-sm font-semibold', isToday ? 'text-brand-700' : 'text-ink')}>{d.getDate()}</div>
+                  </div>
+                  <div className="min-h-[130px] space-y-1 p-1.5">
+                    {list.length === 0 ? (
+                      <p className="pt-2 text-center text-[11px] text-ink-subtle">—</p>
+                    ) : (
+                      list.map((it) => <WeekChip key={it.id} it={it} />)
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </Card>
+  );
+}
+
+function WeekChip({ it }: { it: AgendaItem }) {
+  const color = SOURCE[it.source].color;
+  const inner = (
+    <div className="rounded-md px-1.5 py-1 text-[11px] leading-tight" style={{ backgroundColor: `${color}1A` }}>
+      {!it.journeeEntiere && (
+        <span className="font-medium" style={{ color }}>
+          {heure(it.debut)}{' '}
+        </span>
+      )}
+      <span className="text-ink">{it.titre}</span>
+    </div>
+  );
+  return it.url ? (
+    <Link to={it.url} className="block hover:opacity-80">
+      {inner}
+    </Link>
+  ) : (
+    inner
   );
 }
 

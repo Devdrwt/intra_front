@@ -50,6 +50,17 @@ export function AgendaWidget() {
   const todayKey = ymd(new Date());
   const dayItems = (byDay.get(selected) ?? []).sort((a, b) => a.debut.localeCompare(b.debut));
 
+  // Si le jour sélectionné est vide → on montre les prochains événements (plus utile).
+  const upcoming = useMemo(() => {
+    const now = new Date();
+    return (items ?? [])
+      .filter((it) => new Date(it.fin) >= now)
+      .sort((a, b) => a.debut.localeCompare(b.debut))
+      .slice(0, 4);
+  }, [items]);
+  const showUpcoming = dayItems.length === 0;
+  const panelItems = showUpcoming ? upcoming : dayItems.slice(0, 5);
+
   return (
     <Card>
       <div className="flex items-center justify-between">
@@ -97,22 +108,33 @@ export function AgendaWidget() {
           )}
         </div>
 
-        {/* Événements du jour */}
+        {/* Événements du jour / à venir */}
         <div>
           <div className="mb-2 flex items-center gap-1.5 text-sm font-medium text-ink">
             <CalendarDays size={15} className="text-brand-600" />
-            <span className="capitalize">{new Date(selected).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'short' })}</span>
+            <span className="capitalize">
+              {showUpcoming
+                ? 'Prochains événements'
+                : new Date(selected).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'short' })}
+            </span>
           </div>
-          {dayItems.length === 0 ? (
-            <p className="py-4 text-sm text-ink-subtle">Aucun événement ce jour.</p>
+          {panelItems.length === 0 ? (
+            <p className="py-4 text-sm text-ink-subtle">Rien à venir.</p>
           ) : (
             <ul className="space-y-2">
-              {dayItems.slice(0, 5).map((it) => (
+              {panelItems.map((it) => (
                 <li key={it.id} className="flex items-start gap-2">
                   <span className="mt-1 h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: COLOR[it.source] }} />
                   <div className="min-w-0">
                     <div className="truncate text-sm text-ink">{it.titre}</div>
-                    <div className="text-xs text-ink-subtle">{it.journeeEntiere ? 'Journée' : `${heure(it.debut)}–${heure(it.fin)}`}</div>
+                    <div className="text-xs text-ink-subtle">
+                      {showUpcoming && (
+                        <span className="capitalize">
+                          {new Date(it.debut).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })} ·{' '}
+                        </span>
+                      )}
+                      {it.journeeEntiere ? 'Journée' : `${heure(it.debut)}–${heure(it.fin)}`}
+                    </div>
                   </div>
                 </li>
               ))}
