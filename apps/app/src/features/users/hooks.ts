@@ -28,6 +28,16 @@ export function useUpdateUser() {
   });
 }
 
+export function useSetUserAccess() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, permissions }: { id: string; permissions: string[] }) =>
+      usersService.setAccess(id, permissions),
+    meta: { successMessage: 'Accès aux modules mis à jour' },
+    onSuccess: () => qc.invalidateQueries({ queryKey: [KEY] }),
+  });
+}
+
 export function useDeleteUser() {
   const qc = useQueryClient();
   return useMutation({

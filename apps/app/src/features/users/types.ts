@@ -8,9 +8,21 @@ export interface User {
   lastName?: string;
   status: UserStatus;
   roles: string[]; // clés de rôles
+  extraPermissions: string[]; // modules activés en plus du rôle
   lastLoginAt?: string;
   createdAt: string;
 }
+
+/** Modules qu'un admin peut activer pour un utilisateur (miroir backend). */
+export const MODULE_GRANTS: { permission: string; label: string }[] = [
+  { permission: 'rh.employe:read', label: 'RH & Personnel' },
+  { permission: 'presence:manage', label: 'Présences & Congés' },
+  { permission: 'rapport:manage', label: 'Rapports' },
+  { permission: 'project:read', label: 'Projets' },
+  { permission: 'recrutement:read', label: 'Recrutement' },
+  { permission: 'user:read', label: 'Utilisateurs & accès' },
+  { permission: 'audit:read', label: 'Activité' },
+];
 
 /** Corps de POST /users (InviteUserDto). */
 export interface InviteUserInput {

@@ -23,6 +23,7 @@ let store: User[] = [
     lastName: 'Drwintech',
     status: 'ACTIVE',
     roles: ['admin'],
+    extraPermissions: [],
     lastLoginAt: new Date(Date.now() - 3_600_000).toISOString(),
     createdAt: new Date(Date.now() - 30 * 86_400_000).toISOString(),
   },
@@ -33,6 +34,7 @@ let store: User[] = [
     lastName: 'Adjovi',
     status: 'INVITED',
     roles: ['employee'],
+    extraPermissions: [],
     createdAt: new Date(Date.now() - 2 * 86_400_000).toISOString(),
   },
 ];
@@ -49,6 +51,7 @@ const mockApi = {
       lastName: input.lastName,
       status: 'INVITED',
       roles: input.roleKeys,
+      extraPermissions: [],
       createdAt: new Date().toISOString(),
     };
     store = [user, ...store];
@@ -68,6 +71,10 @@ const mockApi = {
     );
     return delay(store.find((u) => u.id === id)!);
   },
+  setAccess: (id: string, permissions: string[]) => {
+    store = store.map((u) => (u.id === id ? { ...u, extraPermissions: permissions } : u));
+    return delay(store.find((u) => u.id === id)!);
+  },
   remove: (id: string) => {
     store = store.filter((u) => u.id !== id);
     return delay(undefined);
@@ -82,6 +89,8 @@ const httpApi = {
     api.post<InviteResult>('/users', input).then((r) => r.data),
   update: (id: string, input: UpdateUserInput) =>
     api.patch<User>(`/users/${id}`, input).then((r) => r.data),
+  setAccess: (id: string, permissions: string[]) =>
+    api.patch<User>(`/users/${id}/access`, { permissions }).then((r) => r.data),
   remove: (id: string) => api.delete(`/users/${id}`).then(() => undefined),
 };
 
