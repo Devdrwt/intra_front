@@ -3,6 +3,7 @@ import { Download, ExternalLink, FolderKanban, Paperclip, Users } from 'lucide-r
 import { Badge, Button, Card, EmptyState, Modal, Skeleton, cn } from '@drwindesk/ui';
 import { triggerDownload, humanSize } from '@/lib/download';
 import { toast } from '@/lib/toast';
+import { Stagger, StaggerItem } from '@/components/motion';
 import {
   STATUT_PROJET_LABEL,
   STATUT_PROJET_TONE,
@@ -46,9 +47,10 @@ export function MesProjetsPage() {
           />
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((p) => (
-            <button key={p.id} onClick={() => setActive(p)} className="text-left">
+            <StaggerItem key={p.id} className="h-full">
+            <button onClick={() => setActive(p)} className="h-full w-full text-left">
               <Card className="h-full transition-colors hover:border-brand-300">
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="font-semibold text-ink">{p.nom}</h3>
@@ -73,8 +75,9 @@ export function MesProjetsPage() {
                 </div>
               </Card>
             </button>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       )}
 
       {active && <ProjectDetail project={active} onClose={() => setActive(null)} />}

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Briefcase, CalendarClock, Plus, Search } from 'lucide-react';
 import { Avatar, Badge, Button, Card, EmptyState, Input, Select, Skeleton } from '@drwindesk/ui';
 import { hasPermission, useAuth } from '@/auth/AuthContext';
+import { Stagger, StaggerItem } from '@/components/motion';
 import { useProjects } from './hooks';
 import {
   STATUT_PROJET_LABEL,
@@ -78,15 +79,15 @@ export function ProjectsPage() {
           />
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((p) => {
             const ech = echeanceInfo(p.dateFin, p.statut);
             return (
+              <StaggerItem key={p.id} className="h-full">
               <Card
-                key={p.id}
                 interactive
                 onClick={() => navigate(`/projets/${p.id}`)}
-                className="flex flex-col gap-3"
+                className="flex h-full flex-col gap-3"
               >
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="min-w-0 flex-1 truncate font-semibold text-ink">{p.nom}</h3>
@@ -138,9 +139,10 @@ export function ProjectsPage() {
                   )}
                 </div>
               </Card>
+              </StaggerItem>
             );
           })}
-        </div>
+        </Stagger>
       )}
     </div>
   );
