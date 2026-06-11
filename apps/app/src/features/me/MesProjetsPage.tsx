@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Download, ExternalLink, FolderKanban, Paperclip, Users, X } from 'lucide-react';
-import { Badge, Button, Card, EmptyState, Skeleton, cn } from '@drwindesk/ui';
+import { Download, ExternalLink, FolderKanban, Paperclip, Users } from 'lucide-react';
+import { Badge, Button, Card, EmptyState, Modal, Skeleton, cn } from '@drwindesk/ui';
 import { triggerDownload, humanSize } from '@/lib/download';
 import { toast } from '@/lib/toast';
 import {
@@ -98,25 +98,21 @@ function ProjectDetail({ project, onClose }: { project: Project; onClose: () => 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-[6vh]">
-      <div className="absolute inset-0 animate-fade-in bg-ink/40 backdrop-blur-sm" onClick={onClose} />
-      <Card className="relative flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden p-0">
-        <div className="flex items-start justify-between gap-3 border-b border-surface-border p-5">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <h3 className="text-lg font-semibold text-ink">{project.nom}</h3>
-              <Badge tone={STATUT_PROJET_TONE[project.statut]} dot>
-                {STATUT_PROJET_LABEL[project.statut]}
-              </Badge>
-            </div>
-            {project.client && <p className="text-sm text-ink-subtle">{project.client}</p>}
-          </div>
-          <button onClick={onClose} className="text-ink-muted hover:text-ink">
-            <X size={18} />
-          </button>
-        </div>
-
-        <div className="space-y-5 overflow-y-auto p-5">
+    <Modal
+      open
+      onClose={onClose}
+      size="lg"
+      title={
+        <span className="flex items-center gap-2">
+          {project.nom}
+          <Badge tone={STATUT_PROJET_TONE[project.statut]} dot>
+            {STATUT_PROJET_LABEL[project.statut]}
+          </Badge>
+        </span>
+      }
+      description={project.client ?? undefined}
+    >
+        <div className="space-y-5">
           {project.description && (
             <p className="whitespace-pre-wrap text-sm text-ink">{project.description}</p>
           )}
@@ -185,8 +181,7 @@ function ProjectDetail({ project, onClose }: { project: Project; onClose: () => 
             )}
           </div>
         </div>
-      </Card>
-    </div>
+    </Modal>
   );
 }
 

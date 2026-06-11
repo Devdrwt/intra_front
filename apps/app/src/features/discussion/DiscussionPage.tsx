@@ -13,7 +13,7 @@ import {
   Users,
   X,
 } from 'lucide-react';
-import { Avatar, Button, Card, EmptyState, Input, Skeleton, cn } from '@drwindesk/ui';
+import { Avatar, Button, Card, EmptyState, Input, Modal, Skeleton, cn } from '@drwindesk/ui';
 import { hasPermission, useAuth } from '@/auth/AuthContext';
 import { apiErrorMessage } from '@/lib/api';
 import { avatarUrl } from '@/lib/avatar';
@@ -392,23 +392,33 @@ function NewConversationModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-[10vh]">
-      <div className="absolute inset-0 animate-fade-in bg-ink/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative flex max-h-[70vh] w-full max-w-md flex-col overflow-hidden rounded-2xl border border-surface-border bg-surface-elevated shadow-pop">
-        <div className="flex items-center justify-between border-b border-surface-border p-4">
-          <h3 className="font-semibold text-ink">Nouvelle conversation</h3>
-          <button onClick={onClose} className="text-ink-muted hover:text-ink">
-            <X size={18} />
-          </button>
-        </div>
-        <div className="flex gap-1 border-b border-surface-border p-2">
+    <Modal
+      open
+      onClose={onClose}
+      size="md"
+      title="Nouvelle conversation"
+      footer={
+        tab === 'group' ? (
+          <Button
+            onClick={() => void submitGroup()}
+            loading={createGroup.isPending}
+            disabled={!groupName.trim() || selected.length === 0}
+            className="w-full"
+          >
+            Créer le groupe ({selected.length})
+          </Button>
+        ) : undefined
+      }
+    >
+      <div className="space-y-3">
+        <div className="flex gap-1 rounded-xl bg-surface-muted p-1">
           {(['direct', 'group'] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
               className={cn(
                 'flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
-                tab === t ? 'bg-brand-soft text-brand-soft-fg' : 'text-ink-muted hover:text-ink',
+                tab === t ? 'bg-surface text-ink shadow-soft' : 'text-ink-muted hover:text-ink',
               )}
             >
               {t === 'direct' ? 'Message privé' : 'Nouveau groupe'}
@@ -417,16 +427,12 @@ function NewConversationModal({
         </div>
 
         {tab === 'group' && (
-          <div className="border-b border-surface-border p-3">
-            <Input placeholder="Nom du groupe" value={groupName} onChange={(e) => setGroupName(e.target.value)} />
-          </div>
+          <Input placeholder="Nom du groupe" value={groupName} onChange={(e) => setGroupName(e.target.value)} />
         )}
 
-        <div className="border-b border-surface-border p-3">
-          <Input leading={<Search size={15} />} placeholder="Rechercher un collègue…" value={q} onChange={(e) => setQ(e.target.value)} />
-        </div>
+        <Input leading={<Search size={15} />} placeholder="Rechercher un collègue…" value={q} onChange={(e) => setQ(e.target.value)} />
 
-        <div className="flex-1 overflow-y-auto p-2">
+        <div className="-mx-1 max-h-[44vh] overflow-y-auto">
           {filtered.length === 0 ? (
             <p className="py-6 text-center text-sm text-ink-subtle">Aucun collègue.</p>
           ) : (
@@ -458,20 +464,7 @@ function NewConversationModal({
             )
           )}
         </div>
-
-        {tab === 'group' && (
-          <div className="border-t border-surface-border p-3">
-            <Button
-              onClick={() => void submitGroup()}
-              loading={createGroup.isPending}
-              disabled={!groupName.trim() || selected.length === 0}
-              className="w-full"
-            >
-              Créer le groupe ({selected.length})
-            </Button>
-          </div>
-        )}
       </div>
-    </div>
+    </Modal>
   );
 }

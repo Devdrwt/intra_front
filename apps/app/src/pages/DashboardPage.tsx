@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { Card, CardTitle, EmptyState, Skeleton, cn } from '@drwindesk/ui';
 import { displayName, hasPermission, useAuth } from '@/auth/AuthContext';
+import { Stagger, StaggerItem } from '@/components/motion';
 import { useEspaceMoi } from '@/features/espaces/hooks';
 import { severityDot, timeAgo } from '@/features/espaces/helpers';
 import { useMyConges, useMyPointages, useMyProfile, useMyRapports } from '@/features/me/hooks';
@@ -112,39 +113,47 @@ export function DashboardPage() {
       </header>
 
       {/* Stats self-service */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          icon={Clock}
-          label="Pointage du jour"
-          value={pointageValue}
-          tone={todayP?.heureEntree ? 'success' : 'warning'}
-          loading={pointages.isLoading}
-          to="/mon-pointage"
-        />
-        <StatCard
-          icon={FileBarChart}
-          label="Rapport du jour"
-          value={todayR ? 'Remis' : 'À faire'}
-          tone={todayR ? 'success' : 'warning'}
-          loading={rapports.isLoading}
-          to="/mes-rapports"
-        />
-        <StatCard
-          icon={CalendarClock}
-          label="Demandes en attente"
-          value={pendingDemandes}
-          tone={pendingDemandes > 0 ? 'warning' : 'success'}
-          loading={conges.isLoading}
-          to="/mes-demandes"
-        />
-        <StatCard
-          icon={MessagesSquare}
-          label="Messages non lus"
-          value={unreadMsg}
-          tone={unreadMsg > 0 ? 'brand' : 'success'}
-          to="/discussion"
-        />
-      </div>
+      <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StaggerItem>
+          <StatCard
+            icon={Clock}
+            label="Pointage du jour"
+            value={pointageValue}
+            tone={todayP?.heureEntree ? 'success' : 'warning'}
+            loading={pointages.isLoading}
+            to="/mon-pointage"
+          />
+        </StaggerItem>
+        <StaggerItem>
+          <StatCard
+            icon={FileBarChart}
+            label="Rapport du jour"
+            value={todayR ? 'Remis' : 'À faire'}
+            tone={todayR ? 'success' : 'warning'}
+            loading={rapports.isLoading}
+            to="/mes-rapports"
+          />
+        </StaggerItem>
+        <StaggerItem>
+          <StatCard
+            icon={CalendarClock}
+            label="Demandes en attente"
+            value={pendingDemandes}
+            tone={pendingDemandes > 0 ? 'warning' : 'success'}
+            loading={conges.isLoading}
+            to="/mes-demandes"
+          />
+        </StaggerItem>
+        <StaggerItem>
+          <StatCard
+            icon={MessagesSquare}
+            label="Messages non lus"
+            value={unreadMsg}
+            tone={unreadMsg > 0 ? 'brand' : 'success'}
+            to="/discussion"
+          />
+        </StaggerItem>
+      </Stagger>
 
       {/* Agenda / calendrier */}
       <AgendaWidget />

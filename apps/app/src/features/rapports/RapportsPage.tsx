@@ -9,7 +9,6 @@ import {
   PieChart,
   Plus,
   Trash2,
-  X,
 } from 'lucide-react';
 import { triggerDownload, humanSize } from '@/lib/download';
 import { toast } from '@/lib/toast';
@@ -22,6 +21,7 @@ import {
   Card,
   EmptyState,
   Input,
+  Modal,
   Select,
   SkeletonRows,
   cn,
@@ -249,82 +249,60 @@ function RapportDetail({
     }
   };
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-[8vh]">
-      <div className="absolute inset-0 animate-fade-in bg-ink/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative flex max-h-[80vh] w-full max-w-2xl animate-slide-up flex-col overflow-hidden rounded-2xl border border-surface-border bg-surface-elevated shadow-pop">
-        <div className="flex items-start justify-between gap-4 border-b border-surface-border p-5">
-          <div className="flex items-center gap-3">
-            <Avatar name={name} size="md" />
-            <div className="min-w-0">
-              <p className="font-semibold text-ink">{name}</p>
-              {emp?.poste && (
-                <p className="truncate text-xs text-ink-subtle">
-                  {emp.poste}
-                  {emp.departement ? ` · ${emp.departement}` : ''}
-                </p>
-              )}
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-ink-muted hover:bg-surface-muted"
-            aria-label="Fermer"
-          >
-            <X size={18} />
-          </button>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3 border-b border-surface-border px-5 py-3 text-xs text-ink-muted">
+    <Modal
+      open
+      onClose={onClose}
+      size="lg"
+      title={
+        <span className="flex items-center gap-2.5">
+          <Avatar name={name} size="sm" />
+          {name}
+        </span>
+      }
+      description={emp?.poste ? `${emp.poste}${emp.departement ? ` · ${emp.departement}` : ''}` : undefined}
+      footer={
+        canDelete ? (
+          <Button variant="ghost" onClick={remove} disabled={del.isPending} className="text-danger hover:bg-danger-soft">
+            <Trash2 size={16} /> Supprimer le rapport
+          </Button>
+        ) : undefined
+      }
+    >
+      <div className="mb-4 flex flex-wrap items-center gap-3 text-xs text-ink-muted">
+        <span className="inline-flex items-center gap-1.5">
+          <CalendarDays size={14} /> {rapport.date}
+        </span>
+        {rapport.submittedAt && (
           <span className="inline-flex items-center gap-1.5">
-            <CalendarDays size={14} /> {rapport.date}
+            <Clock size={14} /> Soumis le{' '}
+            {new Date(rapport.submittedAt).toLocaleString('fr-FR', {
+              day: '2-digit',
+              month: 'short',
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
           </span>
-          {rapport.submittedAt && (
-            <span className="inline-flex items-center gap-1.5">
-              <Clock size={14} /> Soumis le{' '}
-              {new Date(rapport.submittedAt).toLocaleString('fr-FR', {
-                day: '2-digit',
-                month: 'short',
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </span>
-          )}
-          <Badge tone={rapport.statut === 'SOUMIS' ? 'success' : 'warning'} dot>
-            {STATUT_RAPPORT_LABEL[rapport.statut]}
-          </Badge>
-        </div>
-
-        <div className="overflow-y-auto p-5">
-          <p className="whitespace-pre-wrap text-sm leading-relaxed text-ink">{rapport.contenu}</p>
-
-          {rapport.attachment && (
-            <button
-              type="button"
-              onClick={() => void download()}
-              disabled={dl}
-              className="mt-5 inline-flex items-center gap-2 rounded-xl border border-surface-border px-3 py-2 text-sm font-medium text-ink transition-colors hover:border-brand-300 hover:bg-brand-soft"
-            >
-              <Download size={16} className="text-brand-600" />
-              {rapport.attachment.name}
-              <span className="text-xs text-ink-subtle">· {humanSize(rapport.attachment.size)}</span>
-            </button>
-          )}
-        </div>
-
-        {canDelete && (
-          <div className="flex justify-end border-t border-surface-border p-4">
-            <button
-              type="button"
-              onClick={remove}
-              disabled={del.isPending}
-              className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-danger transition-colors hover:bg-danger-soft"
-            >
-              <Trash2 size={16} /> Supprimer le rapport
-            </button>
-          </div>
         )}
+        <Badge tone={rapport.statut === 'SOUMIS' ? 'success' : 'warning'} dot>
+          {STATUT_RAPPORT_LABEL[rapport.statut]}
+        </Badge>
       </div>
-    </div>
+
+      <p className="whitespace-pre-wrap text-sm leading-relaxed text-ink">{rapport.contenu}</p>
+
+      {rapport.attachment && (
+        <button
+          type="button"
+          onClick={() => void download()}
+          disabled={dl}
+          className="mt-5 inline-flex items-center gap-2 rounded-xl border border-surface-border px-3 py-2 text-sm font-medium text-ink transition-colors hover:border-brand-300 hover:bg-brand-soft"
+        >
+          <Download size={16} className="text-brand-600" />
+          {rapport.attachment.name}
+          <span className="text-xs text-ink-subtle">· {humanSize(rapport.attachment.size)}</span>
+        </button>
+      )}
+    </Modal>
   );
 }
 

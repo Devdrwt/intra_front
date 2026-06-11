@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -9,9 +9,8 @@ import {
   RefreshCw,
   Send,
   Settings as SettingsIcon,
-  X,
 } from 'lucide-react';
-import { Button, Card, EmptyState, Input, Skeleton, Textarea, cn } from '@drwindesk/ui';
+import { Button, Card, EmptyState, Input, Modal, Skeleton, Textarea, cn } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
 import { triggerDownload, humanSize } from '@/lib/download';
 import { toast } from '@/lib/toast';
@@ -231,8 +230,7 @@ function Compose({ initial, onClose }: { initial: Partial<SendInput>; onClose: (
   const [body, setBody] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const submit = async () => {
     setError(null);
     if (!to.trim()) return setError('Destinataire requis.');
     try {
@@ -244,33 +242,28 @@ function Compose({ initial, onClose }: { initial: Partial<SendInput>; onClose: (
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-[8vh]">
-      <div className="absolute inset-0 animate-fade-in bg-ink/40 backdrop-blur-sm" onClick={onClose} />
-      <form
-        onSubmit={onSubmit}
-        className="relative flex max-h-[80vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-surface-border bg-surface-elevated shadow-pop"
-      >
-        <div className="flex items-center justify-between border-b border-surface-border p-4">
-          <h3 className="font-semibold text-ink">Nouveau message</h3>
-          <button type="button" onClick={onClose} className="text-ink-muted hover:text-ink">
-            <X size={18} />
-          </button>
-        </div>
-        <div className="space-y-3 p-4">
-          <Input label="À *" value={to} onChange={(e) => setTo(e.target.value)} placeholder="destinataire@exemple.com" />
-          <Input label="Objet" value={subject} onChange={(e) => setSubject(e.target.value)} />
-          <Textarea label="Message" rows={10} value={body} onChange={(e) => setBody(e.target.value)} />
-          {error && <p className="text-sm text-danger">{error}</p>}
-        </div>
-        <div className="flex justify-end gap-3 border-t border-surface-border p-3">
-          <Button type="button" variant="secondary" onClick={onClose}>
+    <Modal
+      open
+      onClose={onClose}
+      size="lg"
+      title="Nouveau message"
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>
             Annuler
           </Button>
-          <Button type="submit" loading={send.isPending}>
+          <Button onClick={() => void submit()} loading={send.isPending}>
             <Send size={16} /> Envoyer
           </Button>
-        </div>
-      </form>
-    </div>
+        </>
+      }
+    >
+      <div className="space-y-3">
+        <Input label="À *" value={to} onChange={(e) => setTo(e.target.value)} placeholder="destinataire@exemple.com" />
+        <Input label="Objet" value={subject} onChange={(e) => setSubject(e.target.value)} />
+        <Textarea label="Message" rows={10} value={body} onChange={(e) => setBody(e.target.value)} />
+        {error && <p className="text-sm text-danger">{error}</p>}
+      </div>
+    </Modal>
   );
 }
