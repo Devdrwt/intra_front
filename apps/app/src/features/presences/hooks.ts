@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { presencesService } from './service';
-import type { DemandeCongeInput, StatutConge } from './types';
+import type { DemandeCongeInput, PointageSens, StatutConge } from './types';
 
 const POINTAGES = 'pointages';
 const CONGES = 'conges';
@@ -12,7 +12,7 @@ export function usePointagesDuJour() {
 export function usePointer() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ employeId, sens }: { employeId: string; sens: 'ENTREE' | 'SORTIE' }) =>
+    mutationFn: ({ employeId, sens }: { employeId: string; sens: PointageSens }) =>
       presencesService.pointer(employeId, sens),
     meta: { successMessage: 'Pointage enregistré' },
     onSuccess: () => qc.invalidateQueries({ queryKey: [POINTAGES] }),

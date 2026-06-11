@@ -1,7 +1,13 @@
 import { api } from '@/lib/api';
 import { USE_MOCKS } from '@/lib/config';
 import type { Employe } from '@/features/rh/types';
-import type { CategorieDemande, DemandeConge, Pointage, TypeConge } from '@/features/presences/types';
+import type {
+  CategorieDemande,
+  DemandeConge,
+  Pointage,
+  PointageSens,
+  TypeConge,
+} from '@/features/presences/types';
 import type { AttachmentRef, Rapport, StatutRapport } from '@/features/rapports/types';
 import type { Document } from '@/features/documents/types';
 import type { Project } from '@/features/projects/types';
@@ -86,13 +92,15 @@ let seq = 1;
 const mockApi = {
   myEmploye: () => delay({ ...mockEmploye }),
   myPointages: () => delay([...mPointages]),
-  pointer: (sens: 'ENTREE' | 'SORTIE') => {
+  pointer: (sens: PointageSens) => {
     let p = mPointages.find((x) => x.date === today());
     if (!p) {
       p = { id: `mp${++seq}`, employeId: MOCK_ID, date: today() };
       mPointages = [p, ...mPointages];
     }
     if (sens === 'ENTREE') p.heureEntree = nowHM();
+    else if (sens === 'PAUSE') p.heurePauseDebut = nowHM();
+    else if (sens === 'REPRISE') p.heurePauseFin = nowHM();
     else p.heureSortie = nowHM();
     return delay({ ...p });
   },
@@ -151,7 +159,7 @@ const mockApi = {
 const httpApi = {
   myEmploye: () => api.get<Employe>('/me/employe').then((r) => r.data),
   myPointages: () => api.get<Pointage[]>('/me/pointages').then((r) => r.data),
-  pointer: (sens: 'ENTREE' | 'SORTIE') =>
+  pointer: (sens: PointageSens) =>
     api.post<Pointage>('/me/pointages/pointer', { sens }).then((r) => r.data),
   myConges: () => api.get<DemandeConge[]>('/me/conges').then((r) => r.data),
   createConge: (input: MeCongeInput) =>

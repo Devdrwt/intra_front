@@ -1,9 +1,13 @@
 // --- Pointage -----------------------------------------------------------------
+export type PointageSens = 'ENTREE' | 'PAUSE' | 'REPRISE' | 'SORTIE';
+
 export interface Pointage {
   id: string;
   employeId: string;
   date: string; // ISO yyyy-mm-dd
   heureEntree?: string; // HH:mm
+  heurePauseDebut?: string; // HH:mm
+  heurePauseFin?: string; // HH:mm
   heureSortie?: string; // HH:mm
 }
 

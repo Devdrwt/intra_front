@@ -5,7 +5,7 @@ import axios from 'axios';
  * survit au rechargement et fonctionne sans réseau). Rejouée à la reconnexion.
  */
 const KEY = 'drwindesk.offline.pointages';
-type Sens = 'ENTREE' | 'SORTIE';
+type Sens = 'ENTREE' | 'PAUSE' | 'REPRISE' | 'SORTIE';
 interface QueuedPointage {
   sens: Sens;
   ts: number;

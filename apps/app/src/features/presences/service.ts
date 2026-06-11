@@ -1,6 +1,6 @@
 import { api } from '@/lib/api';
 import { USE_MOCKS } from '@/lib/config';
-import type { DemandeConge, DemandeCongeInput, Pointage, StatutConge } from './types';
+import type { DemandeConge, DemandeCongeInput, Pointage, PointageSens, StatutConge } from './types';
 
 /**
  * Service Présences & Congés. MOCK par défaut ; API NestJS avec `VITE_USE_MOCKS=false`.
@@ -50,13 +50,15 @@ let cSeq = conges.length;
 
 const mockApi = {
   pointagesDuJour: () => delay(pointages.filter((p) => p.date === today())),
-  pointer: (employeId: string, sens: 'ENTREE' | 'SORTIE') => {
+  pointer: (employeId: string, sens: PointageSens) => {
     let p = pointages.find((x) => x.employeId === employeId && x.date === today());
     if (!p) {
       p = { id: `p${++pSeq}`, employeId, date: today() };
       pointages = [p, ...pointages];
     }
     if (sens === 'ENTREE') p.heureEntree = nowHM();
+    else if (sens === 'PAUSE') p.heurePauseDebut = nowHM();
+    else if (sens === 'REPRISE') p.heurePauseFin = nowHM();
     else p.heureSortie = nowHM();
     return delay({ ...p });
   },
@@ -85,7 +87,7 @@ const mockApi = {
 const httpApi = {
   pointagesDuJour: () =>
     api.get<Pointage[]>('/pointages', { params: { date: today() } }).then((r) => r.data),
-  pointer: (employeId: string, sens: 'ENTREE' | 'SORTIE') =>
+  pointer: (employeId: string, sens: PointageSens) =>
     api.post<Pointage>('/pointages/pointer', { employeId, sens }).then((r) => r.data),
   listConges: () => api.get<DemandeConge[]>('/conges').then((r) => r.data),
   createConge: (input: DemandeCongeInput) =>

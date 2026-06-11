@@ -17,6 +17,7 @@ import { ORG_NAME } from '@/lib/config';
 import { useTheme } from '@/theme/ThemeProvider';
 import { ReferentielsSection } from '@/features/settings/ReferentielsSection';
 import { OrgLogoCard } from '@/features/settings/OrgLogoCard';
+import { WorkHoursCard } from '@/features/settings/WorkHoursCard';
 import { MailAccountSection } from '@/features/webmail/MailAccountSection';
 import { MobileAppCard } from '@/features/settings/MobileAppCard';
 import { avatarUrl } from '@/lib/avatar';
@@ -85,6 +86,7 @@ export function SettingsPage() {
             <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-subtle">Organisation</h3>
           </div>
           <OrgLogoCard />
+          <WorkHoursCard />
           <Callout tone="info">
             Définissez les départements et services de votre organisation. Ils alimentent les
             formulaires RH, les présences et la consolidation des rapports.

@@ -8,7 +8,7 @@ import {
 } from './service';
 import { enqueuePointage, isNetworkError, startPointageAutoSync } from '@/lib/offlineQueue';
 import { toast } from '@/lib/toast';
-import type { Pointage } from '@/features/presences/types';
+import type { Pointage, PointageSens } from '@/features/presences/types';
 
 const ME = 'me';
 
@@ -68,7 +68,7 @@ export function useMyPointages() {
 
 export function useMePointer() {
   const qc = useQueryClient();
-  return useMutation<Pointage | { offline: true }, Error, 'ENTREE' | 'SORTIE'>({
+  return useMutation<Pointage | { offline: true }, Error, PointageSens>({
     // Offline-aware : si pas de réseau, on met en file (rejouée à la reconnexion).
     mutationFn: async (sens) => {
       try {
