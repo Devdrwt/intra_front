@@ -31,19 +31,26 @@ médical, démarche administrative, événement familial). Le modèle actuel ne 
 ```prisma
 model DemandeConge {           // ⚠️ additif — ne pas recréer le modèle
   // … champs existants …
-  // Permission/repos en demi-journée ou en heures : optionnels, ignorés pour les congés.
-  heureDebut   String?   @map("heure_debut")  // "HH:mm", si absence intra-journée
+  // Permission en heures : optionnels, ignorés pour les congés.
+  heureDebut   String?   @map("heure_debut")  // "HH:mm", si permission intra-journée
   heureFin     String?   @map("heure_fin")    // "HH:mm"
-  // Calcul de durée : jours pour CONGE ; heures pour PERMISSION si heureDebut/Fin fournis.
+  // REPOS hebdomadaire : jour(s) de la semaine (au lieu d'une plage de dates).
+  // Valeurs : "LUN","MAR","MER","JEU","VEN","SAM","DIM".
+  joursRepos   String[]  @default([]) @map("jours_repos")
 }
 ```
 
-Règles :
+Règles (par catégorie) :
 - **PERMISSION** : `dateDebut == dateFin` autorisé + `heureDebut/heureFin` → durée en heures.
-  Si `heureDebut/Fin` absents, c'est une permission « journée ».
-- **CONGE** : comportement actuel inchangé (jours calendaires, `heure*` ignorés).
-- **REPOS** : comme permission (journée ou heures).
-- Validation : `heureFin > heureDebut` si fournis ; sinon 422.
+  Si `heureDebut/Fin` absents, c'est une permission « journée ». Validation `heureFin > heureDebut`.
+- **CONGE** : comportement actuel inchangé (jours calendaires `dateDebut/dateFin`).
+- **REPOS** : ⚠️ **changement** — c'est un **repos hebdomadaire** exprimé en **jours de la semaine**
+  (`joursRepos`), **pas** une plage de dates. Le front **n'envoie plus** `dateDebut/dateFin` pour un
+  REPOS (chaînes vides) et envoie `joursRepos` (≥ 1 jour). **Le backend doit donc** : (a) ajouter le
+  champ `joursRepos`, (b) **relâcher l'obligation de `dateDebut/dateFin` quand `categorie=REPOS`**
+  (sinon 422), (c) exiger au moins un jour pour REPOS. Plus de `heure*` pour REPOS.
+
+> **Type métier** : `type` n'a de sens que pour `CONGE`. Pour `PERMISSION`/`REPOS`, optionnel/ignoré.
 
 > **Type métier par catégorie** : `type` (`TypeConge = ANNUEL|MALADIE|SANS_SOLDE|EXCEPTIONNEL`)
 > n'a de sens que pour `CONGE`. Pour `PERMISSION`/`REPOS`, `type` est optionnel/ignoré

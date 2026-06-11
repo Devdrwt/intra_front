@@ -1,17 +1,20 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { Button, Callout, Card, Input, Select, Spinner } from '@drwindesk/ui';
+import { Button, Callout, Card, Input, Select, Spinner, cn } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
 import { useEmployes } from '@/features/rh/hooks';
 import { fullName } from '@/features/rh/helpers';
 import { useCreateConge } from './hooks';
 import {
   CATEGORIE_LABEL,
+  JOURS_ORDER,
+  JOUR_COURT,
   TYPE_CONGE_OPTIONS,
   nbJours,
   type CategorieDemande,
   type DemandeCongeInput,
+  type JourSemaine,
   type TypeConge,
 } from './types';
 
@@ -33,6 +36,7 @@ export function CongeFormPage() {
     type: 'ANNUEL',
     dateDebut: '',
     dateFin: '',
+    joursRepos: [],
     motif: '',
   });
   const [errors, setErrors] = useState<Errors>({});
@@ -43,14 +47,25 @@ export function CongeFormPage() {
     setErrors((prev) => (prev[k] ? { ...prev, [k]: undefined } : prev));
   };
 
+  const toggleJour = (j: JourSemaine) =>
+    setForm((f) => {
+      const cur = f.joursRepos ?? [];
+      return { ...f, joursRepos: cur.includes(j) ? cur.filter((x) => x !== j) : [...cur, j] };
+    });
+
+  const isRepos = form.categorie === 'REPOS';
   const jours = nbJours(form.dateDebut, form.dateFin);
 
   const validate = (f: DemandeCongeInput): Errors => {
     const e: Errors = {};
     if (!f.employeId) e.employeId = 'Sélectionnez un collaborateur.';
-    if (!f.dateDebut) e.dateDebut = 'Date de début requise.';
-    if (!f.dateFin) e.dateFin = 'Date de fin requise.';
-    else if (f.dateDebut && f.dateFin < f.dateDebut) e.dateFin = 'La fin doit suivre le début.';
+    if (f.categorie === 'REPOS') {
+      if (!f.joursRepos?.length) e.joursRepos = 'Sélectionnez au moins un jour de repos.';
+    } else {
+      if (!f.dateDebut) e.dateDebut = 'Date de début requise.';
+      if (!f.dateFin) e.dateFin = 'Date de fin requise.';
+      else if (f.dateDebut && f.dateFin < f.dateDebut) e.dateFin = 'La fin doit suivre le début.';
+    }
     return e;
   };
 
@@ -64,7 +79,13 @@ export function CongeFormPage() {
     }
     setError(null);
     try {
-      await create.mutateAsync({ ...form, motif: form.motif || undefined });
+      await create.mutateAsync({
+        ...form,
+        dateDebut: isRepos ? '' : form.dateDebut,
+        dateFin: isRepos ? '' : form.dateFin,
+        joursRepos: isRepos ? form.joursRepos : undefined,
+        motif: form.motif || undefined,
+      });
       navigate('/presences');
     } catch (err) {
       setError(apiErrorMessage(err, 'Enregistrement impossible.'));
@@ -113,26 +134,56 @@ export function CongeFormPage() {
               onChange={(e) => set('type', e.target.value as TypeConge)}
             />
           )}
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Input
-              type="date"
-              label="Du *"
-              value={form.dateDebut}
-              onChange={(e) => set('dateDebut', e.target.value)}
-              error={errors.dateDebut}
-            />
-            <Input
-              type="date"
-              label="Au *"
-              value={form.dateFin}
-              onChange={(e) => set('dateFin', e.target.value)}
-              error={errors.dateFin}
-            />
-          </div>
-          {jours > 0 && (
-            <p className="text-sm text-ink-muted">
-              Durée : <span className="font-medium text-ink">{jours} jour(s)</span>
-            </p>
+          {isRepos ? (
+            <div>
+              <span className="text-sm font-medium text-ink">Jour(s) de repos *</span>
+              <p className="text-xs text-ink-subtle">Repos hebdomadaire — choisissez le ou les jours de la semaine.</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {JOURS_ORDER.map((j) => {
+                  const on = (form.joursRepos ?? []).includes(j);
+                  return (
+                    <button
+                      type="button"
+                      key={j}
+                      onClick={() => toggleJour(j)}
+                      className={cn(
+                        'rounded-xl border px-3 py-1.5 text-sm transition-colors',
+                        on
+                          ? 'border-brand-500 bg-brand-soft text-brand-soft-fg'
+                          : 'border-surface-border text-ink-muted hover:bg-surface-muted',
+                      )}
+                    >
+                      {JOUR_COURT[j]}
+                    </button>
+                  );
+                })}
+              </div>
+              {errors.joursRepos && <p className="mt-1 text-xs text-danger">{errors.joursRepos}</p>}
+            </div>
+          ) : (
+            <>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Input
+                  type="date"
+                  label="Du *"
+                  value={form.dateDebut}
+                  onChange={(e) => set('dateDebut', e.target.value)}
+                  error={errors.dateDebut}
+                />
+                <Input
+                  type="date"
+                  label="Au *"
+                  value={form.dateFin}
+                  onChange={(e) => set('dateFin', e.target.value)}
+                  error={errors.dateFin}
+                />
+              </div>
+              {jours > 0 && (
+                <p className="text-sm text-ink-muted">
+                  Durée : <span className="font-medium text-ink">{jours} jour(s)</span>
+                </p>
+              )}
+            </>
           )}
           <Input
             label="Motif"

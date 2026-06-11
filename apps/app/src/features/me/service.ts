@@ -4,6 +4,7 @@ import type { Employe } from '@/features/rh/types';
 import type {
   CategorieDemande,
   DemandeConge,
+  JourSemaine,
   Pointage,
   PointageSens,
   TypeConge,
@@ -26,11 +27,14 @@ import type { Project } from '@/features/projects/types';
 export interface MeCongeInput {
   categorie: CategorieDemande;
   type?: TypeConge;
+  /** Vides pour un REPOS hebdomadaire (on envoie joursRepos à la place). */
   dateDebut: string;
   dateFin: string;
-  /** Permission / repos intra-journée (optionnel). */
+  /** Permission intra-journée (optionnel). */
   heureDebut?: string;
   heureFin?: string;
+  /** Repos hebdomadaire : jour(s) de la semaine. */
+  joursRepos?: JourSemaine[];
   motif?: string;
 }
 

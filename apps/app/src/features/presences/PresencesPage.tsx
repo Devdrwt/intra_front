@@ -31,6 +31,7 @@ import {
   CATEGORIE_LABEL,
   STATUT_CONGE_LABEL,
   TYPE_CONGE_LABEL,
+  joursReposLabel,
   nbJours,
   type CategorieDemande,
   type StatutConge,
@@ -448,10 +449,12 @@ function CongesPanel() {
                       </div>
                     </td>
                     <td className="px-5 py-3 text-ink-muted">
-                      {fmt(c.dateDebut)} → {fmt(c.dateFin)}
+                      {categorie === 'REPOS' && c.joursRepos?.length
+                        ? joursReposLabel(c.joursRepos)
+                        : `${fmt(c.dateDebut)} → ${fmt(c.dateFin)}`}
                     </td>
                     <td className="hidden px-5 py-3 tabular-nums text-ink-muted sm:table-cell">
-                      {nbJours(c.dateDebut, c.dateFin)}
+                      {categorie === 'REPOS' ? '—' : nbJours(c.dateDebut, c.dateFin)}
                     </td>
                     <td className="px-5 py-3">
                       <Badge tone={STATUT_TONE[c.statut]} dot>

@@ -18,16 +18,33 @@ export type CategorieDemande = 'PERMISSION' | 'REPOS' | 'CONGE';
 export type TypeConge = 'ANNUEL' | 'MALADIE' | 'SANS_SOLDE' | 'EXCEPTIONNEL';
 export type StatutConge = 'EN_ATTENTE' | 'APPROUVE' | 'REFUSE';
 
+/** Jours de la semaine — pour le repos hebdomadaire (catégorie REPOS). */
+export type JourSemaine = 'LUN' | 'MAR' | 'MER' | 'JEU' | 'VEN' | 'SAM' | 'DIM';
+export const JOURS_ORDER: JourSemaine[] = ['LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM', 'DIM'];
+export const JOUR_LABEL: Record<JourSemaine, string> = {
+  LUN: 'Lundi', MAR: 'Mardi', MER: 'Mercredi', JEU: 'Jeudi', VEN: 'Vendredi', SAM: 'Samedi', DIM: 'Dimanche',
+};
+export const JOUR_COURT: Record<JourSemaine, string> = {
+  LUN: 'Lun', MAR: 'Mar', MER: 'Mer', JEU: 'Jeu', VEN: 'Ven', SAM: 'Sam', DIM: 'Dim',
+};
+/** Libellé des jours de repos : « Samedi » / « Samedi, Dimanche ». */
+export function joursReposLabel(jours?: JourSemaine[] | null): string {
+  if (!jours || jours.length === 0) return '—';
+  return JOURS_ORDER.filter((j) => jours.includes(j)).map((j) => JOUR_LABEL[j]).join(', ');
+}
+
 export interface DemandeConge {
   id: string;
   employeId: string;
   categorie: CategorieDemande;
   type: TypeConge;
-  dateDebut: string; // ISO
-  dateFin: string; // ISO
-  /** Permission / repos intra-journée : heures "HH:mm" (optionnel). */
+  dateDebut: string; // ISO — vide pour un REPOS hebdomadaire
+  dateFin: string; // ISO — vide pour un REPOS hebdomadaire
+  /** Permission intra-journée : heures "HH:mm" (optionnel). */
   heureDebut?: string;
   heureFin?: string;
+  /** Repos hebdomadaire : jour(s) de la semaine (au lieu d'une plage de dates). */
+  joursRepos?: JourSemaine[];
   motif?: string;
   statut: StatutConge;
   demandeLe: string; // ISO
@@ -42,6 +59,7 @@ export type DemandeCongeInput = Pick<
   | 'dateFin'
   | 'heureDebut'
   | 'heureFin'
+  | 'joursRepos'
   | 'motif'
 >;
 

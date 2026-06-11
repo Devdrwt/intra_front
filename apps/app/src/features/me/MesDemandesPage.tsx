@@ -4,12 +4,16 @@ import { Badge, Button, Callout, Card, CardTitle, EmptyState, Input, Select, Ske
 import { apiErrorMessage } from '@/lib/api';
 import {
   CATEGORIE_LABEL,
+  JOURS_ORDER,
+  JOUR_COURT,
   STATUT_CONGE_LABEL,
   TYPE_CONGE_LABEL,
   TYPE_CONGE_OPTIONS,
   dureeLabel,
+  joursReposLabel,
   nbJours,
   type CategorieDemande,
+  type JourSemaine,
   type StatutConge,
   type TypeConge,
 } from '@/features/presences/types';
@@ -36,9 +40,10 @@ interface FormState {
   dateFin: string;
   heureDebut: string;
   heureFin: string;
+  joursRepos: JourSemaine[];
   motif: string;
 }
-const EMPTY: FormState = { type: 'ANNUEL', dateDebut: '', dateFin: '', heureDebut: '', heureFin: '', motif: '' };
+const EMPTY: FormState = { type: 'ANNUEL', dateDebut: '', dateFin: '', heureDebut: '', heureFin: '', joursRepos: [], motif: '' };
 
 export function MesDemandesPage() {
   const { data: conges, isLoading, error } = useMyConges();
@@ -70,24 +75,37 @@ export function MesDemandesPage() {
   const jours = nbJours(form.dateDebut, form.dateFin);
   const meta = TABS.find((t) => t.key === tab)!;
 
+  const toggleJour = (j: JourSemaine) =>
+    setForm((f) => ({
+      ...f,
+      joursRepos: f.joursRepos.includes(j) ? f.joursRepos.filter((x) => x !== j) : [...f.joursRepos, j],
+    }));
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const errs: typeof errors = {};
-    if (!form.dateDebut) errs.dateDebut = 'Date de début requise.';
-    if (!form.dateFin) errs.dateFin = 'Date de fin requise.';
-    else if (form.dateDebut && form.dateFin < form.dateDebut) errs.dateFin = 'La fin doit suivre le début.';
-    setErrors(errs);
-    if (Object.values(errs).some(Boolean)) return setFormError('Veuillez corriger les champs signalés.');
+    setErrors({});
+    if (tab === 'REPOS') {
+      // Repos hebdomadaire : on choisit des jours, pas une plage de dates.
+      if (form.joursRepos.length === 0) return setFormError('Sélectionnez au moins un jour de repos.');
+    } else {
+      const errs: typeof errors = {};
+      if (!form.dateDebut) errs.dateDebut = 'Date de début requise.';
+      if (!form.dateFin) errs.dateFin = 'Date de fin requise.';
+      else if (form.dateDebut && form.dateFin < form.dateDebut) errs.dateFin = 'La fin doit suivre le début.';
+      setErrors(errs);
+      if (Object.values(errs).some(Boolean)) return setFormError('Veuillez corriger les champs signalés.');
+    }
     setFormError(null);
     try {
-      const intraJournee = tab !== 'CONGE' && !!form.heureDebut && !!form.heureFin;
+      const intraJournee = tab === 'PERMISSION' && !!form.heureDebut && !!form.heureFin;
       await create.mutateAsync({
         categorie: tab,
         type: tab === 'CONGE' ? form.type : undefined,
-        dateDebut: form.dateDebut,
-        dateFin: form.dateFin,
+        dateDebut: tab === 'REPOS' ? '' : form.dateDebut,
+        dateFin: tab === 'REPOS' ? '' : form.dateFin,
         heureDebut: intraJournee ? form.heureDebut : undefined,
         heureFin: intraJournee ? form.heureFin : undefined,
+        joursRepos: tab === 'REPOS' ? form.joursRepos : undefined,
         motif: form.motif || undefined,
       });
       setForm(EMPTY);
@@ -151,50 +169,79 @@ export function MesDemandesPage() {
                 onChange={(e) => setForm((f) => ({ ...f, type: e.target.value as TypeConge }))}
               />
             )}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Input
-                type="date"
-                label="Du *"
-                value={form.dateDebut}
-                onChange={(e) => setForm((f) => ({ ...f, dateDebut: e.target.value }))}
-                error={errors.dateDebut}
-              />
-              <Input
-                type="date"
-                label="Au *"
-                value={form.dateFin}
-                onChange={(e) => setForm((f) => ({ ...f, dateFin: e.target.value }))}
-                error={errors.dateFin}
-              />
-            </div>
-            {tab !== 'CONGE' && (
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Input
-                  type="time"
-                  label="De (heure, optionnel)"
-                  value={form.heureDebut}
-                  onChange={(e) => setForm((f) => ({ ...f, heureDebut: e.target.value }))}
-                />
-                <Input
-                  type="time"
-                  label="À (heure, optionnel)"
-                  value={form.heureFin}
-                  onChange={(e) => setForm((f) => ({ ...f, heureFin: e.target.value }))}
-                />
-              </div>
-            )}
-            {jours > 0 && (
-              <p className="text-sm text-ink-muted">
-                Durée :{' '}
-                <span className="font-medium text-ink">
-                  {dureeLabel({
-                    dateDebut: form.dateDebut,
-                    dateFin: form.dateFin,
-                    heureDebut: tab !== 'CONGE' ? form.heureDebut : undefined,
-                    heureFin: tab !== 'CONGE' ? form.heureFin : undefined,
+            {tab === 'REPOS' ? (
+              <div>
+                <span className="text-sm font-medium text-ink">Jour(s) de repos *</span>
+                <p className="text-xs text-ink-subtle">Repos hebdomadaire — choisissez le ou les jours de la semaine.</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {JOURS_ORDER.map((j) => {
+                    const on = form.joursRepos.includes(j);
+                    return (
+                      <button
+                        type="button"
+                        key={j}
+                        onClick={() => toggleJour(j)}
+                        className={cn(
+                          'rounded-xl border px-3 py-1.5 text-sm transition-colors',
+                          on
+                            ? 'border-brand-500 bg-brand-soft text-brand-soft-fg'
+                            : 'border-surface-border text-ink-muted hover:bg-surface-muted',
+                        )}
+                      >
+                        {JOUR_COURT[j]}
+                      </button>
+                    );
                   })}
-                </span>
-              </p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Input
+                    type="date"
+                    label="Du *"
+                    value={form.dateDebut}
+                    onChange={(e) => setForm((f) => ({ ...f, dateDebut: e.target.value }))}
+                    error={errors.dateDebut}
+                  />
+                  <Input
+                    type="date"
+                    label="Au *"
+                    value={form.dateFin}
+                    onChange={(e) => setForm((f) => ({ ...f, dateFin: e.target.value }))}
+                    error={errors.dateFin}
+                  />
+                </div>
+                {tab === 'PERMISSION' && (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Input
+                      type="time"
+                      label="De (heure, optionnel)"
+                      value={form.heureDebut}
+                      onChange={(e) => setForm((f) => ({ ...f, heureDebut: e.target.value }))}
+                    />
+                    <Input
+                      type="time"
+                      label="À (heure, optionnel)"
+                      value={form.heureFin}
+                      onChange={(e) => setForm((f) => ({ ...f, heureFin: e.target.value }))}
+                    />
+                  </div>
+                )}
+                {jours > 0 && (
+                  <p className="text-sm text-ink-muted">
+                    Durée :{' '}
+                    <span className="font-medium text-ink">
+                      {dureeLabel({
+                        dateDebut: form.dateDebut,
+                        dateFin: form.dateFin,
+                        heureDebut: tab === 'PERMISSION' ? form.heureDebut : undefined,
+                        heureFin: tab === 'PERMISSION' ? form.heureFin : undefined,
+                      })}
+                    </span>
+                  </p>
+                )}
+              </>
             )}
             <Input
               label="Motif"
@@ -241,7 +288,9 @@ export function MesDemandesPage() {
                     {tab === 'CONGE' ? TYPE_CONGE_LABEL[c.type] : CATEGORIE_LABEL[c.categorie ?? 'CONGE']}
                   </p>
                   <p className="text-xs text-ink-subtle">
-                    Du {fmt(c.dateDebut)} au {fmt(c.dateFin)} · {dureeLabel(c)}
+                    {(c.categorie ?? 'CONGE') === 'REPOS' && c.joursRepos?.length
+                      ? `Repos : ${joursReposLabel(c.joursRepos)}`
+                      : `Du ${fmt(c.dateDebut)} au ${fmt(c.dateFin)} · ${dureeLabel(c)}`}
                     {c.motif ? ` · ${c.motif}` : ''}
                   </p>
                 </div>
