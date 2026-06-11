@@ -1,22 +1,27 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CalendarOff, Check, Clock, LogIn, LogOut, Plus, Trash2, X } from 'lucide-react';
+import { CalendarOff, Check, Clock, LogIn, LogOut, Plane, Plus, Trash2, X } from 'lucide-react';
 import {
   Avatar,
   Badge,
   Button,
   Card,
   EmptyState,
+  Input,
+  Select,
   SkeletonRows,
   cn,
 } from '@drwindesk/ui';
-import { useEmployeLookup } from '@/features/rh/hooks';
+import { useEmployeLookup, useEmployes } from '@/features/rh/hooks';
 import { fullName } from '@/features/rh/helpers';
 import {
   useCancelConge,
   useConges,
+  useCreateMission,
+  useMissions,
   usePointagesDuJour,
   usePointer,
+  useRemoveMission,
   useSetStatutConge,
 } from './hooks';
 import {
@@ -28,7 +33,7 @@ import {
   type StatutConge,
 } from './types';
 
-type Tab = 'pointage' | 'conges';
+type Tab = 'pointage' | 'conges' | 'missions';
 
 const STATUT_TONE: Record<StatutConge, 'success' | 'warning' | 'danger'> = {
   APPROUVE: 'success',
@@ -80,6 +85,7 @@ export function PresencesPage() {
           [
             ['pointage', 'Pointage du jour'],
             ['conges', 'Demandes'],
+            ['missions', 'Missions'],
           ] as [Tab, string][]
         ).map(([key, label]) => (
           <button
@@ -95,7 +101,100 @@ export function PresencesPage() {
         ))}
       </div>
 
-      {tab === 'pointage' ? <PointagePanel /> : <CongesPanel />}
+      {tab === 'pointage' ? <PointagePanel /> : tab === 'conges' ? <CongesPanel /> : <MissionsPanel />}
+    </div>
+  );
+}
+
+function MissionsPanel() {
+  const { byId } = useEmployeLookup();
+  const { data: employes } = useEmployes({});
+  const { data: missions, isLoading } = useMissions();
+  const createMission = useCreateMission();
+  const removeMission = useRemoveMission();
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ employeId: '', objet: '', lieu: '', dateDebut: '', dateFin: '' });
+
+  const submit = async () => {
+    if (!form.employeId || !form.objet || !form.dateDebut || !form.dateFin) return;
+    await createMission.mutateAsync({
+      employeId: form.employeId,
+      objet: form.objet,
+      lieu: form.lieu || undefined,
+      dateDebut: form.dateDebut,
+      dateFin: form.dateFin,
+    });
+    setForm({ employeId: '', objet: '', lieu: '', dateDebut: '', dateFin: '' });
+    setOpen(false);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm text-ink-muted">
+          Pendant une mission : présence présumée, pas d’alerte d’oubli, géofencing désactivé.
+        </p>
+        <Button onClick={() => setOpen((v) => !v)}>
+          <Plus size={18} /> Nouvelle mission
+        </Button>
+      </div>
+
+      {open && (
+        <Card className="space-y-3">
+          <Select
+            label="Collaborateur *"
+            placeholder="Sélectionner…"
+            options={(employes ?? []).map((e) => ({ value: e.id, label: fullName(e) }))}
+            value={form.employeId}
+            onChange={(e) => setForm((f) => ({ ...f, employeId: e.target.value }))}
+          />
+          <Input label="Objet *" value={form.objet} onChange={(e) => setForm((f) => ({ ...f, objet: e.target.value }))} />
+          <Input label="Lieu" value={form.lieu} onChange={(e) => setForm((f) => ({ ...f, lieu: e.target.value }))} />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Input type="date" label="Du *" value={form.dateDebut} onChange={(e) => setForm((f) => ({ ...f, dateDebut: e.target.value }))} />
+            <Input type="date" label="Au *" value={form.dateFin} onChange={(e) => setForm((f) => ({ ...f, dateFin: e.target.value }))} />
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="secondary" onClick={() => setOpen(false)}>Annuler</Button>
+            <Button onClick={() => void submit()} loading={createMission.isPending}>Enregistrer</Button>
+          </div>
+        </Card>
+      )}
+
+      <Card className="overflow-hidden p-0">
+        {isLoading ? (
+          <SkeletonRows rows={3} cols={4} />
+        ) : !missions || missions.length === 0 ? (
+          <EmptyState icon={<Plane size={20} />} title="Aucune mission" description="Les périodes de mission apparaîtront ici." />
+        ) : (
+          <ul className="divide-y divide-surface-border">
+            {missions.map((m) => {
+              const emp = byId.get(m.employeId);
+              return (
+                <li key={m.id} className="flex items-center justify-between gap-4 px-5 py-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-ink">
+                      {emp ? fullName(emp) : m.employeId} — {m.objet}
+                    </p>
+                    <p className="truncate text-xs text-ink-subtle">
+                      {fmt(m.dateDebut)} → {fmt(m.dateFin)}
+                      {m.lieu ? ` · ${m.lieu}` : ''}
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={removeMission.isPending}
+                    onClick={() => removeMission.mutate(m.id)}
+                  >
+                    <Trash2 size={15} />
+                  </Button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </Card>
     </div>
   );
 }

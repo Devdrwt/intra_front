@@ -69,12 +69,16 @@ export function MonPointagePage() {
 
       {/* Aujourd'hui */}
       <Card>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <CardTitle>Aujourd’hui</CardTitle>
-          <Badge tone={status.tone} dot>
-            {status.label}
-            {todayDur != null && status.tone === 'success' ? ` · ${fmtDur(todayDur)}` : ''}
-          </Badge>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {p?.enMission && <Badge tone="brand">En mission</Badge>}
+            {p?.horsZone && <Badge tone="warning">Hors zone</Badge>}
+            <Badge tone={status.tone} dot>
+              {status.label}
+              {todayDur != null && status.tone === 'success' ? ` · ${fmtDur(todayDur)}` : ''}
+            </Badge>
+          </div>
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-5">

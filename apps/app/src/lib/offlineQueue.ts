@@ -6,8 +6,11 @@ import axios from 'axios';
  */
 const KEY = 'drwindesk.offline.pointages';
 type Sens = 'ENTREE' | 'PAUSE' | 'REPRISE' | 'SORTIE';
+export type Coords = { lat: number; lng: number };
+type SendFn = (sens: Sens, coords?: Coords) => Promise<unknown>;
 interface QueuedPointage {
   sens: Sens;
+  coords?: Coords;
   ts: number;
 }
 
@@ -32,9 +35,9 @@ export function isNetworkError(err: unknown): boolean {
   return axios.isAxiosError(err) && !err.response;
 }
 
-export function enqueuePointage(sens: Sens): void {
+export function enqueuePointage(sens: Sens, coords?: Coords): void {
   const q = read();
-  q.push({ sens, ts: Date.now() });
+  q.push({ sens, coords, ts: Date.now() });
   write(q);
 }
 
@@ -44,7 +47,7 @@ export function pendingPointagesCount(): number {
 
 let flushing = false;
 /** Rejoue la file via `send`. S'arrête à la 1ʳᵉ erreur réseau (toujours hors-ligne). */
-export async function flushPointages(send: (sens: Sens) => Promise<unknown>): Promise<void> {
+export async function flushPointages(send: SendFn): Promise<void> {
   if (flushing) return;
   flushing = true;
   try {
@@ -52,7 +55,7 @@ export async function flushPointages(send: (sens: Sens) => Promise<unknown>): Pr
     while (q.length) {
       const item = q[0]!;
       try {
-        await send(item.sens);
+        await send(item.sens, item.coords);
         q = read();
         q.shift();
         write(q);
@@ -71,7 +74,7 @@ export async function flushPointages(send: (sens: Sens) => Promise<unknown>): Pr
 
 let listenerRegistered = false;
 /** À appeler une fois : flush immédiat + flush automatique à chaque retour en ligne. */
-export function startPointageAutoSync(send: (sens: Sens) => Promise<unknown>): void {
+export function startPointageAutoSync(send: SendFn): void {
   void flushPointages(send);
   if (listenerRegistered || typeof window === 'undefined') return;
   listenerRegistered = true;

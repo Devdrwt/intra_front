@@ -18,6 +18,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { ReferentielsSection } from '@/features/settings/ReferentielsSection';
 import { OrgLogoCard } from '@/features/settings/OrgLogoCard';
 import { WorkHoursCard } from '@/features/settings/WorkHoursCard';
+import { PointageControlCard } from '@/features/settings/PointageControlCard';
 import { MailAccountSection } from '@/features/webmail/MailAccountSection';
 import { MobileAppCard } from '@/features/settings/MobileAppCard';
 import { avatarUrl } from '@/lib/avatar';
@@ -87,6 +88,7 @@ export function SettingsPage() {
           </div>
           <OrgLogoCard />
           <WorkHoursCard />
+          <PointageControlCard />
           <Callout tone="info">
             Définissez les départements et services de votre organisation. Ils alimentent les
             formulaires RH, les présences et la consolidation des rapports.

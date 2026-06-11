@@ -1,9 +1,32 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { presencesService } from './service';
-import type { DemandeCongeInput, PointageSens, StatutConge } from './types';
+import type { DemandeCongeInput, MissionInput, PointageSens, StatutConge } from './types';
 
 const POINTAGES = 'pointages';
 const CONGES = 'conges';
+const MISSIONS = 'missions';
+
+export function useMissions() {
+  return useQuery({ queryKey: [MISSIONS], queryFn: presencesService.listMissions });
+}
+
+export function useCreateMission() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: MissionInput) => presencesService.createMission(input),
+    meta: { successMessage: 'Mission enregistrée' },
+    onSuccess: () => qc.invalidateQueries({ queryKey: [MISSIONS] }),
+  });
+}
+
+export function useRemoveMission() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => presencesService.removeMission(id),
+    meta: { successMessage: 'Mission supprimée' },
+    onSuccess: () => qc.invalidateQueries({ queryKey: [MISSIONS] }),
+  });
+}
 
 export function usePointagesDuJour() {
   return useQuery({ queryKey: [POINTAGES, 'jour'], queryFn: presencesService.pointagesDuJour });

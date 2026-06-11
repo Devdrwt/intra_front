@@ -9,6 +9,14 @@ export interface WorkHours {
   fin: string;
 }
 
+export interface PointageControl {
+  officeLat: number | null;
+  officeLng: number | null;
+  radiusM: number;
+  geoRequired: boolean;
+  strictWindow: boolean;
+}
+
 export interface OrgSettings {
   name: string;
   timezone: string;
@@ -16,6 +24,7 @@ export interface OrgSettings {
   logoUrl?: string;
   hasLogo: boolean;
   horaires: WorkHours;
+  pointage: PointageControl;
   allowedEmailDomains: string[];
 }
 
@@ -29,6 +38,16 @@ const orgService = {
         heurePauseDebut: h.pauseDebut,
         heureReprise: h.reprise,
         heureFin: h.fin,
+      })
+      .then((r) => r.data),
+  updatePointage: (p: PointageControl) =>
+    api
+      .put<OrgSettings>('/settings', {
+        pointageOfficeLat: p.officeLat,
+        pointageOfficeLng: p.officeLng,
+        pointageRadiusM: p.radiusM,
+        pointageGeoRequired: p.geoRequired,
+        pointageStrictWindow: p.strictWindow,
       })
       .then((r) => r.data),
   uploadLogo: (file: File) => {
@@ -68,6 +87,15 @@ export function useUpdateHoraires() {
   return useMutation({
     mutationFn: (h: WorkHours) => orgService.updateHoraires(h),
     meta: { successMessage: 'Horaires mis à jour' },
+    onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
+  });
+}
+
+export function useUpdatePointage() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (p: PointageControl) => orgService.updatePointage(p),
+    meta: { successMessage: 'Contrôle du pointage mis à jour' },
     onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
   });
 }

@@ -7,6 +7,7 @@ import {
   type ProfileUpdate,
 } from './service';
 import { enqueuePointage, isNetworkError, startPointageAutoSync } from '@/lib/offlineQueue';
+import { getCoords } from '@/lib/geo';
 import { toast } from '@/lib/toast';
 import type { Pointage, PointageSens } from '@/features/presences/types';
 
@@ -71,11 +72,12 @@ export function useMePointer() {
   return useMutation<Pointage | { offline: true }, Error, PointageSens>({
     // Offline-aware : si pas de réseau, on met en file (rejouée à la reconnexion).
     mutationFn: async (sens) => {
+      const coords = await getCoords(); // best-effort (géofence / géoloc obligatoire)
       try {
-        return await meService.pointer(sens);
+        return await meService.pointer(sens, coords);
       } catch (err) {
         if (isNetworkError(err)) {
-          enqueuePointage(sens);
+          enqueuePointage(sens, coords);
           return { offline: true };
         }
         throw err;

@@ -92,7 +92,7 @@ let seq = 1;
 const mockApi = {
   myEmploye: () => delay({ ...mockEmploye }),
   myPointages: () => delay([...mPointages]),
-  pointer: (sens: PointageSens) => {
+  pointer: (sens: PointageSens, _coords?: { lat: number; lng: number }) => {
     let p = mPointages.find((x) => x.date === today());
     if (!p) {
       p = { id: `mp${++seq}`, employeId: MOCK_ID, date: today() };
@@ -159,8 +159,10 @@ const mockApi = {
 const httpApi = {
   myEmploye: () => api.get<Employe>('/me/employe').then((r) => r.data),
   myPointages: () => api.get<Pointage[]>('/me/pointages').then((r) => r.data),
-  pointer: (sens: PointageSens) =>
-    api.post<Pointage>('/me/pointages/pointer', { sens }).then((r) => r.data),
+  pointer: (sens: PointageSens, coords?: { lat: number; lng: number }) =>
+    api
+      .post<Pointage>('/me/pointages/pointer', { sens, lat: coords?.lat, lng: coords?.lng })
+      .then((r) => r.data),
   myConges: () => api.get<DemandeConge[]>('/me/conges').then((r) => r.data),
   createConge: (input: MeCongeInput) =>
     api.post<DemandeConge>('/me/conges', input).then((r) => r.data),

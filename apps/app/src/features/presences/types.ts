@@ -9,6 +9,8 @@ export interface Pointage {
   heurePauseDebut?: string; // HH:mm
   heurePauseFin?: string; // HH:mm
   heureSortie?: string; // HH:mm
+  horsZone?: boolean;
+  enMission?: boolean;
 }
 
 // --- Demandes (permissions / repos / congés) ---------------------------------
@@ -42,6 +44,24 @@ export type DemandeCongeInput = Pick<
   | 'heureFin'
   | 'motif'
 >;
+
+// --- Missions -----------------------------------------------------------------
+export interface Mission {
+  id: string;
+  employeId: string;
+  objet: string;
+  lieu: string | null;
+  dateDebut: string; // yyyy-mm-dd
+  dateFin: string;
+  createdAt: string;
+}
+export interface MissionInput {
+  employeId: string;
+  objet: string;
+  lieu?: string;
+  dateDebut: string;
+  dateFin: string;
+}
 
 export const CATEGORIE_LABEL: Record<CategorieDemande, string> = {
   PERMISSION: 'Permission',
