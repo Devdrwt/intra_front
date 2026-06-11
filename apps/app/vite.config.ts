@@ -39,6 +39,8 @@ export default defineConfig(({ mode }) => {
           navigateFallbackDenylist: [/^\/api/],
           globPatterns: ['**/*.{js,css,html,svg,woff2,png}'],
           cleanupOutdatedCaches: true,
+          // Handlers de notifications push (chargés dans le SW généré).
+          importScripts: ['/push-sw.js'],
         },
         devOptions: { enabled: false },
       }),

@@ -21,6 +21,7 @@ import { WorkHoursCard } from '@/features/settings/WorkHoursCard';
 import { PointageControlCard } from '@/features/settings/PointageControlCard';
 import { MailAccountSection } from '@/features/webmail/MailAccountSection';
 import { MobileAppCard } from '@/features/settings/MobileAppCard';
+import { NotificationsCard } from '@/features/settings/NotificationsCard';
 import { avatarUrl } from '@/lib/avatar';
 import { toast } from '@/lib/toast';
 import {
@@ -98,6 +99,8 @@ export function SettingsPage() {
       )}
 
       <MailAccountSection />
+
+      <NotificationsCard />
 
       <MobileAppCard />
 
