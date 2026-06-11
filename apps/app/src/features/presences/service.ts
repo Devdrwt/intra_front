@@ -8,6 +8,7 @@ import type {
   Pointage,
   PointageSens,
   StatutConge,
+  SuiviPointage,
 } from './types';
 
 /**
@@ -90,6 +91,8 @@ const mockApi = {
     conges = conges.filter((c) => c.id !== id);
     return delay(undefined);
   },
+  suivi: (_from?: string, _to?: string) =>
+    delay(pointages.map((p) => ({ ...p, employeNom: p.employeId })) as SuiviPointage[]),
   listMissions: () => delay([...missions]),
   createMission: (input: MissionInput) => {
     const m: Mission = { id: `mi${++pSeq}`, ...input, lieu: input.lieu ?? null, createdAt: today() };
@@ -114,6 +117,8 @@ const httpApi = {
   setStatutConge: (id: string, statut: StatutConge) =>
     api.patch<DemandeConge>(`/conges/${id}/statut`, { statut }).then((r) => r.data),
   cancelConge: (id: string) => api.delete(`/conges/${id}`).then(() => undefined),
+  suivi: (from?: string, to?: string) =>
+    api.get<SuiviPointage[]>('/pointages/suivi', { params: { from, to } }).then((r) => r.data),
   listMissions: () => api.get<Mission[]>('/missions').then((r) => r.data),
   createMission: (input: MissionInput) => api.post<Mission>('/missions', input).then((r) => r.data),
   removeMission: (id: string) => api.delete(`/missions/${id}`).then(() => undefined),

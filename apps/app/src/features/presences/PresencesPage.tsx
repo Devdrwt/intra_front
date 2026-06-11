@@ -14,6 +14,7 @@ import {
 } from '@drwindesk/ui';
 import { useEmployeLookup, useEmployes } from '@/features/rh/hooks';
 import { fullName } from '@/features/rh/helpers';
+import { useOrgSettings } from '@/features/settings/org';
 import {
   useCancelConge,
   useConges,
@@ -23,8 +24,10 @@ import {
   usePointer,
   useRemoveMission,
   useSetStatutConge,
+  useSuivi,
 } from './hooks';
 import {
+  type SuiviPointage,
   CATEGORIE_LABEL,
   STATUT_CONGE_LABEL,
   TYPE_CONGE_LABEL,
@@ -33,7 +36,7 @@ import {
   type StatutConge,
 } from './types';
 
-type Tab = 'pointage' | 'conges' | 'missions';
+type Tab = 'pointage' | 'conges' | 'missions' | 'suivi';
 
 const STATUT_TONE: Record<StatutConge, 'success' | 'warning' | 'danger'> = {
   APPROUVE: 'success',
@@ -86,6 +89,7 @@ export function PresencesPage() {
             ['pointage', 'Pointage du jour'],
             ['conges', 'Demandes'],
             ['missions', 'Missions'],
+            ['suivi', 'Suivi'],
           ] as [Tab, string][]
         ).map(([key, label]) => (
           <button
@@ -101,7 +105,98 @@ export function PresencesPage() {
         ))}
       </div>
 
-      {tab === 'pointage' ? <PointagePanel /> : tab === 'conges' ? <CongesPanel /> : <MissionsPanel />}
+      {tab === 'pointage' ? (
+        <PointagePanel />
+      ) : tab === 'conges' ? (
+        <CongesPanel />
+      ) : tab === 'missions' ? (
+        <MissionsPanel />
+      ) : (
+        <SuiviPanel />
+      )}
+    </div>
+  );
+}
+
+const toMin = (hhmm?: string): number | null => {
+  if (!hhmm) return null;
+  const [h, m] = hhmm.split(':');
+  return Number(h ?? 0) * 60 + Number(m ?? 0);
+};
+const monthAgo = () => {
+  const d = new Date();
+  d.setDate(d.getDate() - 30);
+  return d.toISOString().slice(0, 10);
+};
+
+function SuiviPanel() {
+  const { data: org } = useOrgSettings();
+  const [from, setFrom] = useState(monthAgo());
+  const [to, setTo] = useState(() => new Date().toISOString().slice(0, 10));
+  const [anomaliesOnly, setAnomaliesOnly] = useState(false);
+  const { data: rows, isLoading } = useSuivi(from, to);
+
+  const debutMin = toMin(org?.horaires.debut) ?? 510; // 08:30
+  const GRACE = 5;
+  const isRetard = (r: SuiviPointage) => {
+    if (r.enMission) return false;
+    const e = toMin(r.heureEntree);
+    return e != null && e > debutMin + GRACE;
+  };
+
+  const list = (rows ?? []).filter((r) => !anomaliesOnly || isRetard(r) || r.horsZone);
+
+  return (
+    <div className="space-y-4">
+      <Card className="flex flex-wrap items-end gap-3">
+        <Input type="date" label="Du" value={from} onChange={(e) => setFrom(e.target.value)} />
+        <Input type="date" label="Au" value={to} onChange={(e) => setTo(e.target.value)} />
+        <label className="flex items-center gap-2 pb-2 text-sm text-ink">
+          <input type="checkbox" checked={anomaliesOnly} onChange={(e) => setAnomaliesOnly(e.target.checked)} />
+          Anomalies seulement (retard / hors zone)
+        </label>
+      </Card>
+
+      <Card className="overflow-hidden p-0">
+        {isLoading ? (
+          <SkeletonRows rows={5} cols={5} />
+        ) : list.length === 0 ? (
+          <EmptyState icon={<Clock size={20} />} title="Aucun pointage" description="Aucun pointage sur cette période." />
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="border-b border-surface-border bg-surface-muted text-left text-xs uppercase tracking-wide text-ink-subtle">
+              <tr>
+                <th className="px-5 py-2.5 font-medium">Date</th>
+                <th className="px-5 py-2.5 font-medium">Collaborateur</th>
+                <th className="px-5 py-2.5 font-medium">Entrée</th>
+                <th className="hidden px-5 py-2.5 font-medium sm:table-cell">Sortie</th>
+                <th className="px-5 py-2.5 text-right font-medium">Signalements</th>
+              </tr>
+            </thead>
+            <tbody>
+              {list.map((r) => {
+                const retard = isRetard(r);
+                return (
+                  <tr key={r.id} className="border-b border-surface-border last:border-0">
+                    <td className="px-5 py-3 text-ink-muted">{fmt(r.date)}</td>
+                    <td className="px-5 py-3 font-medium text-ink">{r.employeNom || r.employeId}</td>
+                    <td className="px-5 py-3 tabular-nums text-ink-muted">{r.heureEntree ?? '—'}</td>
+                    <td className="hidden px-5 py-3 tabular-nums text-ink-muted sm:table-cell">{r.heureSortie ?? '—'}</td>
+                    <td className="px-5 py-3">
+                      <div className="flex flex-wrap justify-end gap-1.5">
+                        {r.enMission && <Badge tone="brand">Mission</Badge>}
+                        {retard && <Badge tone="warning" dot>En retard</Badge>}
+                        {r.horsZone && <Badge tone="danger" dot>Hors zone</Badge>}
+                        {!retard && !r.horsZone && !r.enMission && <span className="text-xs text-ink-subtle">—</span>}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </Card>
     </div>
   );
 }

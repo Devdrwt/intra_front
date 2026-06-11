@@ -45,6 +45,8 @@ export type DemandeCongeInput = Pick<
   | 'motif'
 >;
 
+export type SuiviPointage = Pointage & { employeNom: string };
+
 // --- Missions -----------------------------------------------------------------
 export interface Mission {
   id: string;

@@ -19,9 +19,19 @@ export const MODULE_GRANTS: { permission: string; label: string }[] = [
   { permission: 'presence:manage', label: 'Présences & Congés' },
   { permission: 'rapport:manage', label: 'Rapports' },
   { permission: 'project:read', label: 'Projets' },
+  { permission: 'support:read', label: 'Support / Helpdesk' },
   { permission: 'recrutement:read', label: 'Recrutement' },
-  { permission: 'user:read', label: 'Utilisateurs & accès' },
+  { permission: 'ged.archive:read', label: 'Archivage' },
+  { permission: 'commercial:read', label: "Appels d'offres" },
+  { permission: 'studio:read', label: 'Studio' },
+  { permission: 'rh.eval:read', label: 'Évaluation & Performance' },
+  { permission: 'rh.onboarding:read', label: 'Onboarding' },
+  { permission: 'rh.formation:read', label: 'Formation' },
+  { permission: 'finance:read', label: 'Finance (lecture)' },
+  { permission: 'finance:manage', label: 'Finance — paie & comptabilité' },
+  { permission: 'direction:read', label: 'Cockpit direction' },
   { permission: 'audit:read', label: 'Activité' },
+  { permission: 'user:read', label: 'Utilisateurs & accès' },
 ];
 
 /** Corps de POST /users (InviteUserDto). */

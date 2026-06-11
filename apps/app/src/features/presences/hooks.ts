@@ -6,6 +6,13 @@ const POINTAGES = 'pointages';
 const CONGES = 'conges';
 const MISSIONS = 'missions';
 
+export function useSuivi(from: string, to: string) {
+  return useQuery({
+    queryKey: ['pointages', 'suivi', from, to],
+    queryFn: () => presencesService.suivi(from, to),
+  });
+}
+
 export function useMissions() {
   return useQuery({ queryKey: [MISSIONS], queryFn: presencesService.listMissions });
 }
