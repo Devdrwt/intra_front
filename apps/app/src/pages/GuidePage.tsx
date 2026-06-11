@@ -60,8 +60,11 @@ const SECTIONS: Section[] = [
     tone: 'success',
     title: 'Présences & Congés',
     steps: [
-      'Onglet « Pointage » : enregistrez les entrées et sorties du jour.',
-      'Onglet « Congés » : créez une demande, puis approuvez ou refusez.',
+      'Onglet « Pointage » : entrée, pause, reprise et sortie du jour (la pause est facultative).',
+      'Onglet « Demandes » : permissions, repos et congés — déposez puis approuvez ou refusez.',
+      'Onglet « Missions » (RH) : déclarez une période de mission → présence présumée, sans pointage ni alerte.',
+      'Onglet « Suivi » : repérez les pointages « hors zone » et les retards sur une période.',
+      'Selon le réglage admin, le pointage peut exiger la géolocalisation et rester dans la plage horaire.',
     ],
   },
   {
@@ -102,7 +105,8 @@ const SECTIONS: Section[] = [
     title: 'Utilisateurs & accès',
     steps: [
       'Invitez un membre par email (il reçoit un lien pour définir son mot de passe).',
-      'Activez/désactivez un compte ou ajustez ses rôles.',
+      'Activez/désactivez un compte ou ajustez ses rôles — dont « Personnel de solution » (espace réduit).',
+      'Bouton « Accès aux modules » : ouvrez à la carte Finance, Studio, Appels d’offres, Archivage… pour une personne.',
     ],
   },
   {
@@ -111,8 +115,8 @@ const SECTIONS: Section[] = [
     tone: 'warning',
     title: 'Alertes',
     steps: [
-      'Retrouvez toutes vos notifications.',
-      'Marquez-les comme lues individuellement ou toutes à la fois.',
+      'Retrouvez toutes vos notifications ; marquez-les lues une à une ou toutes à la fois.',
+      'Dans Paramètres → Notifications : activez les notifications push (mobile/bureau, même app fermée) et le son à la réception.',
     ],
   },
 
@@ -123,9 +127,10 @@ const SECTIONS: Section[] = [
     tone: 'brand',
     title: 'Mon agenda',
     steps: [
-      'Vue mois + liste du jour ; créez vos rendez-vous et réunions.',
+      'Trois vues : Mois (titres dans les cases), Semaine (créneaux par jour) et Agenda (liste à venir).',
+      'Créez vos rendez-vous et réunions ; « Aujourd’hui » recadre la vue.',
       'Congés, formations, studio et échéances s’y affichent automatiquement (par couleur).',
-      'Bouton « S’abonner (iCal) » pour le voir dans Google Agenda / Outlook / votre téléphone.',
+      'Bouton « iCal » pour le voir dans Google Agenda / Outlook / votre téléphone.',
     ],
   },
   {

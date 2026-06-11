@@ -95,6 +95,54 @@ const FAQ: Category[] = [
         q: 'Que signifie le « taux » dans la consolidation des rapports ?',
         a: 'C’est le rapport entre les rapports soumis et le nombre attendu (collaborateurs actifs × jours de la période).',
       },
+      {
+        q: 'Comment donner accès à la Finance ou au Studio à une personne ?',
+        a: (
+          <>
+            Dans{' '}
+            <Link to="/utilisateurs" className="font-medium text-brand-600 hover:underline">Utilisateurs & accès</Link>,
+            bouton « Accès aux modules » sur la personne : activez à la carte Finance, Studio, Appels
+            d’offres, Archivage… en plus de son rôle.
+          </>
+        ),
+      },
+      {
+        q: 'C’est quoi le rôle « Personnel de solution » ?',
+        a: 'Un rôle à accès réduit : l’espace personnel de base (tableau de bord, mes tâches, messages, mes demandes, profil) sans les modules d’administration. On peut lui ouvrir des modules au cas par cas via « Accès aux modules ».',
+      },
+    ],
+  },
+  {
+    title: 'Présences & pointage',
+    items: [
+      {
+        q: 'Pourquoi je n’arrive pas à pointer ?',
+        a: 'Selon le réglage de votre organisation, le pointage peut exiger la géolocalisation (autorisez-la dans le navigateur) et n’être possible que pendant la plage horaire de travail. Hors de la zone du bureau, le pointage passe mais est signalé « hors zone ».',
+      },
+      {
+        q: 'Je suis en déplacement / mission, dois-je pointer ?',
+        a: (
+          <>
+            Non. Un RH déclare une période de mission dans{' '}
+            <Link to="/presences" className="font-medium text-brand-600 hover:underline">Présences → onglet « Missions »</Link>{' '}
+            : vous êtes présumé présent, sans pointage ni alerte d’oubli pendant cette période.
+          </>
+        ),
+      },
+      {
+        q: 'Où voir les retards et les pointages hors zone ?',
+        a: (
+          <>
+            Dans{' '}
+            <Link to="/presences" className="font-medium text-brand-600 hover:underline">Présences → onglet « Suivi »</Link>{' '}
+            : les pointages sur une période, avec les badges « En retard » et « Hors zone » (filtre « anomalies seulement »).
+          </>
+        ),
+      },
+      {
+        q: 'La pause est-elle obligatoire ?',
+        a: 'Non, la pause est facultative : utilisez « Pause » / « Reprise » seulement si vous le souhaitez.',
+      },
     ],
   },
   {
@@ -117,6 +165,10 @@ const FAQ: Category[] = [
       {
         q: 'Comment créer un rendez-vous ?',
         a: 'Dans Mon agenda, bouton « Événement » : titre, date, heures (ou journée entière), lieu.',
+      },
+      {
+        q: 'Y a-t-il une vue semaine ?',
+        a: 'Oui : en haut à droite de Mon agenda, basculez entre Mois, Semaine et Agenda (liste à venir). Les boutons « Aujourd’hui » / « Cette semaine » recadrent la vue.',
       },
     ],
   },
@@ -217,6 +269,28 @@ const FAQ: Category[] = [
       {
         q: 'Le pointage fonctionne-t-il sans réseau ?',
         a: 'Oui. Hors-ligne, votre pointage est enregistré localement puis synchronisé automatiquement dès le retour de la connexion.',
+      },
+      {
+        q: 'Comment recevoir les notifications sur mon téléphone ?',
+        a: (
+          <>
+            Dans{' '}
+            <Link to="/parametres" className="font-medium text-brand-600 hover:underline">Paramètres → Notifications</Link>,
+            « Activer les notifications ». Vous êtes alors prévenu des messages et alertes même
+            l’application fermée. Sur iPhone, installez d’abord l’app sur l’écran d’accueil.
+          </>
+        ),
+      },
+      {
+        q: 'Comment avoir un son à la réception d’un message ?',
+        a: (
+          <>
+            Dans{' '}
+            <Link to="/parametres" className="font-medium text-brand-600 hover:underline">Paramètres → Notifications</Link>,
+            activez « Son à la réception » : un « ding » est joué quand un message ou une alerte
+            arrive (application ouverte).
+          </>
+        ),
       },
     ],
   },
