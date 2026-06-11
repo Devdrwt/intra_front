@@ -18,6 +18,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { ReferentielsSection } from '@/features/settings/ReferentielsSection';
 import { OrgLogoCard } from '@/features/settings/OrgLogoCard';
 import { MailAccountSection } from '@/features/webmail/MailAccountSection';
+import { MobileAppCard } from '@/features/settings/MobileAppCard';
 import { avatarUrl } from '@/lib/avatar';
 import { toast } from '@/lib/toast';
 import {
@@ -93,6 +94,8 @@ export function SettingsPage() {
       )}
 
       <MailAccountSection />
+
+      <MobileAppCard />
 
       <PasswordCard />
 
