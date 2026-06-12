@@ -41,7 +41,12 @@ export async function enablePush(): Promise<void> {
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToKey(publicKey),
     }));
-  await api.post('/me/push/subscribe', sub.toJSON());
+  // N'envoyer que endpoint + keys (toJSON() ajoute aussi expirationTime, rejeté côté serveur).
+  const json = sub.toJSON();
+  await api.post('/me/push/subscribe', {
+    endpoint: json.endpoint,
+    keys: { p256dh: json.keys?.p256dh, auth: json.keys?.auth },
+  });
 }
 
 export async function disablePush(): Promise<void> {
