@@ -40,6 +40,7 @@ import {
   Award,
   Images,
   Newspaper,
+  Contact,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -65,6 +66,7 @@ export const MODULES: ModuleRoute[] = [
   // --- Mon espace (collaborateur) -------------------------------------------
   { path: '/', label: 'Tableau de bord', icon: LayoutDashboard, group: 'Mon espace' },
   { path: '/actualites', label: 'Actualités', icon: Newspaper, group: 'Mon espace' },
+  { path: '/annuaire', label: 'Annuaire', icon: Contact, group: 'Mon espace' },
   { path: '/mon-pointage', label: 'Mon pointage', icon: Clock, group: 'Mon espace' },
   { path: '/agenda', label: 'Mon agenda', icon: CalendarDays, group: 'Mon espace' },
   { path: '/mes-demandes', label: 'Mes demandes', icon: CalendarClock, group: 'Mon espace' },
