@@ -7,12 +7,15 @@ import {
   FileBarChart,
   MessagesSquare,
   Plus,
+  Settings2,
   Users,
   UserPlus,
   type LucideIcon,
 } from 'lucide-react';
-import { Badge, Button, Card, CardTitle, EmptyState, PageHeader, Skeleton, cn } from '@drwindesk/ui';
+import { useState, type ReactNode } from 'react';
+import { Badge, Button, Card, CardTitle, EmptyState, Modal, PageHeader, Skeleton, cn } from '@drwindesk/ui';
 import { displayName, hasPermission, useAuth } from '@/auth/AuthContext';
+import { getHiddenWidgets, setHiddenWidgets } from '@/lib/dashboardPrefs';
 import { Stagger, StaggerItem } from '@/components/motion';
 import { useEspaceMoi } from '@/features/espaces/hooks';
 import { severityDot, timeAgo } from '@/features/espaces/helpers';
@@ -171,6 +174,14 @@ export function DashboardPage() {
   const recent = espace?.notifications.recent ?? [];
   const firstName = profile?.firstName?.trim() || (user ? displayName(user).split(' ')[0] : '');
   const isManager = hasPermission(user, 'presence:manage');
+  const [hidden, setHidden] = useState<Set<string>>(getHiddenWidgets);
+  const [customizing, setCustomizing] = useState(false);
+  const toggleWidget = (id: string) => {
+    const next = new Set(hidden);
+    next.has(id) ? next.delete(id) : next.add(id);
+    setHidden(next);
+    setHiddenWidgets(next);
+  };
 
   const rapports = useMyRapports();
   const conges = useMyConges();
@@ -194,6 +205,78 @@ export function DashboardPage() {
     { to: '/utilisateurs', label: 'Inviter un membre', icon: UserPlus, perm: 'user:read' },
   ].filter((a) => !a.perm || hasPermission(user, a.perm));
 
+  const actionsNode = (
+    <Card>
+      <CardTitle>Actions rapides</CardTitle>
+      <div className="mt-4 space-y-2">
+        {actions.map((a, i) => (
+          <Link
+            key={a.to}
+            to={a.to}
+            className="flex items-center gap-3 rounded-xl border border-surface-border px-3 py-2.5 text-sm font-medium text-ink transition-colors hover:border-brand-300 hover:bg-brand-soft"
+          >
+            <span className={cn('flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br text-white shadow', ACTION_GRAD[i % ACTION_GRAD.length])}>
+              <a.icon size={16} />
+            </span>
+            {a.label}
+          </Link>
+        ))}
+      </div>
+    </Card>
+  );
+
+  const notifsNode = (
+    <Card>
+      <div className="flex items-center justify-between">
+        <CardTitle>Notifications</CardTitle>
+        <Link to="/alertes" className="text-sm font-medium text-brand-600 hover:underline">
+          Voir tout
+        </Link>
+      </div>
+      {isLoading ? (
+        <div className="mt-4 space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <Skeleton className="h-2 w-2 rounded-full" />
+              <Skeleton className="h-4 flex-1" />
+            </div>
+          ))}
+        </div>
+      ) : recent.length === 0 ? (
+        <EmptyState icon={<Bell size={20} />} title="Tout est à jour" className="py-8" />
+      ) : (
+        <ul className="mt-3 divide-y divide-surface-border">
+          {recent.slice(0, 5).map((n) => (
+            <li key={n.id} className="flex items-start gap-3 py-2.5">
+              <span className={cn('mt-1.5 h-2 w-2 shrink-0 rounded-full', severityDot(n.severity))} />
+              <div className="min-w-0 flex-1">
+                <div className={cn('truncate text-sm', n.read ? 'text-ink-muted' : 'font-medium text-ink')}>{n.title}</div>
+              </div>
+              <span className="shrink-0 text-xs text-ink-subtle">{timeAgo(n.createdAt)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
+  );
+
+  const widgets: { id: string; label: string; col: 'left' | 'right'; node: ReactNode; managerOnly?: boolean }[] = [
+    { id: 'alaune', label: 'À la une', col: 'left', node: <AlaUneCard /> },
+    { id: 'tempsforts', label: 'Temps forts', col: 'left', node: <TempsFortsCard /> },
+    { id: 'agenda', label: 'Agenda', col: 'left', node: <AgendaWidget /> },
+    { id: 'echeances', label: 'À ne pas oublier', col: 'left', node: <EcheancesCard /> },
+    { id: 'absents', label: 'Absents aujourd’hui', col: 'left', node: <AbsentsCard /> },
+    { id: 'weather', label: 'Météo', col: 'right', node: <WeatherCard /> },
+    { id: 'opsalerts', label: 'Alertes opérationnelles', col: 'right', node: <OpsAlertsCard />, managerOnly: true },
+    { id: 'presence', label: 'Présence du jour', col: 'right', node: <PresenceRepartitionCard />, managerOnly: true },
+    { id: 'solde', label: 'Solde de congés', col: 'right', node: <SoldeCongesCard /> },
+    { id: 'taches', label: 'Mes tâches', col: 'right', node: <MesTachesWidget /> },
+    { id: 'actions', label: 'Actions rapides', col: 'right', node: actionsNode },
+    { id: 'notifs', label: 'Notifications', col: 'right', node: notifsNode },
+  ];
+  const avail = widgets.filter((w) => !w.managerOnly || isManager);
+  const visible = avail.filter((w) => !hidden.has(w.id));
+
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-surface-border bg-gradient-to-r from-brand-soft via-surface to-warning-soft/60 p-5 shadow-soft">
@@ -204,7 +287,14 @@ export function DashboardPage() {
             </span>
           }
           subtitle={<span className="capitalize">{fullDate()}</span>}
-          actions={<PointageQuick />}
+          actions={
+            <>
+              <Button variant="ghost" size="sm" onClick={() => setCustomizing(true)} title="Personnaliser l’accueil">
+                <Settings2 size={16} />
+              </Button>
+              <PointageQuick />
+            </>
+          }
         />
       </div>
 
@@ -226,82 +316,41 @@ export function DashboardPage() {
 
       {isManager && <AdminKpis />}
 
-      {/* Contenu vivant (gauche) + perso (droite) */}
+      {/* Contenu vivant (gauche) + perso (droite) — widgets personnalisables */}
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
-          <AlaUneCard />
-          <TempsFortsCard />
-          <AgendaWidget />
-          <EcheancesCard />
-          <AbsentsCard />
+          {visible.filter((w) => w.col === 'left').map((w) => (
+            <div key={w.id}>{w.node}</div>
+          ))}
         </div>
-
         <div className="space-y-6">
-          <WeatherCard />
-          {isManager && <OpsAlertsCard />}
-          {isManager && <PresenceRepartitionCard />}
-          <SoldeCongesCard />
-          <MesTachesWidget />
-
-          <Card>
-            <CardTitle>Actions rapides</CardTitle>
-            <div className="mt-4 space-y-2">
-              {actions.map((a, i) => (
-                <Link
-                  key={a.to}
-                  to={a.to}
-                  className="flex items-center gap-3 rounded-xl border border-surface-border px-3 py-2.5 text-sm font-medium text-ink transition-colors hover:border-brand-300 hover:bg-brand-soft"
-                >
-                  <span
-                    className={cn(
-                      'flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br text-white shadow',
-                      ACTION_GRAD[i % ACTION_GRAD.length],
-                    )}
-                  >
-                    <a.icon size={16} />
-                  </span>
-                  {a.label}
-                </Link>
-              ))}
-            </div>
-          </Card>
-
-          <Card>
-            <div className="flex items-center justify-between">
-              <CardTitle>Notifications</CardTitle>
-              <Link to="/alertes" className="text-sm font-medium text-brand-600 hover:underline">
-                Voir tout
-              </Link>
-            </div>
-            {isLoading ? (
-              <div className="mt-4 space-y-3">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <Skeleton className="h-2 w-2 rounded-full" />
-                    <Skeleton className="h-4 flex-1" />
-                  </div>
-                ))}
-              </div>
-            ) : recent.length === 0 ? (
-              <EmptyState icon={<Bell size={20} />} title="Tout est à jour" className="py-8" />
-            ) : (
-              <ul className="mt-3 divide-y divide-surface-border">
-                {recent.slice(0, 5).map((n) => (
-                  <li key={n.id} className="flex items-start gap-3 py-2.5">
-                    <span className={cn('mt-1.5 h-2 w-2 shrink-0 rounded-full', severityDot(n.severity))} />
-                    <div className="min-w-0 flex-1">
-                      <div className={cn('truncate text-sm', n.read ? 'text-ink-muted' : 'font-medium text-ink')}>
-                        {n.title}
-                      </div>
-                    </div>
-                    <span className="shrink-0 text-xs text-ink-subtle">{timeAgo(n.createdAt)}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Card>
+          {visible.filter((w) => w.col === 'right').map((w) => (
+            <div key={w.id}>{w.node}</div>
+          ))}
         </div>
       </div>
+
+      <Modal
+        open={customizing}
+        onClose={() => setCustomizing(false)}
+        size="sm"
+        title="Personnaliser l’accueil"
+        description="Affichez ou masquez les widgets."
+      >
+        <div className="space-y-0.5">
+          {avail.map((w) => (
+            <label key={w.id} className="flex items-center justify-between rounded-lg px-2 py-2 hover:bg-surface-muted">
+              <span className="text-sm text-ink">{w.label}</span>
+              <input
+                type="checkbox"
+                className="h-4 w-4 accent-brand-600"
+                checked={!hidden.has(w.id)}
+                onChange={() => toggleWidget(w.id)}
+              />
+            </label>
+          ))}
+        </div>
+      </Modal>
     </div>
   );
 }
