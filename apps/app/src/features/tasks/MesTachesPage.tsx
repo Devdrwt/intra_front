@@ -1,16 +1,22 @@
 import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronRight, Plus } from 'lucide-react';
-import { Badge, Button, Card, Input, Select, SkeletonRows, cn } from '@drwindesk/ui';
+import { Badge, Button, Card, Input, PageHeader, Select, SkeletonRows, cn } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
 import { tasksService, type Task, type TaskPriority, type TaskStatus } from './service';
 
-const COLUMNS: { key: TaskStatus; label: string }[] = [
-  { key: 'TODO', label: 'À faire' },
-  { key: 'IN_PROGRESS', label: 'En cours' },
-  { key: 'IN_REVIEW', label: 'En revue' },
-  { key: 'DONE', label: 'Terminé' },
+const COLUMNS: { key: TaskStatus; label: string; dot: string }[] = [
+  { key: 'TODO', label: 'À faire', dot: 'bg-slate-400' },
+  { key: 'IN_PROGRESS', label: 'En cours', dot: 'bg-brand-500' },
+  { key: 'IN_REVIEW', label: 'En revue', dot: 'bg-amber-500' },
+  { key: 'DONE', label: 'Terminé', dot: 'bg-emerald-500' },
 ];
+const PRIO_ACCENT: Record<TaskPriority, string> = {
+  URGENT: 'border-l-danger',
+  HIGH: 'border-l-warning',
+  MEDIUM: 'border-l-brand-400',
+  LOW: 'border-l-surface-border',
+};
 const NEXT: Partial<Record<TaskStatus, TaskStatus>> = {
   TODO: 'IN_PROGRESS',
   IN_PROGRESS: 'IN_REVIEW',
@@ -50,10 +56,7 @@ export function MesTachesPage() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-ink">Mes tâches</h2>
-        <p className="text-ink-muted">Tableau Kanban transverse — toutes vos tâches, tous projets.</p>
-      </header>
+      <PageHeader title="Mes tâches" subtitle="Tableau Kanban transverse — toutes vos tâches, tous projets." />
 
       <Card>
         <form onSubmit={onCreate} className="flex flex-wrap items-end gap-3">
@@ -71,7 +74,10 @@ export function MesTachesPage() {
           {COLUMNS.map((col) => (
             <div key={col.key} className="rounded-2xl border border-surface-border bg-surface-muted/40 p-3">
               <div className="mb-2 flex items-center justify-between px-1">
-                <span className="text-sm font-semibold text-ink">{col.label}</span>
+                <span className="flex items-center gap-2 text-sm font-semibold text-ink">
+                  <span className={cn('h-2 w-2 rounded-full', col.dot)} />
+                  {col.label}
+                </span>
                 <Badge tone="neutral">{byCol(col.key).length}</Badge>
               </div>
               <div className="space-y-2">
@@ -91,7 +97,7 @@ export function MesTachesPage() {
 function TaskCard({ t, onMove }: { t: Task; onMove: (s: TaskStatus) => void }) {
   const next = NEXT[t.statut];
   return (
-    <div className="rounded-xl border border-surface-border bg-surface-elevated p-3 shadow-sm">
+    <div className={cn('rounded-xl border border-l-4 border-surface-border bg-surface-elevated p-3 shadow-sm transition-shadow hover:shadow-elevated', PRIO_ACCENT[t.priorite])}>
       <div className="flex items-start justify-between gap-2">
         <span className="text-sm font-medium text-ink">{t.titre}</span>
         <Badge tone={PRIO_TONE[t.priorite]}>{t.priorite}</Badge>

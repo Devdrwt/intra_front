@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { CheckCircle2, Inbox, MessageSquare, ThumbsDown, ThumbsUp } from 'lucide-react';
-import { Badge, Button, Card, EmptyState, SkeletonRows, cn } from '@drwindesk/ui';
+import { Badge, Button, Card, EmptyState, PageHeader, SkeletonRows, cn } from '@drwindesk/ui';
 import { hasPermission, useAuth } from '@/auth/AuthContext';
+import { Stagger, StaggerItem } from '@/components/motion';
 import { ApprovalTimeline } from './ApprovalTimeline';
-import { useApprovalInbox, useCancelRequest, useDecide, useMyRequests } from './hooks';
+import { useApprovalInbox, useApprovalInboxCount, useCancelRequest, useDecide, useMyRequests } from './hooks';
 import { ENTITY_LABEL, STATUS_LABEL, type ApprovalStatus, type ApprovableType } from './types';
 
 const STATUS_TONE: Record<ApprovalStatus, 'success' | 'warning' | 'danger' | 'neutral'> = {
@@ -34,19 +35,20 @@ function SlaBadge({ dueAt }: { dueAt?: string }) {
 export function MesValidationsPage() {
   const { user } = useAuth();
   const canAct = hasPermission(user, 'approval:act');
+  const inboxCount = useApprovalInboxCount();
   const [tab, setTab] = useState<'inbox' | 'mine'>(canAct ? 'inbox' : 'mine');
 
   return (
     <div className="space-y-5">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-ink">Mes validations</h2>
-        <p className="text-ink-muted">
-          Congés, frais, achats et demandes à valider — au même endroit.
-        </p>
-      </header>
+      <PageHeader
+        title="Mes validations"
+        subtitle="Congés, frais, achats et demandes à valider — au même endroit."
+      />
 
       <div className="flex gap-2 border-b border-surface-border">
-        {canAct && <TabButton active={tab === 'inbox'} onClick={() => setTab('inbox')} label="À valider" />}
+        {canAct && (
+          <TabButton active={tab === 'inbox'} onClick={() => setTab('inbox')} label="À valider" count={inboxCount} />
+        )}
         <TabButton active={tab === 'mine'} onClick={() => setTab('mine')} label="Mes demandes" />
       </div>
 
@@ -55,17 +57,22 @@ export function MesValidationsPage() {
   );
 }
 
-function TabButton({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
+function TabButton({ active, onClick, label, count }: { active: boolean; onClick: () => void; label: string; count?: number }) {
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        '-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors',
+        '-mb-px inline-flex items-center gap-2 border-b-2 px-3 py-2 text-sm font-medium transition-colors',
         active ? 'border-brand-500 text-brand-700' : 'border-transparent text-ink-muted hover:text-ink',
       )}
     >
       {label}
+      {count != null && count > 0 && (
+        <span className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-warning px-1.5 text-[11px] font-semibold text-white">
+          {count}
+        </span>
+      )}
     </button>
   );
 }
@@ -87,9 +94,10 @@ function InboxTab() {
   }
 
   return (
-    <div className="space-y-3">
+    <Stagger className="space-y-3">
       {tasks.map((t) => (
-        <Card key={t.requestId} className="space-y-3">
+        <StaggerItem key={t.requestId}>
+        <Card className="space-y-3">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
@@ -135,8 +143,9 @@ function InboxTab() {
             </div>
           )}
         </Card>
+        </StaggerItem>
       ))}
-    </div>
+    </Stagger>
   );
 }
 
@@ -157,9 +166,10 @@ function MineTab() {
   }
 
   return (
-    <div className="space-y-3">
+    <Stagger className="space-y-3">
       {reqs.map((r) => (
-        <Card key={r.id} className="space-y-3">
+        <StaggerItem key={r.id}>
+        <Card className="space-y-3">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
@@ -199,7 +209,8 @@ function MineTab() {
             </div>
           )}
         </Card>
+        </StaggerItem>
       ))}
-    </div>
+    </Stagger>
   );
 }
