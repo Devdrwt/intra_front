@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ArrowLeft,
@@ -36,6 +36,13 @@ const time = (iso: string) => {
   return d.toDateString() === new Date().toDateString()
     ? d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
     : d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+};
+const dayKey = (iso: string) => new Date(iso).toDateString();
+const dayLabel = (iso: string) => {
+  const k = dayKey(iso);
+  if (k === new Date().toDateString()) return "Aujourd'hui";
+  if (k === new Date(Date.now() - 86_400_000).toDateString()) return 'Hier';
+  return new Date(iso).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
 };
 
 function ConvAvatar({ conv, size = 'md' }: { conv: ConversationSummary; size?: 'sm' | 'md' }) {
@@ -274,11 +281,21 @@ function ConversationView({ conv, onBack }: { conv: ConversationSummary; onBack:
         ) : items.length === 0 ? (
           <p className="py-8 text-center text-sm text-ink-subtle">Aucun message. Lancez la conversation 👋</p>
         ) : (
-          items.map((m) => {
+          items.map((m, idx) => {
             const isOwn = m.author.id === user?.userId;
             const canDelete = isOwn || canModerate;
+            const prev = items[idx - 1];
+            const showDay = !prev || dayKey(prev.createdAt) !== dayKey(m.createdAt);
             return (
-              <div key={m.id} className={cn('flex gap-2.5', isOwn && 'flex-row-reverse')}>
+              <Fragment key={m.id}>
+                {showDay && (
+                  <div className="flex justify-center py-1">
+                    <span className="rounded-full bg-surface-muted px-3 py-0.5 text-[11px] font-medium capitalize text-ink-subtle">
+                      {dayLabel(m.createdAt)}
+                    </span>
+                  </div>
+                )}
+                <div className={cn('flex gap-2.5', isOwn && 'flex-row-reverse')}>
                 <Avatar name={m.author.name} src={avatarUrl(m.author.id, m.author.hasAvatar)} size="sm" />
                 <div className={cn('group max-w-[78%]', isOwn && 'flex flex-col items-end')}>
                   <div className="mb-0.5 flex items-center gap-2 text-xs text-ink-subtle">
@@ -295,7 +312,14 @@ function ConversationView({ conv, onBack }: { conv: ConversationSummary; onBack:
                       </button>
                     )}
                   </div>
-                  <div className={cn('rounded-2xl px-3.5 py-2 text-sm', isOwn ? 'bg-brand-600 text-white' : 'bg-surface-muted text-ink')}>
+                  <div
+                    className={cn(
+                      'rounded-2xl px-3.5 py-2 text-sm',
+                      isOwn
+                        ? 'rounded-br-md bg-gradient-to-br from-indigo-500 to-violet-600 text-white'
+                        : 'rounded-bl-md bg-surface-muted text-ink',
+                    )}
+                  >
                     {m.body && <p className="whitespace-pre-wrap break-words">{m.body}</p>}
                     {m.attachment && (
                       <button
@@ -312,7 +336,8 @@ function ConversationView({ conv, onBack }: { conv: ConversationSummary; onBack:
                     )}
                   </div>
                 </div>
-              </div>
+                </div>
+              </Fragment>
             );
           })
         )}
