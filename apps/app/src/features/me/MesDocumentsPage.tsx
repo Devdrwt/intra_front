@@ -1,18 +1,30 @@
+import { useState } from 'react';
 import { Download, FileText, FolderArchive } from 'lucide-react';
-import { Badge, Card, CardTitle, EmptyState, PageHeader, Skeleton } from '@drwindesk/ui';
-import { TYPE_DOCUMENT_LABEL } from '@/features/documents/types';
+import { Badge, Card, EmptyState, PageHeader, Skeleton, cn } from '@drwindesk/ui';
+import { TYPE_DOCUMENT_LABEL, type TypeDocument } from '@/features/documents/types';
 import { Stagger, StaggerItem } from '@/components/motion';
 import { useMyDocuments } from './hooks';
 import { MeNotLinked } from './MeNotLinked';
 
 const fmt = (iso: string) => new Date(iso).toLocaleDateString('fr-FR');
 
+const TYPE_GRAD: Record<TypeDocument, string> = {
+  CONTRAT: 'from-indigo-400 to-violet-600',
+  BULLETIN: 'from-emerald-400 to-teal-600',
+  ATTESTATION: 'from-amber-400 to-orange-500',
+  NDA: 'from-rose-400 to-pink-600',
+  AUTRE: 'from-slate-400 to-slate-600',
+};
+
 export function MesDocumentsPage() {
   const { data: documents, isLoading, error } = useMyDocuments();
+  const [type, setType] = useState<TypeDocument | 'ALL'>('ALL');
 
   if (error) return <MeNotLinked />;
 
   const list = documents ?? [];
+  const presentTypes = [...new Set(list.map((d) => d.type))];
+  const filtered = list.filter((d) => type === 'ALL' || d.type === type);
 
   return (
     <div className="space-y-6">
@@ -21,17 +33,31 @@ export function MesDocumentsPage() {
         subtitle="Bulletins, contrats et attestations qui vous sont rattachés."
       />
 
-      <Card className="p-0">
-        <div className="p-5 pb-0">
-          <CardTitle>Documents</CardTitle>
+      {presentTypes.length > 1 && (
+        <div className="flex flex-wrap gap-1 rounded-xl bg-surface-muted p-1">
+          {(['ALL', ...presentTypes] as (TypeDocument | 'ALL')[]).map((t) => (
+            <button
+              key={t}
+              onClick={() => setType(t)}
+              className={cn(
+                'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+                type === t ? 'bg-surface text-ink shadow-soft' : 'text-ink-muted hover:text-ink',
+              )}
+            >
+              {t === 'ALL' ? 'Tout' : TYPE_DOCUMENT_LABEL[t]}
+            </button>
+          ))}
         </div>
+      )}
+
+      <Card className="p-0">
         {isLoading ? (
           <div className="space-y-3 p-5">
             {Array.from({ length: 3 }).map((_, i) => (
               <Skeleton key={i} className="h-5 w-full" />
             ))}
           </div>
-        ) : list.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <EmptyState
             icon={<FolderArchive size={20} />}
             title="Aucun document"
@@ -39,10 +65,10 @@ export function MesDocumentsPage() {
             className="py-10"
           />
         ) : (
-          <Stagger className="mt-3 divide-y divide-surface-border">
-            {list.map((d) => (
+          <Stagger className="divide-y divide-surface-border">
+            {filtered.map((d) => (
               <StaggerItem key={d.id} className="flex items-center gap-3 px-5 py-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-ink-muted">
+                <span className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br text-white', TYPE_GRAD[d.type])}>
                   <FileText size={16} />
                 </span>
                 <div className="min-w-0 flex-1">
