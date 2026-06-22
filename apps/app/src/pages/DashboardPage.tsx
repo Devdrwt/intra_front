@@ -34,6 +34,7 @@ import { TempsFortsCard } from '@/features/dashboard/TempsFortsCard';
 import { AbsentsCard } from '@/features/dashboard/AbsentsCard';
 import { OpsAlertsCard } from '@/features/dashboard/OpsAlertsCard';
 import { SoldeCongesCard } from '@/features/dashboard/SoldeCongesCard';
+import { TendancePresenceCard } from '@/features/dashboard/TendancePresenceCard';
 
 function greeting(h: number = new Date().getHours()): { hello: string; emoji: string } {
   if (h >= 5 && h < 12) return { hello: 'Bonjour', emoji: '☀️' };
@@ -269,6 +270,7 @@ export function DashboardPage() {
     { id: 'weather', label: 'Météo', col: 'right', node: <WeatherCard /> },
     { id: 'opsalerts', label: 'Alertes opérationnelles', col: 'right', node: <OpsAlertsCard />, managerOnly: true },
     { id: 'presence', label: 'Présence du jour', col: 'right', node: <PresenceRepartitionCard />, managerOnly: true },
+    { id: 'tendance', label: 'Tendance présence (7j)', col: 'right', node: <TendancePresenceCard />, managerOnly: true },
     { id: 'solde', label: 'Solde de congés', col: 'right', node: <SoldeCongesCard /> },
     { id: 'taches', label: 'Mes tâches', col: 'right', node: <MesTachesWidget /> },
     { id: 'actions', label: 'Actions rapides', col: 'right', node: actionsNode },

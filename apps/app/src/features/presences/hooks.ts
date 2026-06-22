@@ -13,6 +13,10 @@ export function useSuivi(from: string, to: string) {
   });
 }
 
+export function useTendancePresence() {
+  return useQuery({ queryKey: ['pointages', 'tendance'], queryFn: presencesService.tendance });
+}
+
 export function useMissions() {
   return useQuery({ queryKey: [MISSIONS], queryFn: presencesService.listMissions });
 }

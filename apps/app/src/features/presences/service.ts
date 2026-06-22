@@ -93,6 +93,7 @@ const mockApi = {
   },
   suivi: (_from?: string, _to?: string) =>
     delay(pointages.map((p) => ({ ...p, employeNom: p.employeId })) as SuiviPointage[]),
+  tendance: () => delay([] as { date: string; present: number; total: number }[]),
   listMissions: () => delay([...missions]),
   createMission: (input: MissionInput) => {
     const m: Mission = { id: `mi${++pSeq}`, ...input, lieu: input.lieu ?? null, createdAt: today() };
@@ -119,6 +120,10 @@ const httpApi = {
   cancelConge: (id: string) => api.delete(`/conges/${id}`).then(() => undefined),
   suivi: (from?: string, to?: string) =>
     api.get<SuiviPointage[]>('/pointages/suivi', { params: { from, to } }).then((r) => r.data),
+  tendance: () =>
+    api
+      .get<{ date: string; present: number; total: number }[]>('/pointages/tendance')
+      .then((r) => r.data),
   listMissions: () => api.get<Mission[]>('/missions').then((r) => r.data),
   createMission: (input: MissionInput) => api.post<Mission>('/missions', input).then((r) => r.data),
   removeMission: (id: string) => api.delete(`/missions/${id}`).then(() => undefined),
