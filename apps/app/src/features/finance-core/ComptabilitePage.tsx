@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Download } from 'lucide-react';
-import { Badge, Button, Card, CardTitle, Input, Select } from '@drwindesk/ui';
+import { Badge, Button, Card, CardTitle, Input, PageHeader, Select } from '@drwindesk/ui';
 import { USE_MOCKS } from '@/lib/config';
 import { toast } from '@/lib/toast';
 import { exportUrl } from './service';
@@ -26,10 +26,7 @@ export function ComptabilitePage() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-ink">Comptabilité</h2>
-        <p className="text-ink-muted">Plan comptable SYSCOHADA, journaux, taxes et export pour le cabinet.</p>
-      </header>
+      <PageHeader title="Comptabilité" subtitle="Plan comptable SYSCOHADA, journaux, taxes et export pour le cabinet." />
 
       <Card>
         <CardTitle>Exporter pour la comptabilité</CardTitle>

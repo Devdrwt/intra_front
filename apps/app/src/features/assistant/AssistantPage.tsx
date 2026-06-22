@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Bot, FileSignature, Send, Sparkles } from 'lucide-react';
-import { Button, Callout, Card, CardTitle, Select, Spinner, Textarea, cn } from '@drwindesk/ui';
+import { Button, Callout, Card, CardTitle, PageHeader, Select, Spinner, Textarea, cn } from '@drwindesk/ui';
 import { useEmployes } from '@/features/rh/hooks';
 import { fullName } from '@/features/rh/helpers';
 import { assistantService } from './service';
@@ -11,10 +11,7 @@ export function AssistantPage() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-ink">Assistant IA</h2>
-        <p className="text-ink-muted">Génère des documents (contrats, rapports…) et répond à vos questions.</p>
-      </header>
+      <PageHeader title="Assistant IA" subtitle="Génère des documents (contrats, rapports…) et répond à vos questions." />
 
       <Callout tone="warning">
         Contenu généré par IA — toujours <strong>à vérifier</strong> avant validation. Réponses limitées

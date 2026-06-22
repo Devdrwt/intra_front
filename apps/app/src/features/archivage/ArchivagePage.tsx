@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Cloud, HardDrive, Lock, LockOpen, ShieldCheck } from 'lucide-react';
-import { Badge, Button, Card, CardTitle, SkeletonRows } from '@drwindesk/ui';
+import { Badge, Button, Card, CardTitle, PageHeader, SkeletonRows } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
 import { archivageService, type StatutArchive, type TypeArchiveStore } from './service';
 
@@ -45,10 +45,7 @@ export function ArchivagePage() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-ink">Archivage GED</h2>
-        <p className="text-ink-muted">Rétention légale (OHADA), scellement et stockage cloud.</p>
-      </header>
+      <PageHeader title="Archivage GED" subtitle="Rétention légale (OHADA), scellement et stockage cloud." />
 
       <div className="grid gap-5 lg:grid-cols-2">
         <Card className="p-0">

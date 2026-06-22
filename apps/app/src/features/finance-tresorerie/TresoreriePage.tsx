@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { ArrowDownLeft, ArrowUpRight, Banknote, CreditCard, Plus, Smartphone, X } from 'lucide-react';
-import { Badge, Button, Callout, Card, CardTitle, Input, Select, SkeletonRows, cn } from '@drwindesk/ui';
+import { Badge, Button, Callout, Card, CardTitle, Input, PageHeader, Select, SkeletonRows, cn } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
 import { fcfa } from '@/lib/money';
 import { useComptesTresorerie, useCreateMouvement, useMouvements, useRapprocher } from './hooks';
@@ -23,15 +23,15 @@ export function TresoreriePage() {
 
   return (
     <div className="space-y-5">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-ink">Trésorerie</h2>
-          <p className="text-ink-muted">Disponible total : <span className="font-semibold text-ink">{fcfa(total)}</span></p>
-        </div>
-        <Button onClick={() => setOpen((v) => !v)} variant={open ? 'secondary' : 'primary'}>
-          {open ? <X size={18} /> : <Plus size={18} />} {open ? 'Fermer' : 'Mouvement'}
-        </Button>
-      </header>
+      <PageHeader
+        title="Trésorerie"
+        subtitle={<>Disponible total : <span className="font-semibold text-ink">{fcfa(total)}</span></>}
+        actions={
+          <Button onClick={() => setOpen((v) => !v)} variant={open ? 'secondary' : 'primary'}>
+            {open ? <X size={18} /> : <Plus size={18} />} {open ? 'Fermer' : 'Mouvement'}
+          </Button>
+        }
+      />
 
       {open && <MouvementPanel comptes={(comptes ?? []).map((c) => ({ value: c.id, label: c.nom }))} onDone={() => setOpen(false)} />}
 

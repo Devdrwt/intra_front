@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { GraduationCap, Plus } from 'lucide-react';
-import { Badge, Button, Card, CardTitle, SkeletonRows } from '@drwindesk/ui';
+import { Badge, Button, Card, CardTitle, PageHeader, SkeletonRows } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
 import { fcfa } from '@/lib/money';
 import { formationService, type DemandeFormation } from './service';
@@ -32,10 +32,7 @@ export function FormationPage() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-ink">Formation</h2>
-        <p className="text-ink-muted">Catalogue, demandes (validées par le moteur) et développement des compétences.</p>
-      </header>
+      <PageHeader title="Formation" subtitle="Catalogue, demandes (validées par le moteur) et développement des compétences." />
 
       {(demandes ?? []).length > 0 && (
         <Card className="p-0">

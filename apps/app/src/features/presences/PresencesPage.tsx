@@ -8,6 +8,7 @@ import {
   Card,
   EmptyState,
   Input,
+  PageHeader,
   Select,
   SkeletonRows,
   cn,
@@ -79,10 +80,7 @@ export function PresencesPage() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-ink">Présences & Congés</h2>
-        <p className="text-ink-muted">Pointage du jour et gestion des demandes de congés.</p>
-      </header>
+      <PageHeader title="Présences & Congés" subtitle="Pointage du jour et gestion des demandes de congés." />
 
       <div className="flex w-full max-w-md gap-1 rounded-xl bg-surface-muted p-1">
         {(

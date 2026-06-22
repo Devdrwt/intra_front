@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2, Circle, Rocket, LogOut } from 'lucide-react';
-import { Badge, Card, SkeletonRows, cn } from '@drwindesk/ui';
+import { Badge, Card, PageHeader, SkeletonRows, cn } from '@drwindesk/ui';
 import { onboardingService, type Parcours } from './service';
 
 export function OnboardingPage() {
@@ -14,10 +14,7 @@ export function OnboardingPage() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-ink">Onboarding / Offboarding</h2>
-        <p className="text-ink-muted">Parcours d'intégration et de départ — chaque étape est une tâche assignée.</p>
-      </header>
+      <PageHeader title="Onboarding / Offboarding" subtitle="Parcours d'intégration et de départ — chaque étape est une tâche assignée." />
 
       {isLoading ? (
         <Card className="p-0"><SkeletonRows rows={3} cols={2} /></Card>

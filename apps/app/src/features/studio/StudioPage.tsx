@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CalendarPlus, ChevronRight, Mic, Plus, Radio, Video } from 'lucide-react';
-import { Badge, Button, Card, CardTitle, Input, Select, SkeletonRows, cn } from '@drwindesk/ui';
+import { Badge, Button, Card, CardTitle, Input, PageHeader, Select, SkeletonRows, cn } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
 import { studioService, type Reservation, type StatutProduction, type TypeProduction } from './service';
 
@@ -42,10 +42,7 @@ export function StudioPage() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-ink">Studio</h2>
-        <p className="text-ink-muted">Productions média (podcasts, vidéos, enregistrements) et planning du studio.</p>
-      </header>
+      <PageHeader title="Studio" subtitle="Productions média (podcasts, vidéos, enregistrements) et planning du studio." />
 
       <div className="grid gap-5 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">

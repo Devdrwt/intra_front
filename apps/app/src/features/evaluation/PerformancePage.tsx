@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ClipboardList, Sparkles, Target, Users } from 'lucide-react';
-import { Badge, Button, Card, Select, SkeletonRows, Textarea, cn } from '@drwindesk/ui';
+import { Badge, Button, Card, PageHeader, Select, SkeletonRows, Textarea, cn } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
 import { performanceService, type PerfEmploye, type TypeRecommandation } from './performance';
 
@@ -22,10 +22,7 @@ export function PerformancePage() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-ink">Performance & recommandation</h2>
-        <p className="text-ink-muted">Évaluée sur le travail réel : activités, rapports, missions et objectifs.</p>
-      </header>
+      <PageHeader title="Performance & recommandation" subtitle="Évaluée sur le travail réel : activités, rapports, missions et objectifs." />
 
       {isLoading ? (
         <Card className="p-0"><SkeletonRows rows={3} cols={2} /></Card>

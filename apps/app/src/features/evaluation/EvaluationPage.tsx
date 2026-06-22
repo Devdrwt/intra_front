@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Target, Users } from 'lucide-react';
-import { Badge, Card, CardTitle, SkeletonRows, cn } from '@drwindesk/ui';
+import { Badge, Card, CardTitle, PageHeader, SkeletonRows, cn } from '@drwindesk/ui';
 import { evaluationService, type NiveauObjectif } from './service';
 
 const NIVEAU_LABEL: Record<NiveauObjectif, string> = {
@@ -15,10 +15,7 @@ export function EvaluationPage() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-ink">Évaluation & Objectifs</h2>
-        <p className="text-ink-muted">OKR (objectifs et résultats clés) et campagnes d'évaluation.</p>
-      </header>
+      <PageHeader title="Évaluation & Objectifs" subtitle="OKR (objectifs et résultats clés) et campagnes d'évaluation." />
 
       {(campagnes ?? []).length > 0 && (
         <Card className="p-0">

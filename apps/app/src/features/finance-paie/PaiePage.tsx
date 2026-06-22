@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { CheckCircle2, PlayCircle, Wallet } from 'lucide-react';
-import { Badge, Button, Callout, Card, CardTitle, SkeletonRows, cn } from '@drwindesk/ui';
+import { Badge, Button, Callout, Card, CardTitle, PageHeader, SkeletonRows, cn } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
 import { fcfa } from '@/lib/money';
 import {
@@ -38,10 +38,7 @@ export function PaiePage() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-ink">Paie</h2>
-        <p className="text-ink-muted">Périodes, bulletins et virement des salaires (Mobile Money manuel).</p>
-      </header>
+      <PageHeader title="Paie" subtitle="Périodes, bulletins et virement des salaires (Mobile Money manuel)." />
 
       <Callout tone="warning">
         Données sensibles. Les taux CNSS / ITS sont paramétrés côté backend et à valider avec un expert-paie avant production.

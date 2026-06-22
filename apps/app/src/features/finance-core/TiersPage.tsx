@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Building2, Plus, Trash2, X } from 'lucide-react';
-import { Badge, Button, Callout, Card, EmptyState, Input, Select, SkeletonRows } from '@drwindesk/ui';
+import { Badge, Button, Callout, Card, EmptyState, Input, PageHeader, Select, SkeletonRows } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
 import { useCreateTiers, useDeleteTiers, useTiers } from './hooks';
 import { TIERS_TYPE_LABEL, TIERS_TYPE_OPTIONS, type TiersInput, type TiersType } from './types';
@@ -13,15 +13,15 @@ export function TiersPage() {
 
   return (
     <div className="space-y-5">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-ink">Tiers</h2>
-          <p className="text-ink-muted">Clients & fournisseurs — référentiel partagé de la finance.</p>
-        </div>
-        <Button onClick={() => setOpen((v) => !v)} variant={open ? 'secondary' : 'primary'}>
-          {open ? <X size={18} /> : <Plus size={18} />} {open ? 'Fermer' : 'Nouveau tiers'}
-        </Button>
-      </header>
+      <PageHeader
+        title="Tiers"
+        subtitle="Clients & fournisseurs — référentiel partagé de la finance."
+        actions={
+          <Button onClick={() => setOpen((v) => !v)} variant={open ? 'secondary' : 'primary'}>
+            {open ? <X size={18} /> : <Plus size={18} />} {open ? 'Fermer' : 'Nouveau tiers'}
+          </Button>
+        }
+      />
 
       {open && <CreatePanel onDone={() => setOpen(false)} />}
 

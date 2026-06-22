@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Check, FileText, Inbox, Mail } from 'lucide-react';
-import { Avatar, Badge, Button, Card, EmptyState, Select, SkeletonRows, cn } from '@drwindesk/ui';
+import { Avatar, Badge, Button, Card, EmptyState, PageHeader, Select, SkeletonRows, cn } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
 import {
   useCandidatures,
@@ -35,12 +35,10 @@ export function RecrutementPage() {
   const [tab, setTab] = useState<Tab>('candidatures');
   return (
     <div className="space-y-5">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-ink">Recrutement</h2>
-        <p className="text-ink-muted">
-          Candidatures et messages de contact remontés du site public.
-        </p>
-      </header>
+      <PageHeader
+        title="Recrutement"
+        subtitle="Candidatures et messages de contact remontés du site public."
+      />
 
       <div className="flex w-full max-w-md gap-1 rounded-xl bg-surface-muted p-1">
         {(

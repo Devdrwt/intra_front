@@ -8,6 +8,7 @@ import {
   Card,
   EmptyState,
   Input,
+  PageHeader,
   Select,
   SkeletonRows,
 } from '@drwindesk/ui';
@@ -26,17 +27,17 @@ export function EmployesListPage() {
 
   return (
     <div className="space-y-5">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-ink">RH & Personnel</h2>
-          <p className="text-ink-muted">Référentiel des collaborateurs et prestataires.</p>
-        </div>
-        <Link to="/rh/nouveau">
-          <Button>
-            <Plus size={18} /> Nouvel employé
-          </Button>
-        </Link>
-      </header>
+      <PageHeader
+        title="RH & Personnel"
+        subtitle="Référentiel des collaborateurs et prestataires."
+        actions={
+          <Link to="/rh/nouveau">
+            <Button>
+              <Plus size={18} /> Nouvel employé
+            </Button>
+          </Link>
+        }
+      />
 
       <Card className="p-3">
         <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto]">

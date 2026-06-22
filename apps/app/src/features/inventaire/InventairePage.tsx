@@ -1,7 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Boxes, Package, Plus, Trash2, X } from 'lucide-react';
-import { Badge, Button, Callout, Card, EmptyState, Input, Select, SkeletonRows } from '@drwindesk/ui';
+import { Badge, Button, Callout, Card, EmptyState, Input, PageHeader, Select, SkeletonRows } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
 import { fcfa, fcfaCompact } from '@/lib/money';
@@ -37,15 +37,15 @@ export function InventairePage() {
 
   return (
     <div className="space-y-5">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-ink">Inventaire & immobilisations</h2>
-          <p className="text-ink-muted">Patrimoine de l'entreprise — matériel, mobilier, véhicules, équipement.</p>
-        </div>
-        <Button onClick={() => setOpen((v) => !v)} variant={open ? 'secondary' : 'primary'}>
-          {open ? <X size={18} /> : <Plus size={18} />} {open ? 'Fermer' : 'Nouveau bien'}
-        </Button>
-      </header>
+      <PageHeader
+        title="Inventaire & immobilisations"
+        subtitle="Patrimoine de l'entreprise — matériel, mobilier, véhicules, équipement."
+        actions={
+          <Button onClick={() => setOpen((v) => !v)} variant={open ? 'secondary' : 'primary'}>
+            {open ? <X size={18} /> : <Plus size={18} />} {open ? 'Fermer' : 'Nouveau bien'}
+          </Button>
+        }
+      />
 
       {stats && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

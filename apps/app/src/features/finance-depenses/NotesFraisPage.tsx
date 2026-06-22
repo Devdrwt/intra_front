@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Plus, Receipt, Send, Wallet, X } from 'lucide-react';
-import { Badge, Button, Callout, Card, EmptyState, Input, SkeletonRows } from '@drwindesk/ui';
+import { Badge, Button, Callout, Card, EmptyState, Input, PageHeader, SkeletonRows } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
 import { fcfa } from '@/lib/money';
@@ -28,15 +28,15 @@ export function NotesFraisPage() {
 
   return (
     <div className="space-y-5">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-ink">Notes de frais</h2>
-          <p className="text-ink-muted">Saisie, validation et remboursement (Mobile Money manuel).</p>
-        </div>
-        <Button onClick={() => setOpen((v) => !v)} variant={open ? 'secondary' : 'primary'}>
-          {open ? <X size={18} /> : <Plus size={18} />} {open ? 'Fermer' : 'Nouvelle note'}
-        </Button>
-      </header>
+      <PageHeader
+        title="Notes de frais"
+        subtitle="Saisie, validation et remboursement (Mobile Money manuel)."
+        actions={
+          <Button onClick={() => setOpen((v) => !v)} variant={open ? 'secondary' : 'primary'}>
+            {open ? <X size={18} /> : <Plus size={18} />} {open ? 'Fermer' : 'Nouvelle note'}
+          </Button>
+        }
+      />
 
       {open && <CreatePanel onDone={() => setOpen(false)} />}
 

@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { USE_MOCKS } from '@/lib/config';
 import { FolderKanban } from 'lucide-react';
-import { Badge, Card, EmptyState, SkeletonRows, cn } from '@drwindesk/ui';
+import { Badge, Card, EmptyState, PageHeader, SkeletonRows, cn } from '@drwindesk/ui';
 import { fcfa } from '@/lib/money';
 
 /**
@@ -36,10 +36,7 @@ export function RentabiliteProjetsPage() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-ink">Rentabilité par projet</h2>
-        <p className="text-ink-muted">Entrées − sorties rattachées à chaque projet = marge.</p>
-      </header>
+      <PageHeader title="Rentabilité par projet" subtitle="Entrées − sorties rattachées à chaque projet = marge." />
 
       <Card className="overflow-hidden p-0">
         {isLoading ? (

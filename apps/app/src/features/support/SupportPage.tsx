@@ -8,6 +8,7 @@ import {
   Card,
   EmptyState,
   Input,
+  PageHeader,
   Select,
   SkeletonRows,
   Textarea,
@@ -64,15 +65,15 @@ export function SupportPage() {
 
   return (
     <div className="space-y-5">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-ink">Support</h2>
-          <p className="text-ink-muted">Tickets internes : incidents, demandes, accès, moyens généraux.</p>
-        </div>
-        <Button onClick={() => setOpen((v) => !v)} variant={open ? 'secondary' : 'primary'}>
-          {open ? <X size={18} /> : <Plus size={18} />} {open ? 'Fermer' : 'Nouveau ticket'}
-        </Button>
-      </header>
+      <PageHeader
+        title="Support"
+        subtitle="Tickets internes : incidents, demandes, accès, moyens généraux."
+        actions={
+          <Button onClick={() => setOpen((v) => !v)} variant={open ? 'secondary' : 'primary'}>
+            {open ? <X size={18} /> : <Plus size={18} />} {open ? 'Fermer' : 'Nouveau ticket'}
+          </Button>
+        }
+      />
 
       {open && <CreatePanel onDone={() => setOpen(false)} />}
 

@@ -1,5 +1,5 @@
 import { FileText } from 'lucide-react';
-import { Badge, Card, EmptyState, SkeletonRows } from '@drwindesk/ui';
+import { Badge, Card, EmptyState, PageHeader, SkeletonRows } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
 import { fcfa } from '@/lib/money';
 import { useFacturesFournisseur } from './hooks';
@@ -25,10 +25,7 @@ export function AchatsPage() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-ink">Achats & fournisseurs</h2>
-        <p className="text-ink-muted">Factures fournisseurs et échéancier des dettes.</p>
-      </header>
+      <PageHeader title="Achats & fournisseurs" subtitle="Factures fournisseurs et échéancier des dettes." />
 
       <Card className="overflow-hidden p-0">
         {isLoading ? (

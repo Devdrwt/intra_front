@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Plus, Power, ShieldCheck, SlidersHorizontal, Trash2, X } from 'lucide-react';
-import { Avatar, Badge, Button, Callout, Card, EmptyState, Input, Modal, SkeletonRows, cn } from '@drwindesk/ui';
+import { Avatar, Badge, Button, Callout, Card, EmptyState, Input, Modal, PageHeader, SkeletonRows, cn } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
 import { useDeleteUser, useInviteUser, useSetUserAccess, useUpdateUser, useUsers } from './hooks';
@@ -47,16 +47,16 @@ export function UsersPage() {
 
   return (
     <div className="space-y-5">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-ink">Utilisateurs & accès</h2>
-          <p className="text-ink-muted">Comptes du personnel, rôles et statut de connexion.</p>
-        </div>
-        <Button onClick={() => setOpen((v) => !v)} variant={open ? 'secondary' : 'primary'}>
-          {open ? <X size={18} /> : <Plus size={18} />}
-          {open ? 'Fermer' : 'Inviter'}
-        </Button>
-      </header>
+      <PageHeader
+        title="Utilisateurs & accès"
+        subtitle="Comptes du personnel, rôles et statut de connexion."
+        actions={
+          <Button onClick={() => setOpen((v) => !v)} variant={open ? 'secondary' : 'primary'}>
+            {open ? <X size={18} /> : <Plus size={18} />}
+            {open ? 'Fermer' : 'Inviter'}
+          </Button>
+        }
+      />
 
       {open && <InvitePanel onDone={() => setOpen(false)} />}
 

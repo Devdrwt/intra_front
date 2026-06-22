@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, Banknote, LifeBuoy, TrendingDown, TrendingUp, Users, Wallet } from 'lucide-react';
-import { Badge, Card, CardTitle, SkeletonRows, cn } from '@drwindesk/ui';
+import { Badge, Card, CardTitle, PageHeader, SkeletonRows, cn } from '@drwindesk/ui';
 import { fcfaCompact } from '@/lib/money';
 import { pilotageService } from '@/features/finance-pilotage/service';
 
@@ -31,10 +31,7 @@ export function CockpitPage() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-ink">Cockpit direction</h2>
-        <p className="text-ink-muted">Vue consolidée — finance, RH et activité en temps réel.</p>
-      </header>
+      <PageHeader title="Cockpit direction" subtitle="Vue consolidée — finance, RH et activité en temps réel." />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((c) => (

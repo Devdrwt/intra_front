@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, FileSignature, Megaphone, Plus, X } from 'lucide-react';
-import { Badge, Button, Card, CardTitle, Input, SkeletonRows } from '@drwindesk/ui';
+import { Badge, Button, Card, CardTitle, Input, PageHeader, SkeletonRows } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
 import { fcfa } from '@/lib/money';
 import { commercialService, type AaoInput, type StatutAao, type StatutSoumission } from './service';
@@ -41,15 +41,15 @@ export function AppelsOffresPage() {
 
   return (
     <div className="space-y-5">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-ink">Appels d'offres</h2>
-          <p className="text-ink-muted">Veille des avis, dossiers (DAO) et soumissions.</p>
-        </div>
-        <Button onClick={() => setOpen((v) => !v)} variant={open ? 'secondary' : 'primary'}>
-          {open ? <X size={18} /> : <Plus size={18} />} {open ? 'Fermer' : 'Nouvel avis'}
-        </Button>
-      </header>
+      <PageHeader
+        title="Appels d'offres"
+        subtitle="Veille des avis, dossiers (DAO) et soumissions."
+        actions={
+          <Button onClick={() => setOpen((v) => !v)} variant={open ? 'secondary' : 'primary'}>
+            {open ? <X size={18} /> : <Plus size={18} />} {open ? 'Fermer' : 'Nouvel avis'}
+          </Button>
+        }
+      />
 
       {open && <AaoForm onDone={() => setOpen(false)} />}
 

@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { USE_MOCKS } from '@/lib/config';
 import { Download, FileText, FolderArchive, Library } from 'lucide-react';
-import { Badge, Card, EmptyState, Input, Select, SkeletonRows } from '@drwindesk/ui';
+import { Badge, Card, EmptyState, Input, PageHeader, Select, SkeletonRows } from '@drwindesk/ui';
 
 /**
  * Bibliothèque centrale — vue transverse de TOUS les documents (GED + archives).
@@ -48,10 +48,7 @@ export function BibliothequePage() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-ink">Bibliothèque</h2>
-        <p className="text-ink-muted">Tous les documents de l'entreprise — politiques, modèles, procédures, livrables.</p>
-      </header>
+      <PageHeader title="Bibliothèque" subtitle="Tous les documents de l'entreprise — politiques, modèles, procédures, livrables." />
 
       <Card className="flex flex-wrap items-end gap-3">
         <Input id="q" label="Recherche" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Nom, service…" className="min-w-[200px] flex-1" />

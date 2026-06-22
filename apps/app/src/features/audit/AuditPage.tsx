@@ -9,6 +9,7 @@ import {
   Select,
   SkeletonRows,
   Avatar,
+  PageHeader,
 } from '@drwindesk/ui';
 import { useAuditLogs } from './hooks';
 import { describeAudit } from './describe';
@@ -59,12 +60,10 @@ export function AuditPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h2 className="text-2xl font-bold tracking-tight text-ink">Activité</h2>
-        <p className="text-ink-muted">
-          Journal de toutes les actions effectuées sur la plateforme — qui, quoi, quand.
-        </p>
-      </header>
+      <PageHeader
+        title="Activité"
+        subtitle="Journal de toutes les actions effectuées sur la plateforme — qui, quoi, quand."
+      />
 
       {/* Filtres */}
       <Card className="space-y-4">

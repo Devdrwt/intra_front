@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Briefcase, CalendarClock, Plus, Search } from 'lucide-react';
-import { Avatar, Badge, Button, Card, EmptyState, Input, Select, Skeleton } from '@drwindesk/ui';
+import { Avatar, Badge, Button, Card, EmptyState, Input, PageHeader, Select, Skeleton } from '@drwindesk/ui';
 import { hasPermission, useAuth } from '@/auth/AuthContext';
 import { Stagger, StaggerItem } from '@/components/motion';
 import { useProjects } from './hooks';
@@ -25,19 +25,19 @@ export function ProjectsPage() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-ink">Projets</h2>
-          <p className="text-ink-muted">Portefeuille des projets : avancement, échéances, livrables.</p>
-        </div>
-        {canManage && (
-          <Link to="/projets/nouveau">
-            <Button>
-              <Plus size={18} /> Nouveau projet
-            </Button>
-          </Link>
-        )}
-      </header>
+      <PageHeader
+        title="Projets"
+        subtitle="Portefeuille des projets : avancement, échéances, livrables."
+        actions={
+          canManage ? (
+            <Link to="/projets/nouveau">
+              <Button>
+                <Plus size={18} /> Nouveau projet
+              </Button>
+            </Link>
+          ) : undefined
+        }
+      />
 
       <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
         <Input
