@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react';
 import { CalendarDays, Clock, Coffee, LogIn, LogOut, Play, Timer } from 'lucide-react';
 import { Badge, Button, Card, CardTitle, EmptyState, PageHeader, Skeleton, cn } from '@drwindesk/ui';
 import type { Pointage } from '@/features/presences/types';
+import { Stagger, StaggerItem } from '@/components/motion';
 import { useMePointer, useMyPointages } from './hooks';
 import { MeNotLinked } from './MeNotLinked';
 
@@ -30,10 +32,32 @@ const fmtDur = (min: number | null): string => {
   const m = min % 60;
   return m ? `${h}h${String(m).padStart(2, '0')}` : `${h}h`;
 };
+/** Temps travaillé en direct : jusqu'à maintenant si en cours, gelé pendant la pause. */
+const liveWorkedMin = (p: Pointage | undefined, nowMin: number): number | null => {
+  if (!p?.heureEntree) return null;
+  if (p.heureSortie) return workedMin(p);
+  const e = toMin(p.heureEntree) ?? 0;
+  const onBreak = Boolean(p.heurePauseDebut) && !p.heurePauseFin;
+  const end = onBreak ? (toMin(p.heurePauseDebut) ?? nowMin) : nowMin;
+  const pause = p.heurePauseDebut && p.heurePauseFin ? (toMin(p.heurePauseFin) ?? 0) - (toMin(p.heurePauseDebut) ?? 0) : 0;
+  return Math.max(0, end - e - pause);
+};
 
 export function MonPointagePage() {
   const { data: pointages, isLoading, error } = useMyPointages();
   const pointer = useMePointer();
+  const [nowMin, setNowMin] = useState(() => {
+    const d = new Date();
+    return d.getHours() * 60 + d.getMinutes();
+  });
+  useEffect(() => {
+    const tick = () => {
+      const d = new Date();
+      setNowMin(d.getHours() * 60 + d.getMinutes());
+    };
+    const id = setInterval(tick, 20_000);
+    return () => clearInterval(id);
+  }, []);
 
   if (error) return <MeNotLinked />;
 
@@ -43,6 +67,8 @@ export function MonPointagePage() {
   const hasSortie = Boolean(p?.heureSortie);
   const onBreak = Boolean(p?.heurePauseDebut) && !p?.heurePauseFin;
   const todayDur = workedMin(p);
+  const liveDur = liveWorkedMin(p, nowMin);
+  const enCours = hasEntree && !hasSortie;
 
   const ym = today().slice(0, 7);
   const month = list.filter((x) => x.date.startsWith(ym));
@@ -78,12 +104,30 @@ export function MonPointagePage() {
           </div>
         </div>
 
+        {enCours && (
+          <div className="mt-4 flex items-center gap-4 rounded-2xl bg-brand-soft/50 px-5 py-4">
+            <span className="relative flex h-3 w-3">
+              {!onBreak && (
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-500 opacity-60" />
+              )}
+              <span className="relative inline-flex h-3 w-3 rounded-full bg-brand-600" />
+            </span>
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wide text-ink-subtle">
+                {onBreak ? 'En pause' : 'Temps travaillé'}
+              </p>
+              <p className="text-3xl font-bold tabular-nums text-ink">{fmtDur(liveDur)}</p>
+            </div>
+            <span className="ml-auto text-sm text-ink-subtle">depuis {p?.heureEntree}</span>
+          </div>
+        )}
+
         <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-5">
           <Time label="Entrée" value={p?.heureEntree} />
           <Time label="Pause" value={p?.heurePauseDebut} />
           <Time label="Reprise" value={p?.heurePauseFin} />
           <Time label="Sortie" value={p?.heureSortie} />
-          <Time label="Travaillé" value={todayDur != null ? fmtDur(todayDur) : undefined} strong />
+          <Time label="Travaillé" value={liveDur != null ? fmtDur(liveDur) : undefined} strong />
         </div>
 
         <div className="mt-5 flex flex-wrap gap-2 border-t border-surface-border pt-4">
@@ -134,9 +178,9 @@ export function MonPointagePage() {
             className="py-10"
           />
         ) : (
-          <ul className="mt-3 divide-y divide-surface-border">
+          <Stagger className="mt-3 divide-y divide-surface-border">
             {list.map((x) => (
-              <li key={x.id} className="flex items-center justify-between gap-3 px-5 py-3 text-sm">
+              <StaggerItem key={x.id} className="flex items-center justify-between gap-3 px-5 py-3 text-sm">
                 <span className="font-medium capitalize text-ink">{fmtDate(x.date)}</span>
                 <span className="flex items-center gap-2 text-ink-muted sm:gap-3">
                   <Badge tone={x.heureEntree ? 'success' : 'neutral'}>E {x.heureEntree ?? '—'}</Badge>
@@ -150,9 +194,9 @@ export function MonPointagePage() {
                     {fmtDur(workedMin(x))}
                   </span>
                 </span>
-              </li>
+              </StaggerItem>
             ))}
-          </ul>
+          </Stagger>
         )}
       </Card>
     </div>
