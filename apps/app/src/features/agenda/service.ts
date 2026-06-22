@@ -8,6 +8,28 @@ import { USE_MOCKS } from '@/lib/config';
  */
 export type AgendaSource = 'PERSO' | 'CONGE' | 'FORMATION' | 'STUDIO' | 'TACHE' | 'AO' | 'PAIE';
 export type TypeEvenement = 'RENDEZ_VOUS' | 'REUNION' | 'RAPPEL' | 'CRENEAU' | 'AUTRE';
+export type Recurrence = 'AUCUNE' | 'QUOTIDIEN' | 'HEBDO' | 'MENSUEL';
+
+export const TYPE_EVT_OPTIONS: { value: TypeEvenement; label: string }[] = [
+  { value: 'RENDEZ_VOUS', label: 'Rendez-vous' },
+  { value: 'REUNION', label: 'Réunion' },
+  { value: 'RAPPEL', label: 'Rappel' },
+  { value: 'CRENEAU', label: 'Créneau' },
+  { value: 'AUTRE', label: 'Autre' },
+];
+export const RECURRENCE_OPTIONS: { value: Recurrence; label: string }[] = [
+  { value: 'AUCUNE', label: 'Ne se répète pas' },
+  { value: 'QUOTIDIEN', label: 'Tous les jours' },
+  { value: 'HEBDO', label: 'Toutes les semaines' },
+  { value: 'MENSUEL', label: 'Tous les mois' },
+];
+export const RAPPEL_OPTIONS: { value: number; label: string }[] = [
+  { value: 0, label: 'Aucun rappel' },
+  { value: 10, label: '10 min avant' },
+  { value: 30, label: '30 min avant' },
+  { value: 60, label: '1 h avant' },
+  { value: 1440, label: '1 jour avant' },
+];
 
 export interface AgendaItem {
   id: string;
@@ -28,6 +50,7 @@ export interface EvenementInput {
   journeeEntiere?: boolean;
   lieu?: string;
   type?: TypeEvenement;
+  recurrence?: Recurrence;
   rappelMinutes?: number;
 }
 

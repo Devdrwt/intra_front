@@ -2,12 +2,12 @@ import { useMemo, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { CalendarDays, ChevronLeft, ChevronRight, ExternalLink, Link2, Plus, Trash2 } from 'lucide-react';
-import { Button, Card, EmptyState, Input, Modal, PageHeader, Spinner, cn } from '@drwindesk/ui';
+import { Button, Card, EmptyState, Input, Modal, PageHeader, Select, Spinner, cn } from '@drwindesk/ui';
 import { toast } from '@/lib/toast';
 import { Stagger, StaggerItem } from '@/components/motion';
-import { agendaService } from './service';
+import { agendaService, RAPPEL_OPTIONS, RECURRENCE_OPTIONS, TYPE_EVT_OPTIONS } from './service';
 import { useAgenda, useCreateEvenement, useDeleteEvenement } from './hooks';
-import type { AgendaItem, AgendaSource } from './service';
+import type { AgendaItem, AgendaSource, Recurrence, TypeEvenement } from './service';
 
 const SOURCE: Record<AgendaSource, { label: string; color: string }> = {
   PERSO: { label: 'Perso', color: '#4F46E5' },
@@ -444,13 +444,25 @@ function EventForm({ date, onDone }: { date: string; onDone: () => void }) {
   const [hf, setHf] = useState('10:00');
   const [journee, setJournee] = useState(false);
   const [lieu, setLieu] = useState('');
+  const [type, setType] = useState<TypeEvenement>('RENDEZ_VOUS');
+  const [recurrence, setRecurrence] = useState<Recurrence>('AUCUNE');
+  const [rappel, setRappel] = useState(10);
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!titre.trim()) return;
     const debut = new Date(`${d}T${journee ? '00:00' : hd}:00`).toISOString();
     const fin = new Date(`${d}T${journee ? '23:59' : hf}:00`).toISOString();
-    create.mutate({ titre: titre.trim(), debut, fin, journeeEntiere: journee, lieu: lieu || undefined });
+    create.mutate({
+      titre: titre.trim(),
+      debut,
+      fin,
+      journeeEntiere: journee,
+      lieu: lieu || undefined,
+      type,
+      recurrence,
+      rappelMinutes: rappel || undefined,
+    });
     onDone();
   };
 
@@ -462,6 +474,11 @@ function EventForm({ date, onDone }: { date: string; onDone: () => void }) {
         {!journee && <Input id="hd" type="time" label="De" value={hd} onChange={(e) => setHd(e.target.value)} />}
         {!journee && <Input id="hf" type="time" label="À" value={hf} onChange={(e) => setHf(e.target.value)} />}
         <Input id="lieu" label="Lieu" value={lieu} onChange={(e) => setLieu(e.target.value)} />
+      </div>
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Select label="Catégorie" options={TYPE_EVT_OPTIONS} value={type} onChange={(e) => setType(e.target.value as TypeEvenement)} />
+        <Select label="Répétition" options={RECURRENCE_OPTIONS} value={recurrence} onChange={(e) => setRecurrence(e.target.value as Recurrence)} />
+        <Select label="Rappel" options={RAPPEL_OPTIONS.map((o) => ({ value: String(o.value), label: o.label }))} value={String(rappel)} onChange={(e) => setRappel(Number(e.target.value))} />
       </div>
       <label className="flex items-center gap-2 text-sm text-ink-muted">
         <input type="checkbox" checked={journee} onChange={(e) => setJournee(e.target.checked)} /> Journée entière
