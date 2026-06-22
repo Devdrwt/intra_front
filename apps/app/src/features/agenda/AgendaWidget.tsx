@@ -13,6 +13,7 @@ const COLOR: Record<AgendaSource, string> = {
   TACHE: '#2563EB',
   AO: '#DC2626',
   PAIE: '#64748B',
+  EXTERNE: '#0EA5E9',
 };
 const WEEKDAYS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 const ymd = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;

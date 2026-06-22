@@ -6,7 +6,15 @@ import { USE_MOCKS } from '@/lib/config';
  *   GET /agenda?from&to · POST/PATCH/DELETE /agenda/evenements · GET /me/agenda/ical-url
  * Items = événements perso (éditables) + projection des modules (lecture seule).
  */
-export type AgendaSource = 'PERSO' | 'CONGE' | 'FORMATION' | 'STUDIO' | 'TACHE' | 'AO' | 'PAIE';
+export type AgendaSource =
+  | 'PERSO'
+  | 'CONGE'
+  | 'FORMATION'
+  | 'STUDIO'
+  | 'TACHE'
+  | 'AO'
+  | 'PAIE'
+  | 'EXTERNE';
 export type TypeEvenement = 'RENDEZ_VOUS' | 'REUNION' | 'RAPPEL' | 'CRENEAU' | 'AUTRE';
 export type Recurrence = 'AUCUNE' | 'QUOTIDIEN' | 'HEBDO' | 'MENSUEL';
 
@@ -43,6 +51,20 @@ export interface AgendaItem {
   editable: boolean;
   type?: TypeEvenement;
   recurrent?: boolean;
+  couleur?: string;
+}
+
+export interface IcalFeed {
+  id: string;
+  url: string;
+  label: string;
+  couleur: string;
+  createdAt: string;
+}
+export interface IcalFeedInput {
+  url: string;
+  label: string;
+  couleur?: string;
 }
 
 /** Couleur d'un événement perso selon sa catégorie (sinon couleur de la source). */
@@ -121,6 +143,10 @@ const mockApi = {
     return delay(undefined);
   },
   icalUrl: () => delay({ url: `${location.origin}/api/v1/agenda/ical?token=demo-token-1234` }),
+  listFeeds: () => delay([] as IcalFeed[]),
+  addFeed: (input: IcalFeedInput) =>
+    delay({ id: `feed${seq++}`, url: input.url, label: input.label, couleur: input.couleur ?? '#0EA5E9', createdAt: new Date().toISOString() }),
+  removeFeed: (_id: string) => delay(undefined),
 };
 
 // --- HTTP ---------------------------------------------------------------------
@@ -131,6 +157,10 @@ const httpApi = {
     api.post<AgendaItem>('/agenda/evenements', input).then((r) => r.data),
   remove: (id: string) => api.delete(`/agenda/evenements/${id}`).then(() => undefined),
   icalUrl: () => api.get<{ url: string }>('/me/agenda/ical-url').then((r) => r.data),
+  listFeeds: () => api.get<IcalFeed[]>('/agenda/feeds').then((r) => r.data),
+  addFeed: (input: IcalFeedInput) =>
+    api.post<IcalFeed>('/agenda/feeds', input).then((r) => r.data),
+  removeFeed: (id: string) => api.delete(`/agenda/feeds/${id}`).then(() => undefined),
 };
 
 export const agendaService = USE_MOCKS.agenda ? mockApi : httpApi;

@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /c/xampp/htdocs/intra_back/src/modules/auth -type f -name \"*.ts\" | head -20)",
+      "Read(//c/xampp/htdocs/intra_back/src/modules/auth/**)",
+      "Bash(grep -A 10 \"nextMatricule\" /c/xampp/htdocs/intra_back/src/modules/rh/rh.service.ts | head -20)",
+      "Read(//c/xampp/htdocs/intra_back/src/modules/rh/**)",
+      "Bash(grep -n \"@Permissions\\\\|@Get\\\\|@Post\\\\|@Put\\\\|@Patch\\\\|@Delete\" /c/xampp/htdocs/intra_back/src/modules/espaces/espaces.controller.ts | head -40)",
+      "Read(//c/xampp/htdocs/intra_back/src/modules/espaces/**)",
+      "Bash(grep -r \"rh_manager\\\\|rh.manager\\\\|manager\" /c/xampp/htdocs/intra_back/src --include=\"*.ts\" | grep -i \"role\\\\|permission\" | head -10)",
+      "Read(//c/xampp/htdocs/intra_back/src/**)",
+      "Bash(grep -A 5 \"rh_manager\\\\|employee\\\\|admin\" /c/xampp/htdocs/intra_back/prisma/migrations/20260601182752_init/migration.sql | head -30)",
+      "Read(//c/xampp/htdocs/intra_back/prisma/migrations/20260601182752_init/**)",
+      "Bash(grep -A 20 \"async pointer\" /c/xampp/htdocs/intra_back/src/modules/presences/presences.service.ts | head -30)",
+      "Read(//c/xampp/htdocs/intra_back/src/modules/presences/**)",
+      "Bash(cat /c/xampp/htdocs/intra_back/src/modules/presences/presences.controller.ts)"
+    ]
+  }
+}

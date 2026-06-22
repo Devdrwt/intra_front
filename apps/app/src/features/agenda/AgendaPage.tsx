@@ -1,12 +1,19 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { CalendarDays, ChevronLeft, ChevronRight, ExternalLink, Link2, Plus, Repeat, Trash2 } from 'lucide-react';
+import { CalendarDays, CalendarPlus, ChevronLeft, ChevronRight, ExternalLink, Link2, Plus, Repeat, Trash2 } from 'lucide-react';
 import { Button, Card, EmptyState, Input, Modal, PageHeader, Select, Spinner, cn } from '@drwindesk/ui';
 import { toast } from '@/lib/toast';
 import { Stagger, StaggerItem } from '@/components/motion';
 import { agendaService, RAPPEL_OPTIONS, RECURRENCE_OPTIONS, TYPE_COLOR, TYPE_EVT_OPTIONS } from './service';
-import { useAgenda, useCreateEvenement, useDeleteEvenement } from './hooks';
+import {
+  useAgenda,
+  useAddIcalFeed,
+  useCreateEvenement,
+  useDeleteEvenement,
+  useIcalFeeds,
+  useRemoveIcalFeed,
+} from './hooks';
 import type { AgendaItem, AgendaSource, Recurrence, TypeEvenement } from './service';
 
 const SOURCE: Record<AgendaSource, { label: string; color: string }> = {
@@ -17,11 +24,12 @@ const SOURCE: Record<AgendaSource, { label: string; color: string }> = {
   TACHE: { label: 'Tâche', color: '#2563EB' },
   AO: { label: 'Appel d’offres', color: '#DC2626' },
   PAIE: { label: 'Paie', color: '#64748B' },
+  EXTERNE: { label: 'Externe', color: '#0EA5E9' },
 };
 
-/** Couleur d'un item : par catégorie pour le perso, sinon par source. */
+/** Couleur d'un item : couleur du flux externe, sinon catégorie (perso), sinon source. */
 const itemColor = (it: AgendaItem): string =>
-  it.source === 'PERSO' && it.type ? TYPE_COLOR[it.type] : SOURCE[it.source].color;
+  it.couleur ?? (it.source === 'PERSO' && it.type ? TYPE_COLOR[it.type] : SOURCE[it.source].color);
 
 const WEEKDAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 const ymd = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -48,6 +56,7 @@ export function AgendaPage() {
   const [dir, setDir] = useState(0);
   const [selected, setSelected] = useState(() => ymd(new Date()));
   const [openForm, setOpenForm] = useState(false);
+  const [openFeeds, setOpenFeeds] = useState(false);
 
   const { data: items, isLoading } = useAgenda();
 
@@ -121,6 +130,9 @@ export function AgendaPage() {
                 </button>
               ))}
             </div>
+            <Button variant="secondary" onClick={() => setOpenFeeds(true)}>
+              <CalendarPlus size={16} /> Calendriers
+            </Button>
             <Button variant="secondary" onClick={subscribe}>
               <Link2 size={16} /> iCal
             </Button>
@@ -259,6 +271,96 @@ export function AgendaPage() {
       <Modal open={openForm} onClose={() => setOpenForm(false)} title="Nouvel événement" size="md">
         <EventForm date={selected} onDone={() => setOpenForm(false)} />
       </Modal>
+
+      <Modal open={openFeeds} onClose={() => setOpenFeeds(false)} title="Calendriers externes" size="md">
+        <FeedsManager />
+      </Modal>
+    </div>
+  );
+}
+
+const FEED_COLORS = ['#0EA5E9', '#16A34A', '#D97706', '#9333EA', '#DC2626', '#0D9488'];
+
+function FeedsManager() {
+  const { data: feeds, isLoading } = useIcalFeeds();
+  const add = useAddIcalFeed();
+  const remove = useRemoveIcalFeed();
+  const [url, setUrl] = useState('');
+  const [label, setLabel] = useState('');
+  const [couleur, setCouleur] = useState(FEED_COLORS[0]);
+
+  const onAdd = (e: FormEvent) => {
+    e.preventDefault();
+    if (!url.trim() || !label.trim()) return;
+    add.mutate(
+      { url: url.trim(), label: label.trim(), couleur },
+      {
+        onSuccess: () => {
+          setUrl('');
+          setLabel('');
+        },
+      },
+    );
+  };
+
+  return (
+    <div className="grid gap-5">
+      <p className="text-sm text-ink-muted">
+        Abonne-toi à un calendrier Google ou Outlook : colle l'<strong>URL iCal secrète</strong>{' '}
+        (format <code>.ics</code>). Les événements s'affichent <strong>en lecture seule</strong>, avec
+        la couleur choisie. Mise à jour automatique toutes les 10 minutes.
+      </p>
+
+      {isLoading ? (
+        <Spinner />
+      ) : feeds && feeds.length > 0 ? (
+        <ul className="grid gap-2">
+          {feeds.map((f) => (
+            <li key={f.id} className="flex items-center gap-3 rounded-xl border border-line bg-surface px-3 py-2">
+              <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: f.couleur }} />
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm font-medium text-ink">{f.label}</div>
+                <div className="truncate text-xs text-ink-subtle">{f.url}</div>
+              </div>
+              <button
+                onClick={() => remove.mutate(f.id)}
+                disabled={remove.isPending}
+                className="text-ink-subtle hover:text-danger"
+                aria-label="Retirer"
+              >
+                <Trash2 size={15} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="rounded-xl bg-surface-muted px-3 py-4 text-center text-sm text-ink-subtle">
+          Aucun calendrier externe pour l'instant.
+        </p>
+      )}
+
+      <form onSubmit={onAdd} className="grid gap-3 border-t border-line pt-4">
+        <Input id="feed-label" label="Nom" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Agenda Google perso" />
+        <Input id="feed-url" label="URL iCal (.ics)" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://calendar.google.com/.../basic.ics" />
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-ink-muted">Couleur :</span>
+          {FEED_COLORS.map((c) => (
+            <button
+              key={c}
+              type="button"
+              onClick={() => setCouleur(c)}
+              className={cn('h-6 w-6 rounded-full border-2 transition', couleur === c ? 'border-ink' : 'border-transparent')}
+              style={{ backgroundColor: c }}
+              aria-label={`Couleur ${c}`}
+            />
+          ))}
+        </div>
+        <div className="flex justify-end">
+          <Button type="submit" loading={add.isPending}>
+            <Plus size={16} /> Ajouter le calendrier
+          </Button>
+        </div>
+      </form>
     </div>
   );
 }
