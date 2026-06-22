@@ -40,6 +40,16 @@ export interface TaskInput {
   progression?: number;
   assigneeId?: string;
   projetId?: string;
+  parentTaskId?: string;
+}
+
+export interface TaskComment {
+  id: string;
+  taskId: string;
+  authorId: string;
+  authorNom?: string;
+  body: string;
+  createdAt: string;
 }
 
 const delay = <T>(value: T, ms = 140): Promise<T> =>
@@ -88,6 +98,11 @@ const mockApi = {
     tasks = tasks.filter((t) => t.id !== id);
     return delay(undefined);
   },
+  subtasks: (_parentId: string) => delay([] as Task[]),
+  comments: (_taskId: string) => delay([] as TaskComment[]),
+  addComment: (taskId: string, body: string) =>
+    delay({ id: `c${seq++}`, taskId, authorId: 'me', authorNom: 'Moi', body, createdAt: new Date().toISOString() }),
+  removeComment: (_id: string) => delay(undefined),
 };
 
 // --- HTTP ---------------------------------------------------------------------
@@ -102,6 +117,13 @@ const httpApi = {
   move: (id: string, statut: TaskStatus) =>
     api.patch<Task>(`/tasks/${id}/move`, { statut, position: 0 }).then((r) => r.data),
   remove: (id: string) => api.delete(`/tasks/${id}`).then(() => undefined),
+  subtasks: (parentId: string) =>
+    api.get<Task[]>('/tasks', { params: { parentTaskId: parentId } }).then((r) => r.data),
+  comments: (taskId: string) =>
+    api.get<TaskComment[]>(`/tasks/${taskId}/comments`).then((r) => r.data),
+  addComment: (taskId: string, body: string) =>
+    api.post<TaskComment>(`/tasks/${taskId}/comments`, { body }).then((r) => r.data),
+  removeComment: (id: string) => api.delete(`/tasks/comments/${id}`).then(() => undefined),
 };
 
 export const tasksService = USE_MOCKS.projects ? mockApi : httpApi;

@@ -1,9 +1,20 @@
 import { useMemo, useState, type DragEvent, type FormEvent } from 'react';
-import { CalendarClock, ChevronRight, Plus, Tag, Trash2 } from 'lucide-react';
+import { CalendarClock, CheckCircle2, ChevronRight, Circle, Plus, Send, Tag, Trash2 } from 'lucide-react';
 import { Badge, Button, Card, Input, Modal, PageHeader, Select, SkeletonRows, Textarea, cn } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
 import { type Task, type TaskInput, type TaskPriority, type TaskStatus } from './service';
-import { useCreateTask, useMoveTask, useMyTasksFull, useRemoveTask, useUpdateTask } from './hooks';
+import {
+  useAddComment,
+  useCreateSubtask,
+  useCreateTask,
+  useMoveTask,
+  useMyTasksFull,
+  useRemoveComment,
+  useRemoveTask,
+  useSubtasks,
+  useTaskComments,
+  useUpdateTask,
+} from './hooks';
 
 const COLUMNS: { key: TaskStatus; label: string; dot: string }[] = [
   { key: 'TODO', label: 'À faire', dot: 'bg-slate-400' },
@@ -220,6 +231,7 @@ function TaskEditor({ task, onDone }: { task: Task; onDone: () => void }) {
   };
 
   return (
+    <div className="grid gap-5">
     <form onSubmit={onSave} className="grid gap-4">
       <Input id="ed-titre" label="Titre" value={form.titre ?? ''} onChange={(e) => set('titre', e.target.value)} />
       <Textarea id="ed-desc" label="Description" rows={3} value={form.description ?? ''} onChange={(e) => set('description', e.target.value)} placeholder="Détails, contexte, critères…" />
@@ -259,5 +271,83 @@ function TaskEditor({ task, onDone }: { task: Task; onDone: () => void }) {
         </div>
       </div>
     </form>
+
+      <SubtasksSection taskId={task.id} />
+      <CommentsSection taskId={task.id} />
+    </div>
+  );
+}
+
+function SubtasksSection({ taskId }: { taskId: string }) {
+  const { data } = useSubtasks(taskId);
+  const create = useCreateSubtask(taskId);
+  const move = useMoveTask();
+  const [titre, setTitre] = useState('');
+  const subs = data ?? [];
+  const done = subs.filter((s) => s.statut === 'DONE').length;
+
+  return (
+    <div className="border-t border-surface-border pt-4">
+      <h4 className="mb-2 text-sm font-semibold text-ink">
+        Sous-tâches {subs.length > 0 && <span className="text-ink-subtle">· {done}/{subs.length}</span>}
+      </h4>
+      <ul className="space-y-1">
+        {subs.map((s) => (
+          <li key={s.id} className="flex items-center gap-2 text-sm">
+            <button
+              type="button"
+              onClick={() => move.mutate({ id: s.id, statut: s.statut === 'DONE' ? 'TODO' : 'DONE' })}
+              className={cn('shrink-0', s.statut === 'DONE' ? 'text-emerald-500' : 'text-ink-subtle hover:text-brand-500')}
+            >
+              {s.statut === 'DONE' ? <CheckCircle2 size={16} /> : <Circle size={16} />}
+            </button>
+            <span className={cn(s.statut === 'DONE' && 'text-ink-subtle line-through')}>{s.titre}</span>
+          </li>
+        ))}
+      </ul>
+      <form
+        onSubmit={(e) => { e.preventDefault(); if (titre.trim()) { create.mutate(titre.trim()); setTitre(''); } }}
+        className="mt-2 flex gap-2"
+      >
+        <Input id="sub-add" value={titre} onChange={(e) => setTitre(e.target.value)} placeholder="Nouvelle sous-tâche…" className="flex-1" />
+        <Button type="submit" variant="secondary" loading={create.isPending}><Plus size={15} /></Button>
+      </form>
+    </div>
+  );
+}
+
+function CommentsSection({ taskId }: { taskId: string }) {
+  const { data } = useTaskComments(taskId);
+  const add = useAddComment(taskId);
+  const remove = useRemoveComment(taskId);
+  const [body, setBody] = useState('');
+  const comments = data ?? [];
+
+  return (
+    <div className="border-t border-surface-border pt-4">
+      <h4 className="mb-2 text-sm font-semibold text-ink">Commentaires {comments.length > 0 && <span className="text-ink-subtle">· {comments.length}</span>}</h4>
+      <ul className="max-h-48 space-y-2 overflow-auto">
+        {comments.map((c) => (
+          <li key={c.id} className="group rounded-lg bg-surface-muted px-3 py-2 text-sm">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-medium text-ink">{c.authorNom ?? 'Utilisateur'}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-ink-subtle">{new Date(c.createdAt).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                <button type="button" onClick={() => remove.mutate(c.id)} className="text-ink-subtle opacity-0 transition group-hover:opacity-100 hover:text-danger"><Trash2 size={12} /></button>
+              </div>
+            </div>
+            <p className="mt-0.5 whitespace-pre-wrap text-ink-muted">{c.body}</p>
+          </li>
+        ))}
+        {comments.length === 0 && <li className="text-xs text-ink-subtle">Aucun commentaire pour l'instant.</li>}
+      </ul>
+      <form
+        onSubmit={(e) => { e.preventDefault(); if (body.trim()) { add.mutate(body.trim()); setBody(''); } }}
+        className="mt-2 flex gap-2"
+      >
+        <Input id="cmt-add" value={body} onChange={(e) => setBody(e.target.value)} placeholder="Écrire un commentaire…" className="flex-1" />
+        <Button type="submit" variant="secondary" loading={add.isPending}><Send size={15} /></Button>
+      </form>
+    </div>
   );
 }

@@ -44,3 +44,35 @@ export function useRemoveTask() {
     onSuccess: () => invalidate(qc),
   });
 }
+
+export function useSubtasks(parentId: string) {
+  return useQuery({ queryKey: ['tasks', 'subtasks', parentId], queryFn: () => tasksService.subtasks(parentId) });
+}
+
+export function useCreateSubtask(parentId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (titre: string) => tasksService.createFull({ titre, parentTaskId: parentId }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['tasks', 'subtasks', parentId] }),
+  });
+}
+
+export function useTaskComments(taskId: string) {
+  return useQuery({ queryKey: ['tasks', 'comments', taskId], queryFn: () => tasksService.comments(taskId) });
+}
+
+export function useAddComment(taskId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: string) => tasksService.addComment(taskId, body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['tasks', 'comments', taskId] }),
+  });
+}
+
+export function useRemoveComment(taskId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => tasksService.removeComment(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['tasks', 'comments', taskId] }),
+  });
+}
