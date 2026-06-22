@@ -22,7 +22,7 @@ import { useApprovalInboxCount } from '@/features/approvals/hooks';
 import { usePointagesDuJour } from '@/features/presences/hooks';
 import { useEmployes } from '@/features/rh/hooks';
 import { AgendaWidget } from '@/features/agenda/AgendaWidget';
-import { ActualitesWidget } from '@/features/actualites/ActualitesWidget';
+import { AlaUneCard } from '@/features/actualites/AlaUneCard';
 import { MesTachesWidget } from '@/features/tasks/MesTachesWidget';
 
 function greeting(h: number = new Date().getHours()): { hello: string; emoji: string } {
@@ -169,15 +169,17 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title={
-          <span className="capitalize">
-            {greeting().hello} {firstName} {greeting().emoji}
-          </span>
-        }
-        subtitle={<span className="capitalize">{fullDate()}</span>}
-        actions={<PointageQuick />}
-      />
+      <div className="rounded-2xl border border-surface-border bg-gradient-to-br from-brand-soft/60 via-surface to-surface p-5 shadow-soft">
+        <PageHeader
+          title={
+            <span className="capitalize">
+              {greeting().hello} {firstName} {greeting().emoji}
+            </span>
+          }
+          subtitle={<span className="capitalize">{fullDate()}</span>}
+          actions={<PointageQuick />}
+        />
+      </div>
 
       {/* Indicateurs self-service */}
       <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -200,7 +202,7 @@ export function DashboardPage() {
       {/* Contenu vivant (gauche) + perso (droite) */}
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
-          <ActualitesWidget />
+          <AlaUneCard />
           <AgendaWidget />
         </div>
 
