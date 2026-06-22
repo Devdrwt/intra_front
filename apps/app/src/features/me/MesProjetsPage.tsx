@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Download, ExternalLink, FolderKanban, Paperclip, Users } from 'lucide-react';
-import { Badge, Button, Card, EmptyState, Modal, PageHeader, Skeleton, cn } from '@drwindesk/ui';
+import { Avatar, Badge, Button, Card, EmptyState, Modal, PageHeader, Skeleton, cn } from '@drwindesk/ui';
 import { triggerDownload, humanSize } from '@/lib/download';
 import { toast } from '@/lib/toast';
 import { Stagger, StaggerItem } from '@/components/motion';
@@ -51,7 +51,7 @@ export function MesProjetsPage() {
           {list.map((p) => (
             <StaggerItem key={p.id} className="h-full">
             <button onClick={() => setActive(p)} className="h-full w-full text-left">
-              <Card className="h-full transition-colors hover:border-brand-300">
+              <Card interactive className="flex h-full flex-col">
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="font-semibold text-ink">{p.nom}</h3>
                   <Badge tone={STATUT_PROJET_TONE[p.statut]} dot>
@@ -63,15 +63,33 @@ export function MesProjetsPage() {
                   <p className="mt-2 line-clamp-2 text-sm text-ink-muted">{p.description}</p>
                 )}
                 <div className="mt-3">
-                  <div className="h-1.5 w-full rounded-full bg-surface-muted">
+                  <div className="mb-1 flex items-center justify-between text-xs">
+                    <span className="text-ink-subtle">Avancement</span>
+                    <span className="font-semibold tabular-nums text-ink">{p.progression}%</span>
+                  </div>
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-muted">
                     <div
-                      className="h-1.5 rounded-full bg-brand-600"
+                      className={cn(
+                        'h-1.5 rounded-full transition-all',
+                        p.progression >= 80 ? 'bg-emerald-500' : p.progression >= 40 ? 'bg-brand-600' : 'bg-amber-500',
+                      )}
                       style={{ width: `${Math.min(100, Math.max(0, p.progression))}%` }}
                     />
                   </div>
-                  <p className="mt-1 text-xs text-ink-subtle">
-                    {p.progression}% · échéance {fmt(p.dateFin)}
-                  </p>
+                </div>
+                <div className="mt-auto flex items-center justify-between gap-2 pt-3">
+                  <div className="flex -space-x-2">
+                    {p.responsable && <Avatar name={personName(p.responsable)} size="sm" />}
+                    {p.membres.slice(0, 3).map((m) => (
+                      <Avatar key={m.id} name={personName(m)} size="sm" />
+                    ))}
+                    {p.membres.length > 3 && (
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full border border-surface-border bg-surface text-[10px] font-medium text-ink-subtle">
+                        +{p.membres.length - 3}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-xs text-ink-subtle">échéance {fmt(p.dateFin)}</span>
                 </div>
               </Card>
             </button>
