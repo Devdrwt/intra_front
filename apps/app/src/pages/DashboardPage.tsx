@@ -51,6 +51,19 @@ const ACTION_GRAD = [
   'from-amber-400 to-orange-500',
   'from-rose-400 to-pink-600',
 ];
+// Fond légèrement teinté + accent coloré à gauche, par tonalité (tokens = sûrs en sombre).
+const TONE_BG: Record<Tone, string> = {
+  brand: 'bg-gradient-to-br from-brand-soft/60 to-transparent',
+  success: 'bg-gradient-to-br from-success-soft/60 to-transparent',
+  warning: 'bg-gradient-to-br from-warning-soft/60 to-transparent',
+  danger: 'bg-gradient-to-br from-danger-soft/60 to-transparent',
+};
+const TONE_BORDER: Record<Tone, string> = {
+  brand: 'border-l-4 border-l-brand-500',
+  success: 'border-l-4 border-l-success',
+  warning: 'border-l-4 border-l-warning',
+  danger: 'border-l-4 border-l-danger',
+};
 
 function StatCard({
   icon: Icon,
@@ -68,7 +81,7 @@ function StatCard({
   to?: string;
 }) {
   const inner = (
-    <Card interactive={!!to} className="flex h-full items-center gap-4">
+    <Card interactive={!!to} className={cn('flex h-full items-center gap-4', TONE_BG[tone], TONE_BORDER[tone])}>
       <span className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white shadow-lg', TONE_GRAD[tone])}>
         <Icon size={20} />
       </span>
