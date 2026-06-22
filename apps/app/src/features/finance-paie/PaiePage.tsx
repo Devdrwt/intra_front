@@ -49,8 +49,8 @@ export function PaiePage() {
       ) : (
         <Card className="p-0">
           <ul className="divide-y divide-surface-border">
-            {(periodes ?? []).map((p) => (
-              <li key={p.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3">
+            {(periodes ?? []).map((p, i) => (
+              <li key={p.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 animate-row" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
                 <button onClick={() => setSelected((v) => (v === p.id ? undefined : p.id))} className="text-left">
                   <div className="font-medium text-ink">{MOIS_LABEL[p.mois]} {p.annee}</div>
                   <div className="text-xs text-ink-subtle">{p.nbBulletins} bulletin(s) · net {fcfa(p.totalNet)}</div>
@@ -102,8 +102,8 @@ function BulletinsCard({ periodeId }: { periodeId: string }) {
           </tr>
         </thead>
         <tbody>
-          {(bulletins ?? []).map((b) => (
-            <tr key={b.id} className="border-b border-surface-border last:border-0">
+          {(bulletins ?? []).map((b, i) => (
+            <tr key={b.id} className="border-b border-surface-border last:border-0 animate-row" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
               <td className="px-5 py-3 font-medium text-ink">{b.employeNom}</td>
               <td className="hidden px-5 py-3 text-ink-muted sm:table-cell">{fcfa(b.salaireBrut)}</td>
               <td className="px-5 py-3 font-semibold text-ink">{fcfa(b.netAPayer)}</td>

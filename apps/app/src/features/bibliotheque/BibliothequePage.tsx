@@ -63,8 +63,8 @@ export function BibliothequePage() {
           <EmptyState icon={<Library size={20} />} title="Aucun document" description="Aucun document ne correspond à ces filtres." />
         ) : (
           <ul className="divide-y divide-surface-border">
-            {filtered.map((d) => (
-              <li key={d.id} className="flex items-center justify-between gap-3 px-5 py-3">
+            {filtered.map((d, i) => (
+              <li key={d.id} className="flex items-center justify-between gap-3 px-5 py-3 animate-row" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
                 <div className="flex items-center gap-3">
                   <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-muted text-ink-muted"><FileText size={18} /></span>
                   <div>

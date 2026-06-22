@@ -3,6 +3,7 @@ import { GraduationCap, Plus } from 'lucide-react';
 import { Badge, Button, Card, CardTitle, PageHeader, SkeletonRows } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
 import { fcfa } from '@/lib/money';
+import { Stagger, StaggerItem } from '@/components/motion';
 import { formationService, type DemandeFormation } from './service';
 
 const TONE: Record<DemandeFormation['statut'], NonNullable<BadgeProps['tone']>> = {
@@ -38,8 +39,8 @@ export function FormationPage() {
         <Card className="p-0">
           <div className="p-5 pb-2"><CardTitle>Mes demandes</CardTitle></div>
           <ul className="divide-y divide-surface-border">
-            {(demandes ?? []).map((d) => (
-              <li key={d.id} className="flex items-center justify-between gap-3 px-5 py-3">
+            {(demandes ?? []).map((d, i) => (
+              <li key={d.id} className="flex items-center justify-between gap-3 px-5 py-3 animate-row" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
                 <div>
                   <div className="font-medium text-ink">{d.formationTitre}</div>
                   <div className="text-xs text-ink-subtle">{d.reference}{d.coutEstime ? ` · ${fcfa(d.coutEstime)}` : ''}</div>
@@ -55,9 +56,10 @@ export function FormationPage() {
       {isLoading ? (
         <Card className="p-0"><SkeletonRows rows={3} cols={2} /></Card>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-3">
+        <Stagger className="grid gap-4 lg:grid-cols-3">
           {(catalogue ?? []).map((f) => (
-            <Card key={f.id} className="flex flex-col justify-between gap-3">
+            <StaggerItem key={f.id} className="h-full">
+            <Card className="flex h-full flex-col justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2 text-ink-muted">
                   <GraduationCap size={16} /> <span className="text-xs">{f.type}{f.organisme ? ` · ${f.organisme}` : ''}</span>
@@ -74,8 +76,9 @@ export function FormationPage() {
                 <Plus size={14} /> Demander
               </Button>
             </Card>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       )}
     </div>
   );

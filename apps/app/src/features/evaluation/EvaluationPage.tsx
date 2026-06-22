@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Target, Users } from 'lucide-react';
 import { Badge, Card, CardTitle, PageHeader, SkeletonRows, cn } from '@drwindesk/ui';
+import { Stagger, StaggerItem } from '@/components/motion';
 import { evaluationService, type NiveauObjectif } from './service';
 
 const NIVEAU_LABEL: Record<NiveauObjectif, string> = {
@@ -21,8 +22,8 @@ export function EvaluationPage() {
         <Card className="p-0">
           <div className="p-5 pb-2"><CardTitle>Campagnes d'évaluation</CardTitle></div>
           <ul className="divide-y divide-surface-border">
-            {(campagnes ?? []).map((c) => (
-              <li key={c.id} className="flex items-center justify-between gap-3 px-5 py-3">
+            {(campagnes ?? []).map((c, i) => (
+              <li key={c.id} className="flex items-center justify-between gap-3 px-5 py-3 animate-row" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
                 <div>
                   <div className="font-medium text-ink">{c.nom}</div>
                   <div className="text-xs text-ink-subtle">{c.nbEvaluations} évaluation(s)</div>
@@ -40,9 +41,10 @@ export function EvaluationPage() {
       {isLoading ? (
         <Card className="p-0"><SkeletonRows rows={3} cols={2} /></Card>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <Stagger className="grid gap-4 lg:grid-cols-2">
           {(objectifs ?? []).map((o) => (
-            <Card key={o.id} className="space-y-3">
+            <StaggerItem key={o.id} className="h-full">
+            <Card className="h-full space-y-3">
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <div className="flex items-center gap-2 text-ink-muted">
@@ -73,8 +75,9 @@ export function EvaluationPage() {
                 })}
               </ul>
             </Card>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       )}
     </div>
   );

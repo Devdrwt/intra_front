@@ -56,8 +56,8 @@ export function NotesFraisPage() {
               </tr>
             </thead>
             <tbody>
-              {notes.map((n) => (
-                <tr key={n.id} className="border-b border-surface-border last:border-0">
+              {notes.map((n, i) => (
+                <tr key={n.id} className="border-b border-surface-border last:border-0 animate-row" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
                   <td className="px-5 py-3">
                     <div className="font-medium text-ink">{n.titre}</div>
                     <div className="text-xs text-ink-subtle">{n.reference}{n.paiementRef ? ` · réf ${n.paiementRef}` : ''}</div>

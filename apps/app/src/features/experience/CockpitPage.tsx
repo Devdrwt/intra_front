@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, Banknote, LifeBuoy, TrendingDown, TrendingUp, Users, Wallet } from 'lucide-react';
 import { Badge, Card, CardTitle, PageHeader, SkeletonRows, cn } from '@drwindesk/ui';
 import { fcfaCompact } from '@/lib/money';
+import { Stagger, StaggerItem } from '@/components/motion';
 import { pilotageService } from '@/features/finance-pilotage/service';
 
 /**
@@ -33,15 +34,17 @@ export function CockpitPage() {
     <div className="space-y-5">
       <PageHeader title="Cockpit direction" subtitle="Vue consolidée — finance, RH et activité en temps réel." />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((c) => (
-          <Card key={c.label}>
+          <StaggerItem key={c.label} className="h-full">
+          <Card className="h-full">
             <div className="flex items-center gap-2 text-ink-muted"><c.icon size={18} /><span className="text-xs">{c.label}</span></div>
             <div className={cn('mt-2 text-2xl font-bold', c.tone)}>{c.value}</div>
             <div className="text-xs text-ink-subtle">{c.sub}</div>
           </Card>
+          </StaggerItem>
         ))}
-      </div>
+      </Stagger>
 
       <Card>
         <CardTitle>Budgets</CardTitle>

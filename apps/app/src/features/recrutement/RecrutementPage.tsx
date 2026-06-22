@@ -94,8 +94,8 @@ function CandidaturesPanel() {
           />
         ) : (
           <ul className="divide-y divide-surface-border">
-            {list.map((c) => (
-              <li key={c.id} className="flex flex-wrap items-start gap-4 px-5 py-4">
+            {list.map((c, i) => (
+              <li key={c.id} className="flex flex-wrap items-start gap-4 px-5 py-4 animate-row" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
                 <Avatar name={c.nom} size="md" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
@@ -180,10 +180,11 @@ function MessagesPanel() {
           />
         ) : (
           <ul className="divide-y divide-surface-border">
-            {list.map((m) => (
+            {list.map((m, i) => (
               <li
                 key={m.id}
-                className={cn('flex items-start gap-4 px-5 py-4', !m.traite && 'bg-brand-50/40')}
+                className={cn('flex items-start gap-4 px-5 py-4 animate-row', !m.traite && 'bg-brand-50/40')}
+                style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">

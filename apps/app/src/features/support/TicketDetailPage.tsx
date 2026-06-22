@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowUpCircle, Lock, Send } from 'lucide-react';
 import { Badge, Button, Card, Select, Spinner, Textarea, cn } from '@drwindesk/ui';
 import { hasPermission, useAuth } from '@/auth/AuthContext';
+import { Stagger, StaggerItem } from '@/components/motion';
 import { SlaBadge } from './SupportPage';
 import { useAddComment, useEscalateTicket, usePatchTicket, useTicket } from './hooks';
 import { PRIORITY_LABEL, STATUS_OPTIONS, TYPE_LABEL, type TicketStatus } from './types';
@@ -75,18 +76,22 @@ export function TicketDetailPage() {
           Échanges {ticket.comments.length > 0 && <span className="text-ink-subtle">({ticket.comments.length})</span>}
         </h3>
         {ticket.comments.length === 0 && <p className="text-sm text-ink-subtle">Aucun échange pour l'instant.</p>}
-        {ticket.comments.map((c) => (
-          <Card key={c.id} className={cn(c.type === 'INTERNAL' && 'border-warning/30 bg-warning-soft/30')}>
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-ink">{c.authorId === 'me' ? 'Moi' : c.authorId ?? 'Système'}</span>
-              <span className="flex items-center gap-2 text-xs text-ink-subtle">
-                {c.type === 'INTERNAL' && <Badge tone="warning"><Lock size={11} /> Interne</Badge>}
-                {fmt(c.createdAt)}
-              </span>
-            </div>
-            <p className="mt-1 whitespace-pre-wrap text-sm text-ink-muted">{c.content}</p>
-          </Card>
-        ))}
+        <Stagger className="space-y-3">
+          {ticket.comments.map((c) => (
+            <StaggerItem key={c.id}>
+            <Card className={cn(c.type === 'INTERNAL' && 'border-warning/30 bg-warning-soft/30')}>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-ink">{c.authorId === 'me' ? 'Moi' : c.authorId ?? 'Système'}</span>
+                <span className="flex items-center gap-2 text-xs text-ink-subtle">
+                  {c.type === 'INTERNAL' && <Badge tone="warning"><Lock size={11} /> Interne</Badge>}
+                  {fmt(c.createdAt)}
+                </span>
+              </div>
+              <p className="mt-1 whitespace-pre-wrap text-sm text-ink-muted">{c.content}</p>
+            </Card>
+            </StaggerItem>
+          ))}
+        </Stagger>
         <CommentForm ticketId={ticket.id} canInternal={canWrite} />
       </section>
     </div>

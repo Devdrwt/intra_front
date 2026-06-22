@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ClipboardList, Sparkles, Target, Users } from 'lucide-react';
 import { Badge, Button, Card, PageHeader, Select, SkeletonRows, Textarea, cn } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
+import { Stagger, StaggerItem } from '@/components/motion';
 import { performanceService, type PerfEmploye, type TypeRecommandation } from './performance';
 
 const RECO_OPTIONS = [
@@ -27,9 +28,13 @@ export function PerformancePage() {
       {isLoading ? (
         <Card className="p-0"><SkeletonRows rows={3} cols={2} /></Card>
       ) : (
-        <div className="space-y-4">
-          {(perf ?? []).map((p) => <PerfCard key={p.employeId} p={p} />)}
-        </div>
+        <Stagger className="space-y-4">
+          {(perf ?? []).map((p) => (
+            <StaggerItem key={p.employeId}>
+              <PerfCard p={p} />
+            </StaggerItem>
+          ))}
+        </Stagger>
       )}
     </div>
   );

@@ -51,8 +51,8 @@ export function TiersPage() {
               </tr>
             </thead>
             <tbody>
-              {tiers.map((t) => (
-                <tr key={t.id} className="border-b border-surface-border last:border-0">
+              {tiers.map((t, i) => (
+                <tr key={t.id} className="border-b border-surface-border last:border-0 animate-row" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
                   <td className="px-5 py-3">
                     <div className="font-medium text-ink">{t.nom}</div>
                     <div className="text-xs text-ink-subtle">{t.code}{t.ifu ? ` · IFU ${t.ifu}` : ''}</div>

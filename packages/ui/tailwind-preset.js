@@ -94,6 +94,9 @@ module.exports = {
       animation: {
         'fade-in': 'fade-in 0.18s ease-out',
         'slide-up': 'slide-up 0.2s ease-out',
+        // Apparition de ligne (table) : fill-mode backwards → reste invisible
+        // pendant le délai, pour un effet « cascade » via animation-delay par index.
+        row: 'fade-in 0.4s ease-out backwards',
         'ken-burns': 'ken-burns 22s ease-in-out infinite alternate',
         blob: 'blob 16s ease-in-out infinite',
       },

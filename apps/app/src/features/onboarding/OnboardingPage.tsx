@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2, Circle, Rocket, LogOut } from 'lucide-react';
 import { Badge, Card, PageHeader, SkeletonRows, cn } from '@drwindesk/ui';
+import { Stagger, StaggerItem } from '@/components/motion';
 import { onboardingService, type Parcours } from './service';
 
 export function OnboardingPage() {
@@ -19,11 +20,13 @@ export function OnboardingPage() {
       {isLoading ? (
         <Card className="p-0"><SkeletonRows rows={3} cols={2} /></Card>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <Stagger className="grid gap-4 lg:grid-cols-2">
           {(parcours ?? []).map((p) => (
-            <ParcoursCard key={p.id} p={p} onToggle={(etapeId) => toggle.mutate({ parcoursId: p.id, etapeId })} />
+            <StaggerItem key={p.id} className="h-full">
+              <ParcoursCard p={p} onToggle={(etapeId) => toggle.mutate({ parcoursId: p.id, etapeId })} />
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       )}
     </div>
   );
@@ -33,7 +36,7 @@ function ParcoursCard({ p, onToggle }: { p: Parcours; onToggle: (etapeId: string
   const done = p.etapes.filter((e) => e.faite).length;
   const pct = p.etapes.length ? Math.round((done / p.etapes.length) * 100) : 0;
   return (
-    <Card className="space-y-3">
+    <Card className="h-full space-y-3">
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
           {p.type === 'ONBOARDING' ? <Rocket size={18} className="text-brand-600" /> : <LogOut size={18} className="text-ink-muted" />}

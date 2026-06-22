@@ -51,8 +51,8 @@ export function ArchivagePage() {
         <Card className="p-0">
           <div className="p-5 pb-2"><CardTitle>Connexions cloud d'archivage</CardTitle></div>
           <ul className="divide-y divide-surface-border">
-            {(stores ?? []).map((s) => (
-              <li key={s.id} className="flex items-center justify-between gap-3 px-5 py-3">
+            {(stores ?? []).map((s, i) => (
+              <li key={s.id} className="flex items-center justify-between gap-3 px-5 py-3 animate-row" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
                 <div className="flex items-center gap-2">
                   {s.type === 'LOCAL' ? <HardDrive size={18} className="text-ink-muted" /> : <Cloud size={18} className="text-brand-600" />}
                   <div>
@@ -74,8 +74,8 @@ export function ArchivagePage() {
         <Card className="p-0">
           <div className="p-5 pb-2"><CardTitle>Politiques de rétention</CardTitle></div>
           <ul className="divide-y divide-surface-border">
-            {(politiques ?? []).map((p) => (
-              <li key={p.id} className="flex items-center justify-between gap-3 px-5 py-3">
+            {(politiques ?? []).map((p, i) => (
+              <li key={p.id} className="flex items-center justify-between gap-3 px-5 py-3 animate-row" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
                 <div>
                   <div className="font-medium text-ink">{p.nom}</div>
                   <div className="text-xs text-ink-subtle">{p.dureeConservationMois} mois · {p.actionEcheance === 'PURGER' ? 'purge à l’échéance' : 'conservation'}</div>
@@ -102,8 +102,8 @@ export function ArchivagePage() {
               </tr>
             </thead>
             <tbody>
-              {(archives ?? []).map((a) => (
-                <tr key={a.id} className="border-b border-surface-border last:border-0">
+              {(archives ?? []).map((a, i) => (
+                <tr key={a.id} className="border-b border-surface-border last:border-0 animate-row" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
                   <td className="px-5 py-3">
                     <div className="font-medium text-ink">{a.documentNom}</div>
                     <div className="text-xs text-ink-subtle">{a.storeNom} · {a.tailleKo} Ko · archivé {a.archivedAt}</div>

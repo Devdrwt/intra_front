@@ -106,8 +106,8 @@ export function AuditPage() {
           />
         ) : (
           <ul className="divide-y divide-surface-border">
-            {items.map((log) => (
-              <li key={log.id} className="flex items-center gap-3 px-5 py-3">
+            {items.map((log, i) => (
+              <li key={log.id} className="flex items-center gap-3 px-5 py-3 animate-row" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
                 <Avatar name={log.actorEmail ?? 'Système'} size="sm" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">

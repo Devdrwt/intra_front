@@ -158,8 +158,8 @@ export function ProjectDetailPage() {
               <p className="px-5 py-6 text-center text-sm text-ink-subtle">Aucun document joint.</p>
             ) : (
               <ul className="mt-3 divide-y divide-surface-border">
-                {p.documents.map((d) => (
-                  <li key={d.id} className="flex items-center gap-3 px-5 py-3">
+                {p.documents.map((d, i) => (
+                  <li key={d.id} className="flex items-center gap-3 px-5 py-3 animate-row" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-ink-subtle">
                       <FileText size={16} />
                     </span>
@@ -244,8 +244,8 @@ export function ProjectDetailPage() {
               <p className="mt-2 text-sm text-ink-subtle">Aucun membre assigné.</p>
             ) : (
               <ul className="mt-3 space-y-2">
-                {p.membres.map((m) => (
-                  <li key={m.id} className="flex items-center gap-2.5 text-sm">
+                {p.membres.map((m, i) => (
+                  <li key={m.id} className="flex items-center gap-2.5 text-sm animate-row" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
                     <Avatar name={`${m.prenom} ${m.nom}`} size="sm" />
                     <span className="text-ink">
                       {m.prenom} {m.nom}
@@ -268,8 +268,8 @@ export function ProjectDetailPage() {
               )}
               {(p.liens?.length ?? 0) > 0 && (
                 <ul className="mt-3 space-y-1.5">
-                  {p.liens!.map((l) => (
-                    <li key={l.url}>
+                  {p.liens!.map((l, i) => (
+                    <li key={l.url} className="animate-row" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
                       <a
                         href={l.url}
                         target="_blank"

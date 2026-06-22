@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CalendarPlus, ChevronRight, Mic, Plus, Radio, Video } from 'lucide-react';
 import { Badge, Button, Card, CardTitle, Input, PageHeader, Select, SkeletonRows, cn } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
+import { Stagger, StaggerItem } from '@/components/motion';
 import { studioService, type Reservation, type StatutProduction, type TypeProduction } from './service';
 
 const TYPE_ICON: Record<TypeProduction, typeof Mic> = { PODCAST: Mic, VIDEO: Video, ENREGISTREMENT: Radio, LIVE: Radio, AUTRE: Radio };
@@ -58,12 +59,13 @@ export function StudioPage() {
           {isLoading ? (
             <Card className="p-0"><SkeletonRows rows={3} cols={2} /></Card>
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2">
+            <Stagger className="grid gap-3 sm:grid-cols-2">
               {(productions ?? []).map((p) => {
                 const Icon = TYPE_ICON[p.type];
                 const next = NEXT[p.statut];
                 return (
-                  <Card key={p.id} className="space-y-2">
+                  <StaggerItem key={p.id} className="h-full">
+                  <Card className="h-full space-y-2">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2 text-ink-muted"><Icon size={16} /><span className="text-xs">{p.type}</span></div>
                       <Badge tone={STATUT_TONE[p.statut]} dot>{STATUT_LABEL[p.statut]}</Badge>
@@ -76,9 +78,10 @@ export function StudioPage() {
                       </button>
                     )}
                   </Card>
+                  </StaggerItem>
                 );
               })}
-            </div>
+            </Stagger>
           )}
         </div>
 
@@ -111,8 +114,8 @@ function PlanningCard({ reservations }: { reservations: Reservation[] }) {
     <Card className="p-0">
       <div className="p-5 pb-2"><CardTitle>Planning du studio</CardTitle></div>
       <ul className="divide-y divide-surface-border">
-        {reservations.map((r) => (
-          <li key={r.id} className="px-5 py-2.5 text-sm">
+        {reservations.map((r, i) => (
+          <li key={r.id} className="px-5 py-2.5 text-sm animate-row" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
             <div className="font-medium text-ink">{r.date} · {r.heureDebut}–{r.heureFin}</div>
             <div className="text-xs text-ink-subtle">{r.objet ?? r.productionTitre ?? 'Réservé'}</div>
           </li>

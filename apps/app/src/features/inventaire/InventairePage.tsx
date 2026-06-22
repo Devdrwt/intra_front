@@ -90,8 +90,8 @@ export function InventairePage() {
               </tr>
             </thead>
             <tbody>
-              {biens.map((b) => (
-                <tr key={b.id} className="border-b border-surface-border last:border-0">
+              {biens.map((b, i) => (
+                <tr key={b.id} className="border-b border-surface-border last:border-0 animate-row" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
                   <td className="px-5 py-3">
                     <div className="font-medium text-ink">{b.nom}{b.quantite > 1 ? ` ×${b.quantite}` : ''}</div>
                     <div className="text-xs text-ink-subtle">{b.reference}{b.categorie ? ` · ${b.categorie}` : ''}{b.localisation ? ` · ${b.localisation}` : ''}</div>

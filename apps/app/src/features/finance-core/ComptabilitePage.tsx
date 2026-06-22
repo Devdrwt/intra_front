@@ -70,7 +70,7 @@ function RefCard({ title, items }: { title: string; items: { left: string; right
       </div>
       <ul className="divide-y divide-surface-border">
         {items.map((it, i) => (
-          <li key={i} className="flex items-center justify-between gap-2 px-5 py-2.5 text-sm">
+          <li key={i} className="flex items-center justify-between gap-2 px-5 py-2.5 text-sm animate-row" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
             <span className="font-mono text-xs text-ink-muted">{it.left}</span>
             <span className="flex-1 truncate text-ink">{it.right}</span>
             {it.tag && <Badge tone="neutral">{it.tag}</Badge>}

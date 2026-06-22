@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, Banknote, Receipt, TrendingDown, TrendingUp, Users } from 'lucide-react';
 import { Badge, Card, CardTitle, PageHeader, SkeletonRows, cn } from '@drwindesk/ui';
 import { fcfaCompact } from '@/lib/money';
+import { Stagger, StaggerItem } from '@/components/motion';
 import { pilotageService } from './service';
 
 export function PilotagePage() {
@@ -22,15 +23,17 @@ export function PilotagePage() {
     <div className="space-y-5">
       <PageHeader title="Budgets & pilotage" subtitle="Cockpit financier — trésorerie, résultat, créances, budgets." />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {kpis.map((k) => (
-          <Card key={k.label}>
+          <StaggerItem key={k.label} className="h-full">
+          <Card className="h-full">
             <div className="flex items-center gap-2 text-ink-muted"><k.icon size={18} /><span className="text-xs">{k.label}</span></div>
             <div className={cn('mt-2 text-xl font-bold', k.tone)}>{k.value}</div>
             {k.sub && <div className="text-xs text-ink-subtle">{k.sub}</div>}
           </Card>
+          </StaggerItem>
         ))}
-      </div>
+      </Stagger>
 
       <Card>
         <CardTitle>Budget vs réalisé</CardTitle>

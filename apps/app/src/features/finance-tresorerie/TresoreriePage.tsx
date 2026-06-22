@@ -67,8 +67,8 @@ export function TresoreriePage() {
           <CardTitle>Mouvements {selected ? `— ${comptes?.find((c) => c.id === selected)?.nom}` : '(tous comptes)'}</CardTitle>
         </div>
         <ul className="divide-y divide-surface-border">
-          {(mouvements ?? []).map((m) => (
-            <li key={m.id} className="flex items-center justify-between gap-3 px-5 py-3">
+          {(mouvements ?? []).map((m, i) => (
+            <li key={m.id} className="flex items-center justify-between gap-3 px-5 py-3 animate-row" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
               <div className="flex items-center gap-3">
                 <span className={cn('flex h-8 w-8 items-center justify-center rounded-full', m.sens === 'ENTREE' ? 'bg-success-soft text-success-soft-fg' : 'bg-danger-soft text-danger-soft-fg')}>
                   {m.sens === 'ENTREE' ? <ArrowDownLeft size={16} /> : <ArrowUpRight size={16} />}

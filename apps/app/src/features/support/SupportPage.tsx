@@ -118,8 +118,8 @@ export function SupportPage() {
               </tr>
             </thead>
             <tbody>
-              {tickets.map((t: Ticket) => (
-                <tr key={t.id} className="border-b border-surface-border last:border-0 hover:bg-surface-muted/50">
+              {tickets.map((t: Ticket, i) => (
+                <tr key={t.id} className="border-b border-surface-border last:border-0 hover:bg-surface-muted/50 animate-row" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
                   <td className="px-5 py-3">
                     <Link to={`/support/${t.id}`} className="block">
                       <div className="font-medium text-ink">{t.title}</div>

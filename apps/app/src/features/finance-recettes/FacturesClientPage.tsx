@@ -64,10 +64,10 @@ export function FacturesClientPage() {
               </tr>
             </thead>
             <tbody>
-              {factures.map((f) => {
+              {factures.map((f, i) => {
                 const reste = f.montantTtc - f.montantPaye;
                 return (
-                  <tr key={f.id} className="border-b border-surface-border last:border-0">
+                  <tr key={f.id} className="border-b border-surface-border last:border-0 animate-row" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
                     <td className="px-5 py-3">
                       <div className="font-medium text-ink">{f.clientNom}</div>
                       <div className="text-xs text-ink-subtle">{f.reference} · {f.objet}</div>

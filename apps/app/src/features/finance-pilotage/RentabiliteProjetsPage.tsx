@@ -54,8 +54,8 @@ export function RentabiliteProjetsPage() {
               </tr>
             </thead>
             <tbody>
-              {data.map((p) => (
-                <tr key={p.projetId} className="border-b border-surface-border last:border-0">
+              {data.map((p, i) => (
+                <tr key={p.projetId} className="border-b border-surface-border last:border-0 animate-row" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
                   <td className="px-5 py-3 font-medium text-ink">{p.projetNom}</td>
                   <td className="px-5 py-3 text-right text-success">{fcfa(p.entrees)}</td>
                   <td className="px-5 py-3 text-right text-danger">{fcfa(p.sorties)}</td>
