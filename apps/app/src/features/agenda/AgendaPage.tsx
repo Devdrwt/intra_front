@@ -1,11 +1,11 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { CalendarDays, ChevronLeft, ChevronRight, ExternalLink, Link2, Plus, Trash2 } from 'lucide-react';
+import { CalendarDays, ChevronLeft, ChevronRight, ExternalLink, Link2, Plus, Repeat, Trash2 } from 'lucide-react';
 import { Button, Card, EmptyState, Input, Modal, PageHeader, Select, Spinner, cn } from '@drwindesk/ui';
 import { toast } from '@/lib/toast';
 import { Stagger, StaggerItem } from '@/components/motion';
-import { agendaService, RAPPEL_OPTIONS, RECURRENCE_OPTIONS, TYPE_EVT_OPTIONS } from './service';
+import { agendaService, RAPPEL_OPTIONS, RECURRENCE_OPTIONS, TYPE_COLOR, TYPE_EVT_OPTIONS } from './service';
 import { useAgenda, useCreateEvenement, useDeleteEvenement } from './hooks';
 import type { AgendaItem, AgendaSource, Recurrence, TypeEvenement } from './service';
 
@@ -18,6 +18,10 @@ const SOURCE: Record<AgendaSource, { label: string; color: string }> = {
   AO: { label: 'Appel d’offres', color: '#DC2626' },
   PAIE: { label: 'Paie', color: '#64748B' },
 };
+
+/** Couleur d'un item : par catégorie pour le perso, sinon par source. */
+const itemColor = (it: AgendaItem): string =>
+  it.source === 'PERSO' && it.type ? TYPE_COLOR[it.type] : SOURCE[it.source].color;
 
 const WEEKDAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 const ymd = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -205,7 +209,7 @@ export function AgendaPage() {
                         <div className="min-w-0 space-y-0.5">
                           {dayItems.slice(0, 2).map((it) => (
                             <div key={it.id} className="flex items-center gap-1 truncate text-[10px] leading-tight">
-                              <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: SOURCE[it.source].color }} />
+                              <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: itemColor(it) }} />
                               <span className="truncate text-ink">{it.titre}</span>
                             </div>
                           ))}
@@ -388,7 +392,7 @@ function WeekView({
 }
 
 function WeekChip({ it }: { it: AgendaItem }) {
-  const color = SOURCE[it.source].color;
+  const color = itemColor(it);
   const inner = (
     <div className="rounded-md px-1.5 py-1 text-[11px] leading-tight" style={{ backgroundColor: `${color}1A` }}>
       {!it.journeeEntiere && (
@@ -410,7 +414,7 @@ function WeekChip({ it }: { it: AgendaItem }) {
 
 function DayItem({ it }: { it: AgendaItem }) {
   const del = useDeleteEvenement();
-  const color = SOURCE[it.source].color;
+  const color = itemColor(it);
   return (
     <li className="flex items-start gap-3 px-4 py-3">
       <span className="mt-1 h-full w-1 rounded-full" style={{ backgroundColor: color, minHeight: 32 }} />
@@ -419,6 +423,7 @@ function DayItem({ it }: { it: AgendaItem }) {
           <span className="text-[10px] font-semibold uppercase" style={{ color }}>{SOURCE[it.source].label}</span>
           {!it.journeeEntiere && <span className="text-xs text-ink-subtle">{heure(it.debut)}–{heure(it.fin)}</span>}
           {it.journeeEntiere && <span className="text-xs text-ink-subtle">Journée</span>}
+          {it.recurrent && <Repeat size={12} className="text-ink-subtle" />}
         </div>
         <div className="truncate font-medium text-ink">{it.titre}</div>
         {it.lieu && <div className="text-xs text-ink-subtle">{it.lieu}</div>}

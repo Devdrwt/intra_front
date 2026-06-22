@@ -41,7 +41,18 @@ export interface AgendaItem {
   lieu?: string;
   url?: string;
   editable: boolean;
+  type?: TypeEvenement;
+  recurrent?: boolean;
 }
+
+/** Couleur d'un événement perso selon sa catégorie (sinon couleur de la source). */
+export const TYPE_COLOR: Record<TypeEvenement, string> = {
+  RENDEZ_VOUS: '#4F46E5',
+  REUNION: '#0891B2',
+  RAPPEL: '#D97706',
+  CRENEAU: '#7C3AED',
+  AUTRE: '#64748B',
+};
 
 export interface EvenementInput {
   titre: string;
