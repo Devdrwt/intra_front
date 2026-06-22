@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import { useMemo, useState, type DragEvent, type FormEvent } from 'react';
 import { CalendarClock, ChevronRight, Plus, Tag, Trash2 } from 'lucide-react';
 import { Badge, Button, Card, Input, Modal, PageHeader, Select, SkeletonRows, Textarea, cn } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
@@ -49,6 +49,15 @@ export function MesTachesPage() {
   const [search, setSearch] = useState('');
   const [onlyLate, setOnlyLate] = useState(false);
   const [edited, setEdited] = useState<Task | null>(null);
+  const [dragOver, setDragOver] = useState<TaskStatus | null>(null);
+
+  const onDrop = (statut: TaskStatus) => (e: DragEvent) => {
+    e.preventDefault();
+    const id = e.dataTransfer.getData('text/plain');
+    setDragOver(null);
+    const t = (tasks ?? []).find((x) => x.id === id);
+    if (id && t && t.statut !== statut) move.mutate({ id, statut });
+  };
 
   const onCreate = (e: FormEvent) => {
     e.preventDefault();
@@ -99,7 +108,16 @@ export function MesTachesPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {COLUMNS.map((col) => (
-            <div key={col.key} className="rounded-2xl border border-surface-border bg-surface-muted/40 p-3">
+            <div
+              key={col.key}
+              onDragOver={(e) => { e.preventDefault(); setDragOver(col.key); }}
+              onDragLeave={() => setDragOver((d) => (d === col.key ? null : d))}
+              onDrop={onDrop(col.key)}
+              className={cn(
+                'rounded-2xl border bg-surface-muted/40 p-3 transition-colors',
+                dragOver === col.key ? 'border-brand-400 bg-brand-soft/40 ring-2 ring-brand-300' : 'border-surface-border',
+              )}
+            >
               <div className="mb-2 flex items-center justify-between px-1">
                 <span className="flex items-center gap-2 text-sm font-semibold text-ink">
                   <span className={cn('h-2 w-2 rounded-full', col.dot)} />
@@ -130,7 +148,12 @@ function TaskCard({ t, onMove, onOpen }: { t: Task; onMove: (s: TaskStatus) => v
   const late = isLate(t);
   const prog = t.progression ?? 0;
   return (
-    <div className={cn('cursor-pointer rounded-xl border border-l-4 border-surface-border bg-surface-elevated p-3 shadow-sm transition-shadow hover:shadow-elevated', PRIO_ACCENT[t.priorite])} onClick={onOpen}>
+    <div
+      draggable
+      onDragStart={(e) => { e.dataTransfer.setData('text/plain', t.id); e.dataTransfer.effectAllowed = 'move'; }}
+      className={cn('cursor-pointer rounded-xl border border-l-4 border-surface-border bg-surface-elevated p-3 shadow-sm transition-shadow hover:shadow-elevated active:cursor-grabbing', PRIO_ACCENT[t.priorite])}
+      onClick={onOpen}
+    >
       <div className="flex items-start justify-between gap-2">
         <span className="text-sm font-medium text-ink">{t.titre}</span>
         <Badge tone={PRIO_TONE[t.priorite]}>{PRIO_LABEL[t.priorite]}</Badge>
