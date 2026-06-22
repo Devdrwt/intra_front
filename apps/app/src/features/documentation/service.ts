@@ -1,6 +1,6 @@
 import { api } from '@/lib/api';
 import { triggerDownload } from '@/lib/download';
-import type { CreateDocInput, DocItem, DocVersion } from './types';
+import type { CreateDocInput, DocItem, DocStatut, DocVersion } from './types';
 
 export const documentationService = {
   list: (categorie?: string, q?: string) =>
@@ -13,6 +13,8 @@ export const documentationService = {
     fd.append('file', input.file);
     return api.post<DocItem>('/docs', fd).then((r) => r.data);
   },
+  setStatut: (id: string, statut: DocStatut) =>
+    api.patch<DocItem>(`/docs/${id}/statut`, { statut }).then((r) => r.data),
   remove: (id: string) => api.delete(`/docs/${id}`).then(() => undefined),
   download: (id: string, name: string) =>
     api.get(`/docs/${id}/file`, { responseType: 'blob' }).then((r) => triggerDownload(r.data, name)),

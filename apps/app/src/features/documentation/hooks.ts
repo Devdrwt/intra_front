@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { documentationService } from './service';
-import type { CreateDocInput } from './types';
+import type { CreateDocInput, DocStatut } from './types';
 
 const KEY = 'docs';
 
@@ -25,6 +25,16 @@ export function useRemoveDoc() {
   return useMutation({
     mutationFn: (id: string) => documentationService.remove(id),
     meta: { successMessage: 'Document supprimé' },
+    onSuccess: () => qc.invalidateQueries({ queryKey: [KEY] }),
+  });
+}
+
+export function useSetDocStatut() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, statut }: { id: string; statut: DocStatut }) =>
+      documentationService.setStatut(id, statut),
+    meta: { successMessage: 'Statut mis à jour' },
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEY] }),
   });
 }

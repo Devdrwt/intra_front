@@ -18,9 +18,16 @@ import { humanSize } from '@/lib/download';
 import { apiErrorMessage } from '@/lib/api';
 import { toast } from '@/lib/toast';
 import { Stagger, StaggerItem } from '@/components/motion';
-import { useAddVersion, useCreateDoc, useDocVersions, useDocs, useRemoveDoc } from './hooks';
+import {
+  useAddVersion,
+  useCreateDoc,
+  useDocVersions,
+  useDocs,
+  useRemoveDoc,
+  useSetDocStatut,
+} from './hooks';
 import { documentationService } from './service';
-import { DOC_CATEGORIES, type DocItem } from './types';
+import { DOC_CATEGORIES, DOC_STATUT_META, type DocItem, type DocStatut } from './types';
 
 const fmt = (iso: string) => new Date(iso).toLocaleDateString('fr-FR');
 
@@ -31,6 +38,7 @@ export function DocumentationPage() {
   const [q, setQ] = useState('');
   const { data, isLoading } = useDocs(cat, q);
   const remove = useRemoveDoc();
+  const setStatut = useSetDocStatut();
   const [showNew, setShowNew] = useState(false);
   const [dlId, setDlId] = useState<string | null>(null);
   const [historyDoc, setHistoryDoc] = useState<DocItem | null>(null);
@@ -107,6 +115,9 @@ export function DocumentationPage() {
                     <p className="truncate font-medium text-ink">{d.titre}</p>
                     <Badge tone="neutral">{d.categorie}</Badge>
                     {d.version > 1 && <Badge tone="brand">v{d.version}</Badge>}
+                    {canManage && d.statut !== 'PUBLIE' && (
+                      <Badge tone={DOC_STATUT_META[d.statut].tone}>{DOC_STATUT_META[d.statut].label}</Badge>
+                    )}
                   </div>
                   {d.description && <p className="truncate text-sm text-ink-subtle">{d.description}</p>}
                   <p className="text-xs text-ink-subtle">
@@ -114,6 +125,19 @@ export function DocumentationPage() {
                     {d.taille > 0 && ` · ${humanSize(d.taille)}`}
                   </p>
                 </div>
+                {canManage && (
+                  <div className="w-32 shrink-0">
+                    <Select
+                      options={[
+                        { value: 'BROUILLON', label: 'Brouillon' },
+                        { value: 'EN_REVUE', label: 'En revue' },
+                        { value: 'PUBLIE', label: 'Publier' },
+                      ]}
+                      value={d.statut}
+                      onChange={(e) => setStatut.mutate({ id: d.id, statut: e.target.value as DocStatut })}
+                    />
+                  </div>
+                )}
                 <Button size="sm" variant="ghost" onClick={() => setHistoryDoc(d)} title="Historique des versions">
                   <History size={15} />
                 </Button>
@@ -257,6 +281,9 @@ function NewDocModal({ onClose }: { onClose: () => void }) {
           </Button>
           <p className="mt-1 text-xs text-ink-subtle">PDF, Word, Excel, PowerPoint, image — 10 Mo max.</p>
         </div>
+        <p className="text-xs text-ink-subtle">
+          Le document est créé en <strong>brouillon</strong> — passez-le en « Publier » pour le rendre visible de tous.
+        </p>
       </div>
     </Modal>
   );
