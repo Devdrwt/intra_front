@@ -38,6 +38,7 @@ import {
   Library,
   LineChart,
   Award,
+  Images,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -126,6 +127,7 @@ export const MODULES: ModuleRoute[] = [
     requires: 'rh.employe:read',
   },
   { path: '/archivage', label: 'Archivage', icon: Archive, group: 'Administration', requires: 'ged.archive:read' },
+  { path: '/mediatheque', label: 'Médiathèque', icon: Images, group: 'Administration', requires: 'media:read' },
   {
     path: '/recrutement',
     label: 'Recrutement',

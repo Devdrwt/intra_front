@@ -55,6 +55,7 @@ import { ProjectsPage } from '@/features/projects/ProjectsPage';
 import { ProjectDetailPage } from '@/features/projects/ProjectDetailPage';
 import { ProjectFormPage } from '@/features/projects/ProjectFormPage';
 import { DocumentsPage } from '@/features/documents/DocumentsPage';
+import { MediathequePage } from '@/features/mediatheque/MediathequePage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { GuidePage } from '@/pages/GuidePage';
 import { FaqPage } from '@/pages/FaqPage';
@@ -103,6 +104,10 @@ export default function App() {
               <Route path="rh/:id" element={<EmployeDetailPage />} />
               <Route path="rh/:id/editer" element={<EmployeFormPage />} />
               <Route path="documents" element={<DocumentsPage />} />
+            </Route>
+
+            <Route element={<RequirePermission perm="media:read" />}>
+              <Route path="mediatheque" element={<MediathequePage />} />
             </Route>
 
             <Route element={<RequirePermission perm="presence:manage" />}>
