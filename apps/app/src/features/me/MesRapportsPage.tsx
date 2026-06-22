@@ -1,10 +1,16 @@
 import { useRef, useState, type FormEvent } from 'react';
-import { Download, FileBarChart, Paperclip, PenLine, Save, Send, Trash2, X } from 'lucide-react';
-import { Badge, Button, Callout, Card, CardTitle, EmptyState, Input, PageHeader, Skeleton, Textarea } from '@drwindesk/ui';
+import { Download, FileBarChart, FileText, Paperclip, PenLine, Save, Send, Trash2, X } from 'lucide-react';
+import { Badge, Button, Callout, Card, CardTitle, EmptyState, Input, PageHeader, Skeleton, Textarea, cn } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
 import { triggerDownload, humanSize } from '@/lib/download';
 import { toast } from '@/lib/toast';
+import { Stagger, StaggerItem } from '@/components/motion';
 import { STATUT_RAPPORT_LABEL, type Rapport, type StatutRapport } from '@/features/rapports/types';
+
+const STATUT_GRAD: Record<StatutRapport, string> = {
+  SOUMIS: 'from-emerald-400 to-teal-600',
+  BROUILLON: 'from-amber-400 to-orange-500',
+};
 import { useDeleteMyRapport, useMyRapports, useUpsertMyRapport } from './hooks';
 import { meService } from './service';
 import { MeNotLinked } from './MeNotLinked';
@@ -131,6 +137,11 @@ export function MesRapportsPage() {
             placeholder="Activités réalisées, points de blocage, prochaines étapes…"
             error={fieldError ?? undefined}
           />
+          {contenu.trim() && (
+            <p className="-mt-2 text-right text-xs text-ink-subtle">
+              {contenu.trim().split(/\s+/).length} mots · {contenu.length} caractères
+            </p>
+          )}
 
           {/* Pièce jointe */}
           <div>
@@ -200,9 +211,13 @@ export function MesRapportsPage() {
             className="py-10"
           />
         ) : (
-          <ul className="mt-3 divide-y divide-surface-border">
+          <Stagger className="mt-3 divide-y divide-surface-border">
             {list.map((r) => (
-              <li key={r.id} className="px-5 py-3">
+              <StaggerItem key={r.id} className="flex gap-3 px-5 py-3">
+                <span className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br text-white', STATUT_GRAD[r.statut])}>
+                  <FileText size={16} />
+                </span>
+                <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-sm font-medium capitalize text-ink">{fmt(r.date)}</span>
                   <div className="flex items-center gap-2">
@@ -236,9 +251,10 @@ export function MesRapportsPage() {
                     <span className="text-ink-subtle">· {humanSize(r.attachment.size)}</span>
                   </button>
                 )}
-              </li>
+                </div>
+              </StaggerItem>
             ))}
-          </ul>
+          </Stagger>
         )}
       </Card>
     </div>
