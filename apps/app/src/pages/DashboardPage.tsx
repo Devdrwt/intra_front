@@ -38,12 +38,19 @@ const fullDate = () =>
   new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
 
 type Tone = 'brand' | 'success' | 'warning' | 'danger';
-const TONE: Record<Tone, string> = {
-  brand: 'bg-brand-soft text-brand-soft-fg',
-  success: 'bg-success-soft text-success-soft-fg',
-  warning: 'bg-warning-soft text-warning-soft-fg',
-  danger: 'bg-danger-soft text-danger-soft-fg',
+// Pastilles d'icônes en dégradés vifs (icône blanche) — pour donner de la vie.
+const TONE_GRAD: Record<Tone, string> = {
+  brand: 'bg-gradient-to-br from-indigo-400 to-violet-600 shadow-indigo-500/30',
+  success: 'bg-gradient-to-br from-emerald-400 to-teal-600 shadow-emerald-500/30',
+  warning: 'bg-gradient-to-br from-amber-400 to-orange-500 shadow-amber-500/30',
+  danger: 'bg-gradient-to-br from-rose-400 to-pink-600 shadow-rose-500/30',
 };
+const ACTION_GRAD = [
+  'from-indigo-400 to-violet-600',
+  'from-emerald-400 to-teal-600',
+  'from-amber-400 to-orange-500',
+  'from-rose-400 to-pink-600',
+];
 
 function StatCard({
   icon: Icon,
@@ -62,7 +69,7 @@ function StatCard({
 }) {
   const inner = (
     <Card interactive={!!to} className="flex h-full items-center gap-4">
-      <span className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-xl', TONE[tone])}>
+      <span className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white shadow-lg', TONE_GRAD[tone])}>
         <Icon size={20} />
       </span>
       <div className="min-w-0">
@@ -170,7 +177,7 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-surface-border bg-gradient-to-br from-brand-soft/60 via-surface to-surface p-5 shadow-soft">
+      <div className="rounded-2xl border border-surface-border bg-gradient-to-r from-brand-soft via-surface to-warning-soft/60 p-5 shadow-soft">
         <PageHeader
           title={
             <span className="capitalize">
@@ -214,13 +221,18 @@ export function DashboardPage() {
           <Card>
             <CardTitle>Actions rapides</CardTitle>
             <div className="mt-4 space-y-2">
-              {actions.map((a) => (
+              {actions.map((a, i) => (
                 <Link
                   key={a.to}
                   to={a.to}
                   className="flex items-center gap-3 rounded-xl border border-surface-border px-3 py-2.5 text-sm font-medium text-ink transition-colors hover:border-brand-300 hover:bg-brand-soft"
                 >
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-muted text-ink-muted">
+                  <span
+                    className={cn(
+                      'flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br text-white shadow',
+                      ACTION_GRAD[i % ACTION_GRAD.length],
+                    )}
+                  >
                     <a.icon size={16} />
                   </span>
                   {a.label}
