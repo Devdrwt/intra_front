@@ -58,6 +58,7 @@ import { DocumentsPage } from '@/features/documents/DocumentsPage';
 import { MediathequePage } from '@/features/mediatheque/MediathequePage';
 import { ActualitesPage } from '@/features/actualites/ActualitesPage';
 import { AnnuairePage } from '@/features/annuaire/AnnuairePage';
+import { DocumentationPage } from '@/features/documentation/DocumentationPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { GuidePage } from '@/pages/GuidePage';
 import { FaqPage } from '@/pages/FaqPage';
@@ -83,6 +84,7 @@ export default function App() {
             <Route path="agenda" element={<AgendaPage />} />
             <Route path="actualites" element={<ActualitesPage />} />
             <Route path="annuaire" element={<AnnuairePage />} />
+            <Route path="base-documentaire" element={<DocumentationPage />} />
             <Route path="mon-pointage" element={<MonPointagePage />} />
             <Route path="mes-demandes" element={<MesDemandesPage />} />
             <Route path="mes-validations" element={<MesValidationsPage />} />

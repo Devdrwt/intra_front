@@ -41,6 +41,7 @@ import {
   Images,
   Newspaper,
   Contact,
+  FolderOpen,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -67,6 +68,7 @@ export const MODULES: ModuleRoute[] = [
   { path: '/', label: 'Tableau de bord', icon: LayoutDashboard, group: 'Mon espace' },
   { path: '/actualites', label: 'Actualités', icon: Newspaper, group: 'Mon espace' },
   { path: '/annuaire', label: 'Annuaire', icon: Contact, group: 'Mon espace' },
+  { path: '/base-documentaire', label: 'Base documentaire', icon: FolderOpen, group: 'Mon espace' },
   { path: '/mon-pointage', label: 'Mon pointage', icon: Clock, group: 'Mon espace' },
   { path: '/agenda', label: 'Mon agenda', icon: CalendarDays, group: 'Mon espace' },
   { path: '/mes-demandes', label: 'Mes demandes', icon: CalendarClock, group: 'Mon espace' },

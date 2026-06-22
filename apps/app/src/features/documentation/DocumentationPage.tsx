@@ -1,0 +1,184 @@
+import { useRef, useState } from 'react';
+import { Download, FileText, FolderOpen, Search, Trash2, Upload } from 'lucide-react';
+import {
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  Input,
+  Modal,
+  PageHeader,
+  Select,
+  Skeleton,
+  Textarea,
+  cn,
+} from '@drwindesk/ui';
+import { hasPermission, useAuth } from '@/auth/AuthContext';
+import { humanSize } from '@/lib/download';
+import { apiErrorMessage } from '@/lib/api';
+import { toast } from '@/lib/toast';
+import { Stagger, StaggerItem } from '@/components/motion';
+import { useCreateDoc, useDocs, useRemoveDoc } from './hooks';
+import { documentationService } from './service';
+import { DOC_CATEGORIES, type DocItem } from './types';
+
+const fmt = (iso: string) => new Date(iso).toLocaleDateString('fr-FR');
+
+export function DocumentationPage() {
+  const { user } = useAuth();
+  const canManage = hasPermission(user, 'doc:manage');
+  const [cat, setCat] = useState('');
+  const [q, setQ] = useState('');
+  const { data, isLoading } = useDocs(cat, q);
+  const remove = useRemoveDoc();
+  const [showNew, setShowNew] = useState(false);
+  const [dlId, setDlId] = useState<string | null>(null);
+
+  const download = async (d: DocItem) => {
+    setDlId(d.id);
+    try {
+      await documentationService.download(d.id, d.titre);
+    } catch (e) {
+      toast.error(apiErrorMessage(e, 'Téléchargement impossible.'));
+    } finally {
+      setDlId(null);
+    }
+  };
+
+  return (
+    <div className="space-y-5">
+      <PageHeader
+        title="Base documentaire"
+        subtitle="Procédures, manuels, contrats et documents de référence de l’entreprise."
+        actions={
+          canManage ? (
+            <Button onClick={() => setShowNew(true)}>
+              <Upload size={16} /> Déposer
+            </Button>
+          ) : undefined
+        }
+      />
+
+      <Card className="flex flex-wrap items-center gap-3">
+        <div className="min-w-[220px] flex-1">
+          <Input leading={<Search size={16} />} placeholder="Rechercher un document…" value={q} onChange={(e) => setQ(e.target.value)} />
+        </div>
+        <div className="flex flex-wrap gap-1 rounded-xl bg-surface-muted p-1">
+          {['', ...DOC_CATEGORIES].map((c) => (
+            <button
+              key={c || 'all'}
+              onClick={() => setCat(c)}
+              className={cn(
+                'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+                cat === c ? 'bg-surface text-ink shadow-soft' : 'text-ink-muted hover:text-ink',
+              )}
+            >
+              {c || 'Tout'}
+            </button>
+          ))}
+        </div>
+      </Card>
+
+      {isLoading ? (
+        <div className="space-y-2">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-16 rounded-xl" />
+          ))}
+        </div>
+      ) : !data || data.length === 0 ? (
+        <Card className="p-0">
+          <EmptyState
+            icon={<FolderOpen size={20} />}
+            title="Aucun document"
+            description={canManage ? 'Déposez un premier document de référence.' : 'Aucun document pour cette recherche.'}
+          />
+        </Card>
+      ) : (
+        <Stagger className="space-y-2">
+          {data.map((d) => (
+            <StaggerItem key={d.id}>
+              <Card className="flex items-center gap-4 py-3">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand-soft-fg">
+                  <FileText size={20} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="truncate font-medium text-ink">{d.titre}</p>
+                    <Badge tone="neutral">{d.categorie}</Badge>
+                  </div>
+                  {d.description && <p className="truncate text-sm text-ink-subtle">{d.description}</p>}
+                  <p className="text-xs text-ink-subtle">
+                    {fmt(d.createdAt)}
+                    {d.taille > 0 && ` · ${humanSize(d.taille)}`}
+                  </p>
+                </div>
+                <Button variant="secondary" size="sm" onClick={() => void download(d)} loading={dlId === d.id}>
+                  <Download size={15} /> Télécharger
+                </Button>
+                {canManage && (
+                  <Button size="sm" variant="ghost" onClick={() => remove.mutate(d.id)} disabled={remove.isPending} className="text-ink-subtle hover:text-danger">
+                    <Trash2 size={15} />
+                  </Button>
+                )}
+              </Card>
+            </StaggerItem>
+          ))}
+        </Stagger>
+      )}
+
+      {showNew && <NewDocModal onClose={() => setShowNew(false)} />}
+    </div>
+  );
+}
+
+function NewDocModal({ onClose }: { onClose: () => void }) {
+  const create = useCreateDoc();
+  const [titre, setTitre] = useState('');
+  const [description, setDescription] = useState('');
+  const [categorie, setCategorie] = useState<string>('Procédures');
+  const [file, setFile] = useState<File | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const submit = async () => {
+    if (titre.trim().length < 2 || !file) return;
+    await create.mutateAsync({ titre: titre.trim(), description: description.trim() || undefined, categorie, file });
+    onClose();
+  };
+
+  return (
+    <Modal
+      open
+      onClose={onClose}
+      size="md"
+      title="Déposer un document"
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>
+            Annuler
+          </Button>
+          <Button onClick={() => void submit()} loading={create.isPending} disabled={titre.trim().length < 2 || !file}>
+            Déposer
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <Input label="Titre *" value={titre} onChange={(e) => setTitre(e.target.value)} placeholder="Ex. Procédure de demande d’achat" />
+        <Select
+          label="Catégorie"
+          options={DOC_CATEGORIES.map((c) => ({ value: c, label: c }))}
+          value={categorie}
+          onChange={(e) => setCategorie(e.target.value)}
+        />
+        <Textarea label="Description" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
+        <div>
+          <input ref={fileRef} type="file" className="hidden" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+          <Button variant="secondary" onClick={() => fileRef.current?.click()}>
+            <Upload size={16} /> {file ? file.name : 'Choisir un fichier'}
+          </Button>
+          <p className="mt-1 text-xs text-ink-subtle">PDF, Word, Excel, PowerPoint, image — 10 Mo max.</p>
+        </div>
+      </div>
+    </Modal>
+  );
+}
