@@ -25,6 +25,8 @@ import { AgendaWidget } from '@/features/agenda/AgendaWidget';
 import { AlaUneCard } from '@/features/actualites/AlaUneCard';
 import { PresenceRepartitionCard } from '@/features/presences/PresenceRepartitionCard';
 import { MesTachesWidget } from '@/features/tasks/MesTachesWidget';
+import { WeatherCard } from '@/features/dashboard/WeatherCard';
+import { EcheancesCard } from '@/features/dashboard/EcheancesCard';
 
 function greeting(h: number = new Date().getHours()): { hello: string; emoji: string } {
   if (h >= 5 && h < 12) return { hello: 'Bonjour', emoji: '☀️' };
@@ -225,9 +227,11 @@ export function DashboardPage() {
         <div className="space-y-6 lg:col-span-2">
           <AlaUneCard />
           <AgendaWidget />
+          <EcheancesCard />
         </div>
 
         <div className="space-y-6">
+          <WeatherCard />
           {isManager && <PresenceRepartitionCard />}
           <MesTachesWidget />
 
