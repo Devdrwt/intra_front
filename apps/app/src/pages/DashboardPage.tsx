@@ -23,6 +23,7 @@ import { usePointagesDuJour } from '@/features/presences/hooks';
 import { useEmployes } from '@/features/rh/hooks';
 import { AgendaWidget } from '@/features/agenda/AgendaWidget';
 import { AlaUneCard } from '@/features/actualites/AlaUneCard';
+import { PresenceRepartitionCard } from '@/features/presences/PresenceRepartitionCard';
 import { MesTachesWidget } from '@/features/tasks/MesTachesWidget';
 
 function greeting(h: number = new Date().getHours()): { hello: string; emoji: string } {
@@ -207,6 +208,7 @@ export function DashboardPage() {
         </div>
 
         <div className="space-y-6">
+          {isManager && <PresenceRepartitionCard />}
           <MesTachesWidget />
 
           <Card>
