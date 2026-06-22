@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Download, FileText, FolderOpen, Search, Trash2, Upload } from 'lucide-react';
+import { Download, FileText, FolderOpen, History, Search, Trash2, Upload } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -18,7 +18,7 @@ import { humanSize } from '@/lib/download';
 import { apiErrorMessage } from '@/lib/api';
 import { toast } from '@/lib/toast';
 import { Stagger, StaggerItem } from '@/components/motion';
-import { useCreateDoc, useDocs, useRemoveDoc } from './hooks';
+import { useAddVersion, useCreateDoc, useDocVersions, useDocs, useRemoveDoc } from './hooks';
 import { documentationService } from './service';
 import { DOC_CATEGORIES, type DocItem } from './types';
 
@@ -33,6 +33,7 @@ export function DocumentationPage() {
   const remove = useRemoveDoc();
   const [showNew, setShowNew] = useState(false);
   const [dlId, setDlId] = useState<string | null>(null);
+  const [historyDoc, setHistoryDoc] = useState<DocItem | null>(null);
 
   const download = async (d: DocItem) => {
     setDlId(d.id);
@@ -105,6 +106,7 @@ export function DocumentationPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="truncate font-medium text-ink">{d.titre}</p>
                     <Badge tone="neutral">{d.categorie}</Badge>
+                    {d.version > 1 && <Badge tone="brand">v{d.version}</Badge>}
                   </div>
                   {d.description && <p className="truncate text-sm text-ink-subtle">{d.description}</p>}
                   <p className="text-xs text-ink-subtle">
@@ -112,6 +114,9 @@ export function DocumentationPage() {
                     {d.taille > 0 && ` · ${humanSize(d.taille)}`}
                   </p>
                 </div>
+                <Button size="sm" variant="ghost" onClick={() => setHistoryDoc(d)} title="Historique des versions">
+                  <History size={15} />
+                </Button>
                 <Button variant="secondary" size="sm" onClick={() => void download(d)} loading={dlId === d.id}>
                   <Download size={15} /> Télécharger
                 </Button>
@@ -127,7 +132,81 @@ export function DocumentationPage() {
       )}
 
       {showNew && <NewDocModal onClose={() => setShowNew(false)} />}
+      {historyDoc && (
+        <VersionsModal doc={historyDoc} canManage={canManage} onClose={() => setHistoryDoc(null)} />
+      )}
     </div>
+  );
+}
+
+function VersionsModal({ doc, canManage, onClose }: { doc: DocItem; canManage: boolean; onClose: () => void }) {
+  const { data: versions, isLoading } = useDocVersions(doc.id);
+  const addVersion = useAddVersion(doc.id);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [note, setNote] = useState('');
+  const [dlId, setDlId] = useState<string | null>(null);
+
+  const onPick = async (file: File | null) => {
+    if (!file) return;
+    try {
+      await addVersion.mutateAsync({ file, note: note.trim() || undefined });
+      setNote('');
+    } catch (e) {
+      toast.error(apiErrorMessage(e, 'Dépôt impossible.'));
+    } finally {
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
+  const dl = async (versionId: string) => {
+    setDlId(versionId);
+    try {
+      await documentationService.downloadVersion(versionId, doc.titre);
+    } catch (e) {
+      toast.error(apiErrorMessage(e, 'Téléchargement impossible.'));
+    } finally {
+      setDlId(null);
+    }
+  };
+
+  return (
+    <Modal open onClose={onClose} size="md" title={`Historique — ${doc.titre}`}>
+      {canManage && (
+        <div className="mb-4 space-y-2 rounded-xl border border-surface-border p-3">
+          <Input placeholder="Note de version (optionnel)" value={note} onChange={(e) => setNote(e.target.value)} />
+          <input ref={fileRef} type="file" className="hidden" onChange={(e) => void onPick(e.target.files?.[0] ?? null)} />
+          <Button variant="secondary" size="sm" onClick={() => fileRef.current?.click()} loading={addVersion.isPending}>
+            <Upload size={15} /> Déposer une nouvelle version
+          </Button>
+        </div>
+      )}
+
+      {isLoading ? (
+        <div className="space-y-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-10 rounded-lg" />
+          ))}
+        </div>
+      ) : (
+        <ul className="divide-y divide-surface-border">
+          {(versions ?? []).map((v) => (
+            <li key={v.id} className="flex items-center gap-3 py-2.5">
+              <Badge tone={v.version === doc.version ? 'brand' : 'neutral'}>v{v.version}</Badge>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-ink-subtle">
+                  {new Date(v.createdAt).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                  {v.taille > 0 && ` · ${humanSize(v.taille)}`}
+                  {v.version === doc.version && ' · actuelle'}
+                </p>
+                {v.note && <p className="truncate text-sm text-ink-muted">{v.note}</p>}
+              </div>
+              <Button size="sm" variant="ghost" onClick={() => void dl(v.id)} loading={dlId === v.id}>
+                <Download size={15} />
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Modal>
   );
 }
 

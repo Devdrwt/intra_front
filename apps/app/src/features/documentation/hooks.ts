@@ -28,3 +28,24 @@ export function useRemoveDoc() {
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEY] }),
   });
 }
+
+export function useDocVersions(docId: string | null) {
+  return useQuery({
+    queryKey: [KEY, 'versions', docId],
+    queryFn: () => documentationService.listVersions(docId!),
+    enabled: !!docId,
+  });
+}
+
+export function useAddVersion(docId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ file, note }: { file: File; note?: string }) =>
+      documentationService.addVersion(docId, file, note),
+    meta: { successMessage: 'Nouvelle version déposée' },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [KEY] });
+      qc.invalidateQueries({ queryKey: [KEY, 'versions', docId] });
+    },
+  });
+}

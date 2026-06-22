@@ -17,6 +17,16 @@ export interface CreateDocInput {
   file: File;
 }
 
+export interface DocVersion {
+  id: string;
+  version: number;
+  taille: number;
+  mimeType: string;
+  note: string | null;
+  createdBy: string | null;
+  createdAt: string;
+}
+
 export const DOC_CATEGORIES = [
   'Procédures',
   'Manuels',
