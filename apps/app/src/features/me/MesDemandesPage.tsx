@@ -1,7 +1,8 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import { useMemo, useState } from 'react';
 import { Clock, Coffee, Plane, Plus, X, type LucideIcon } from 'lucide-react';
-import { Badge, Button, Callout, Card, CardTitle, EmptyState, Input, PageHeader, Select, Skeleton, cn } from '@drwindesk/ui';
+import { Badge, Button, Callout, Card, CardTitle, EmptyState, Input, Modal, PageHeader, Select, Skeleton, cn } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
+import { Stagger, StaggerItem } from '@/components/motion';
 import {
   CATEGORIE_LABEL,
   JOURS_ORDER,
@@ -24,6 +25,13 @@ const STATUT_TONE: Record<StatutConge, 'success' | 'warning' | 'danger'> = {
   EN_ATTENTE: 'warning',
   APPROUVE: 'success',
   REFUSE: 'danger',
+};
+
+// Couleur par catégorie (onglet actif + pastille d'icône).
+const CAT_TAB: Record<CategorieDemande, { active: string; grad: string }> = {
+  PERMISSION: { active: 'border-brand-500 bg-brand-soft text-brand-soft-fg', grad: 'from-indigo-400 to-violet-600' },
+  REPOS: { active: 'border-warning bg-warning-soft text-warning-soft-fg', grad: 'from-amber-400 to-orange-500' },
+  CONGE: { active: 'border-success bg-success-soft text-success-soft-fg', grad: 'from-emerald-400 to-teal-600' },
 };
 
 const TABS: { key: CategorieDemande; label: string; icon: LucideIcon; hint: string }[] = [
@@ -81,8 +89,7 @@ export function MesDemandesPage() {
       joursRepos: f.joursRepos.includes(j) ? f.joursRepos.filter((x) => x !== j) : [...f.joursRepos, j],
     }));
 
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const submit = async () => {
     setErrors({});
     if (tab === 'REPOS') {
       // Repos hebdomadaire : on choisit des jours, pas une plage de dates.
@@ -134,7 +141,7 @@ export function MesDemandesPage() {
               className={cn(
                 'inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition-colors',
                 active
-                  ? 'border-brand-500 bg-brand-soft text-brand-soft-fg'
+                  ? CAT_TAB[t.key].active
                   : 'border-surface-border text-ink-muted hover:bg-surface-muted hover:text-ink',
               )}
             >
@@ -157,10 +164,23 @@ export function MesDemandesPage() {
         </Button>
       </div>
 
-      {open && (
-        <Card>
-          <CardTitle>Demande de {CATEGORIE_LABEL[tab].toLowerCase()}</CardTitle>
-          <form onSubmit={onSubmit} noValidate className="mt-4 space-y-4">
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+        size="md"
+        title={`Demande de ${CATEGORIE_LABEL[tab].toLowerCase()}`}
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setOpen(false)}>
+              Annuler
+            </Button>
+            <Button onClick={() => void submit()} loading={create.isPending}>
+              Soumettre la demande
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
             {tab === 'CONGE' && (
               <Select
                 label="Type de congé *"
@@ -250,17 +270,8 @@ export function MesDemandesPage() {
               placeholder={tab === 'CONGE' ? 'Optionnel' : 'Précisez le motif'}
             />
             {formError && <Callout tone="danger">{formError}</Callout>}
-            <div className="flex justify-end gap-3">
-              <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
-                Annuler
-              </Button>
-              <Button type="submit" loading={create.isPending}>
-                Soumettre la demande
-              </Button>
-            </div>
-          </form>
-        </Card>
-      )}
+        </div>
+      </Modal>
 
       <Card className="p-0">
         <div className="p-5 pb-0">
@@ -280,19 +291,24 @@ export function MesDemandesPage() {
             className="py-10"
           />
         ) : (
-          <ul className="mt-3 divide-y divide-surface-border">
+          <Stagger className="mt-3 divide-y divide-surface-border">
             {list.map((c) => (
-              <li key={c.id} className="flex items-center justify-between gap-4 px-5 py-3">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-ink">
-                    {tab === 'CONGE' ? TYPE_CONGE_LABEL[c.type] : CATEGORIE_LABEL[c.categorie ?? 'CONGE']}
-                  </p>
-                  <p className="text-xs text-ink-subtle">
-                    {(c.categorie ?? 'CONGE') === 'REPOS' && c.joursRepos?.length
-                      ? `Repos : ${joursReposLabel(c.joursRepos)}`
-                      : `Du ${fmt(c.dateDebut)} au ${fmt(c.dateFin)} · ${dureeLabel(c)}`}
-                    {c.motif ? ` · ${c.motif}` : ''}
-                  </p>
+              <StaggerItem key={c.id} className="flex items-center justify-between gap-4 px-5 py-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br text-white', CAT_TAB[tab].grad)}>
+                    <meta.icon size={16} />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-ink">
+                      {tab === 'CONGE' ? TYPE_CONGE_LABEL[c.type] : CATEGORIE_LABEL[c.categorie ?? 'CONGE']}
+                    </p>
+                    <p className="text-xs text-ink-subtle">
+                      {(c.categorie ?? 'CONGE') === 'REPOS' && c.joursRepos?.length
+                        ? `Repos : ${joursReposLabel(c.joursRepos)}`
+                        : `Du ${fmt(c.dateDebut)} au ${fmt(c.dateFin)} · ${dureeLabel(c)}`}
+                      {c.motif ? ` · ${c.motif}` : ''}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   <Badge tone={STATUT_TONE[c.statut]} dot>
@@ -310,9 +326,9 @@ export function MesDemandesPage() {
                     </button>
                   )}
                 </div>
-              </li>
+              </StaggerItem>
             ))}
-          </ul>
+          </Stagger>
         )}
       </Card>
     </div>
