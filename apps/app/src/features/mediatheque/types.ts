@@ -28,7 +28,10 @@ export interface CreateCollectionInput {
 }
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api/v1';
-/** URL directe du fichier (cookie de session envoyé automatiquement avec <img>/<video>). */
-export function mediaFileUrl(itemId: string): string {
-  return `${API_BASE}/media/items/${itemId}/file`;
+/**
+ * URL directe du fichier (cookie de session envoyé automatiquement avec <img>/<video>).
+ * `thumb` → vignette WebP légère (pour les grilles/couvertures).
+ */
+export function mediaFileUrl(itemId: string, thumb = false): string {
+  return `${API_BASE}/media/items/${itemId}/file${thumb ? '?thumb=1' : ''}`;
 }

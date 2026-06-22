@@ -87,7 +87,7 @@ function CollectionsList({ canManage, onOpen }: { canManage: boolean; onOpen: (i
                 <Card interactive className="h-full overflow-hidden p-0">
                   <div className="flex aspect-[16/10] items-center justify-center bg-surface-muted">
                     {c.coverItemId ? (
-                      <img src={mediaFileUrl(c.coverItemId)} alt={c.nom} className="h-full w-full object-cover" loading="lazy" />
+                      <img src={mediaFileUrl(c.coverItemId, true)} alt={c.nom} className="h-full w-full object-cover" loading="lazy" />
                     ) : (
                       <Images size={32} className="text-ink-subtle" />
                     )}
@@ -264,7 +264,7 @@ function CollectionView({
               <div className="group relative aspect-square overflow-hidden rounded-xl border border-surface-border bg-surface-muted">
                 <button onClick={() => setLightbox(it)} className="h-full w-full">
                   {it.type === 'IMAGE' ? (
-                    <img src={mediaFileUrl(it.id)} alt={it.nom} className="h-full w-full object-cover transition-transform group-hover:scale-105" loading="lazy" />
+                    <img src={mediaFileUrl(it.id, true)} alt={it.nom} className="h-full w-full object-cover transition-transform group-hover:scale-105" loading="lazy" />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center">
                       <Film size={28} className="text-ink-subtle" />
