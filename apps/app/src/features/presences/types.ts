@@ -108,11 +108,26 @@ export const STATUT_CONGE_LABEL: Record<StatutConge, string> = {
 };
 
 /** Nombre de jours calendaires inclus entre deux dates ISO. */
+/**
+ * Nombre de jours OUVRABLES (lundi → vendredi) entre deux dates incluses.
+ * L'entreprise travaille 5 jours/semaine : samedi et dimanche ne comptent pas.
+ * Calcul en UTC pour éviter les décalages de fuseau (dates « yyyy-mm-dd »).
+ */
 export function nbJours(dateDebut: string, dateFin: string): number {
-  const d1 = new Date(dateDebut);
-  const d2 = new Date(dateFin);
-  if (Number.isNaN(d1.getTime()) || Number.isNaN(d2.getTime())) return 0;
-  return Math.max(0, Math.round((d2.getTime() - d1.getTime()) / 86_400_000) + 1);
+  const p = (s: string) => {
+    const [y, m, d] = s.split('-').map(Number);
+    return y && m && d ? Date.UTC(y, m - 1, d) : NaN;
+  };
+  let cur = p(dateDebut);
+  const end = p(dateFin);
+  if (Number.isNaN(cur) || Number.isNaN(end) || end < cur) return 0;
+  let count = 0;
+  while (cur <= end) {
+    const day = new Date(cur).getUTCDay(); // 0 = dimanche, 6 = samedi
+    if (day !== 0 && day !== 6) count++;
+    cur += 86_400_000;
+  }
+  return count;
 }
 
 /** Durée d'une plage horaire "HH:mm" → "HH:mm", en heures (0 si invalide). */
