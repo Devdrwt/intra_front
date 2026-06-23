@@ -35,14 +35,16 @@ export function UsersPage() {
   const remove = useDeleteUser();
   const [open, setOpen] = useState(false);
   const [accessUser, setAccessUser] = useState<User | null>(null);
+  const [toDelete, setToDelete] = useState<{ id: string; label: string } | null>(null);
 
   const toggleStatus = (id: string, current: UserStatus) =>
     update.mutate({ id, input: { status: current === 'DISABLED' ? 'ACTIVE' : 'DISABLED' } });
 
-  const onDelete = (id: string, label: string) => {
-    if (confirm(`Supprimer le compte de ${label} ? Cette action est irréversible.`)) {
-      remove.mutate(id);
-    }
+  const onDelete = (id: string, label: string) => setToDelete({ id, label });
+
+  const confirmDelete = () => {
+    if (!toDelete) return;
+    remove.mutate(toDelete.id, { onSuccess: () => setToDelete(null) });
   };
 
   return (
@@ -146,6 +148,26 @@ export function UsersPage() {
       </Card>
 
       {accessUser && <AccessModal user={accessUser} onClose={() => setAccessUser(null)} />}
+
+      <Modal open={!!toDelete} onClose={() => setToDelete(null)} title="Supprimer le compte" size="sm">
+        <div className="space-y-5">
+          <div className="flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-danger-soft text-danger">
+              <Trash2 size={18} />
+            </span>
+            <p className="text-sm text-ink-muted">
+              Supprimer le compte de <strong className="text-ink">{toDelete?.label}</strong> ?{' '}
+              Cette action est <strong className="text-danger">irréversible</strong>.
+            </p>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="secondary" onClick={() => setToDelete(null)}>Annuler</Button>
+            <Button variant="danger" onClick={confirmDelete} loading={remove.isPending}>
+              <Trash2 size={16} /> Supprimer
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
