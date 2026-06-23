@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
-import { Clock, Coffee, Plane, Plus, X, type LucideIcon } from 'lucide-react';
+import { Clock, Coffee, Paperclip, Plane, Plus, X, type LucideIcon } from 'lucide-react';
 import { Badge, Button, Callout, Card, CardTitle, EmptyState, Input, Modal, PageHeader, Select, Skeleton, cn } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
+import { humanSize, triggerDownload } from '@/lib/download';
 import { Stagger, StaggerItem } from '@/components/motion';
+import { meService, type MeCongeInput } from './service';
 import {
   CATEGORIE_LABEL,
   JOURS_ORDER,
@@ -64,6 +66,7 @@ export function MesDemandesPage() {
   const [tab, setTab] = useState<CategorieDemande>('PERMISSION');
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(EMPTY);
+  const [file, setFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<{ dateDebut?: string; dateFin?: string }>({});
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -108,6 +111,16 @@ export function MesDemandesPage() {
     setFormError(null);
     try {
       const intraJournee = tab === 'PERMISSION' && !!form.heureDebut && !!form.heureFin;
+      let justif: Partial<MeCongeInput> = {};
+      if (file) {
+        const up = await meService.uploadCongeAttachment(file);
+        justif = {
+          justificatifKey: up.key,
+          justificatifName: up.name,
+          justificatifSize: up.size,
+          justificatifType: up.type,
+        };
+      }
       await create.mutateAsync({
         categorie: tab,
         type: tab === 'CONGE' ? form.type : undefined,
@@ -118,8 +131,10 @@ export function MesDemandesPage() {
         joursRepos: tab === 'REPOS' ? form.joursRepos : undefined,
         reposIntervalleSemaines: tab === 'REPOS' ? Number(form.reposIntervalle) : undefined,
         motif: form.motif || undefined,
+        ...justif,
       });
       setForm(EMPTY);
+      setFile(null);
       setOpen(false);
     } catch (err) {
       setFormError(apiErrorMessage(err, 'Envoi impossible.'));
@@ -281,6 +296,22 @@ export function MesDemandesPage() {
               onChange={(e) => setForm((f) => ({ ...f, motif: e.target.value }))}
               placeholder={tab === 'CONGE' ? 'Optionnel' : 'Précisez le motif'}
             />
+            <div>
+              <span className="text-sm font-medium text-ink-muted">Justificatif (optionnel)</span>
+              <p className="text-xs text-ink-subtle">Certificat médical, document… (PDF ou image).</p>
+              <div className="mt-2 flex items-center gap-2">
+                <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-surface-border px-3 py-1.5 text-sm text-ink-muted hover:text-ink">
+                  <Paperclip size={15} /> Joindre un fichier
+                  <input type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+                </label>
+                {file && (
+                  <span className="inline-flex items-center gap-1 text-xs text-ink-muted">
+                    {file.name} · {humanSize(file.size)}
+                    <button type="button" onClick={() => setFile(null)} className="text-ink-subtle hover:text-danger"><X size={13} /></button>
+                  </span>
+                )}
+              </div>
+            </div>
             {formError && <Callout tone="danger">{formError}</Callout>}
         </div>
       </Modal>
@@ -320,6 +351,15 @@ export function MesDemandesPage() {
                         : `Du ${fmt(c.dateDebut)} au ${fmt(c.dateFin)} · ${dureeLabel(c)}`}
                       {c.motif ? ` · ${c.motif}` : ''}
                     </p>
+                    {c.justificatif && (
+                      <button
+                        type="button"
+                        onClick={() => void meService.downloadCongeAttachment(c.id).then((b) => triggerDownload(b, c.justificatif!.name))}
+                        className="mt-1 inline-flex items-center gap-1 text-xs text-brand-600 hover:underline"
+                      >
+                        <Paperclip size={12} /> {c.justificatif.name}
+                      </button>
+                    )}
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">

@@ -61,6 +61,8 @@ export interface DemandeConge {
   /** Repos : cadence en semaines (1 = chaque semaine, 2 = une sur deux…). */
   reposIntervalleSemaines?: number;
   motif?: string;
+  /** Justificatif joint (certificat médical…) — métadonnées seulement. */
+  justificatif?: { name: string; size: number; type: string };
   statut: StatutConge;
   demandeLe: string; // ISO
 }

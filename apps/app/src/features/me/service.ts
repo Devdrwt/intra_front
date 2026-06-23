@@ -38,6 +38,10 @@ export interface MeCongeInput {
   /** Repos : cadence en semaines (1 = chaque semaine). */
   reposIntervalleSemaines?: number;
   motif?: string;
+  justificatifKey?: string;
+  justificatifName?: string;
+  justificatifSize?: number;
+  justificatifType?: string;
 }
 
 /** Mon profil. */
@@ -143,6 +147,8 @@ const mockApi = {
   uploadAttachment: (file: File) =>
     delay({ key: `rapports/mock-${++seq}`, name: file.name, size: file.size, type: file.type }),
   downloadRapportAttachment: (_id: string) => delay(new Blob(['mock'])),
+  uploadCongeAttachment: (file: File) => delay({ key: 'mock', name: file.name, size: file.size, type: file.type }),
+  downloadCongeAttachment: (_id: string) => delay(new Blob(['mock'])),
   cancelConge: (id: string) => {
     mConges = mConges.filter((c) => c.id !== id);
     return delay(undefined);
@@ -186,6 +192,13 @@ const httpApi = {
   },
   downloadRapportAttachment: (id: string) =>
     api.get(`/me/rapports/${id}/attachment`, { responseType: 'blob' }).then((r) => r.data as Blob),
+  uploadCongeAttachment: (file: File) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    return api.post<AttachmentRef>('/me/conges/attachment', fd).then((r) => r.data);
+  },
+  downloadCongeAttachment: (id: string) =>
+    api.get(`/me/conges/${id}/attachment`, { responseType: 'blob' }).then((r) => r.data as Blob),
   cancelConge: (id: string) => api.delete(`/me/conges/${id}`).then(() => undefined),
   deleteRapport: (id: string) => api.delete(`/me/rapports/${id}`).then(() => undefined),
   getProfile: () => api.get<MyProfile>('/me/profile').then((r) => r.data),
