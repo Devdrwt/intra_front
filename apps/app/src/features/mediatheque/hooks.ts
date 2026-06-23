@@ -26,6 +26,27 @@ export function useRemoveCollection() {
   });
 }
 
+export function useCollectionAccess(id: string | null) {
+  return useQuery({
+    queryKey: [KEY, 'access', id],
+    queryFn: () => mediaService.getAccess(id!),
+    enabled: !!id,
+  });
+}
+
+export function useSetCollectionAccess(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userIds, restricted }: { userIds: string[]; restricted: boolean }) =>
+      mediaService.setRestricted(id, restricted).then(() => mediaService.setAccess(id, userIds)),
+    meta: { successMessage: 'Accès mis à jour' },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [KEY, 'collections'] });
+      qc.invalidateQueries({ queryKey: [KEY, 'access', id] });
+    },
+  });
+}
+
 export function useItems(collectionId: string | null) {
   return useQuery({
     queryKey: [KEY, 'items', collectionId],

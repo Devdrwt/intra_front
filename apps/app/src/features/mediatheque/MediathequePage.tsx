@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ChevronLeft, ChevronRight, Download, Film, ImageIcon, Images, Plus, Trash2, Upload } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, Download, Film, ImageIcon, Images, Lock, Plus, Trash2, Upload } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -19,12 +19,16 @@ import { toast } from '@/lib/toast';
 import { Stagger, StaggerItem } from '@/components/motion';
 import {
   useAddItem,
+  useCollectionAccess,
   useCollections,
   useCreateCollection,
   useItems,
   useRemoveCollection,
   useRemoveItem,
+  useSetCollectionAccess,
 } from './hooks';
+import { useUsers } from '@/features/users/hooks';
+import { userLabel } from '@/features/users/types';
 import { mediaFileUrl, type MediaItem } from './types';
 
 export function MediathequePage() {
@@ -96,7 +100,10 @@ function CollectionsList({ canManage, onOpen }: { canManage: boolean; onOpen: (i
                   <div className="p-4">
                     <div className="flex items-center justify-between gap-2">
                       <h3 className="truncate font-semibold text-ink">{c.nom}</h3>
-                      {c.type === 'IDENTITE' && <Badge tone="brand">Identité</Badge>}
+                      <span className="flex shrink-0 items-center gap-1">
+                        {c.restricted && <Lock size={13} className="text-amber-500" />}
+                        {c.type === 'IDENTITE' && <Badge tone="brand">Identité</Badge>}
+                      </span>
                     </div>
                     {c.description && <p className="mt-0.5 line-clamp-1 text-sm text-ink-subtle">{c.description}</p>}
                     <p className="mt-1 text-xs text-ink-subtle">
@@ -184,6 +191,7 @@ function CollectionView({
   const fileRef = useRef<HTMLInputElement>(null);
   const [lbIndex, setLbIndex] = useState<number | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [showAccess, setShowAccess] = useState(false);
 
   const onPick = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -236,6 +244,11 @@ function CollectionView({
               </>
             )}
             {canManage && (
+              <Button variant="secondary" onClick={() => setShowAccess(true)}>
+                <Lock size={16} /> Accès
+              </Button>
+            )}
+            {canManage && (
               <Button variant="ghost" onClick={() => void deleteGallery()} disabled={removeCollection.isPending} className="text-danger hover:bg-danger-soft">
                 <Trash2 size={16} /> Supprimer la galerie
               </Button>
@@ -243,6 +256,7 @@ function CollectionView({
           </>
         }
       />
+      {showAccess && <AccessModal collectionId={collectionId} onClose={() => setShowAccess(false)} />}
 
       {isLoading ? (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -369,6 +383,72 @@ function Lightbox({
             <Download size={15} /> Télécharger l'original
           </Button>
         </div>
+      </div>
+    </Modal>
+  );
+}
+
+function AccessModal({ collectionId, onClose }: { collectionId: string; onClose: () => void }) {
+  const { data: users } = useUsers();
+  const { data: access, isLoading } = useCollectionAccess(collectionId);
+  const save = useSetCollectionAccess(collectionId);
+  const collection = useCollections().data?.find((c) => c.id === collectionId);
+
+  const [restricted, setRestricted] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [init, setInit] = useState(false);
+
+  // Initialise une fois les données chargées.
+  if (!init && access && collection) {
+    setRestricted(collection.restricted);
+    setSelected(new Set(access));
+    setInit(true);
+  }
+
+  const toggle = (uid: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.has(uid) ? next.delete(uid) : next.add(uid);
+      return next;
+    });
+
+  const submit = async () => {
+    await save.mutateAsync({ userIds: [...selected], restricted });
+    onClose();
+  };
+
+  return (
+    <Modal
+      open
+      onClose={onClose}
+      size="md"
+      title="Accès à la galerie"
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>Annuler</Button>
+          <Button onClick={() => void submit()} loading={save.isPending}>Enregistrer</Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <label className="flex items-center gap-2 text-sm text-ink">
+          <input type="checkbox" className="accent-brand-600" checked={restricted} onChange={(e) => setRestricted(e.target.checked)} />
+          Restreindre l'accès à certains utilisateurs
+        </label>
+        {restricted &&
+          (isLoading ? (
+            <Skeleton className="h-40 w-full rounded-lg" />
+          ) : (
+            <div className="max-h-64 space-y-1 overflow-y-auto rounded-xl border border-surface-border p-2">
+              {(users ?? []).map((u) => (
+                <label key={u.id} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-surface-muted">
+                  <input type="checkbox" className="accent-brand-600" checked={selected.has(u.id)} onChange={() => toggle(u.id)} />
+                  {userLabel(u)}
+                </label>
+              ))}
+            </div>
+          ))}
+        {!restricted && <p className="text-sm text-ink-subtle">La galerie est visible par tous les utilisateurs autorisés à la médiathèque.</p>}
       </div>
     </Modal>
   );

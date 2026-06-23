@@ -15,4 +15,9 @@ export const mediaService = {
     return api.post<MediaItem>(`/media/collections/${collectionId}/items`, fd).then((r) => r.data);
   },
   removeItem: (id: string) => api.delete(`/media/items/${id}`).then(() => undefined),
+  getAccess: (id: string) => api.get<string[]>(`/media/collections/${id}/access`).then((r) => r.data),
+  setAccess: (id: string, userIds: string[]) =>
+    api.put(`/media/collections/${id}/access`, { userIds }).then(() => undefined),
+  setRestricted: (id: string, restricted: boolean) =>
+    api.patch<MediaCollection>(`/media/collections/${id}/restricted`, { restricted }).then((r) => r.data),
 };

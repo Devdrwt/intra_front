@@ -6,6 +6,7 @@ export interface MediaCollection {
   nom: string;
   description: string | null;
   type: MediaCollectionType;
+  restricted: boolean;
   itemsCount: number;
   coverItemId: string | null;
   createdAt: string;
