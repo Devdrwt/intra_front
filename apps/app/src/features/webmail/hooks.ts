@@ -46,7 +46,8 @@ export function useMailMessage(accountId: string | null, uid: number | null) {
 export function useSendMail(accountId: string | null) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: SendInput) => webmailService.send(accountId!, input),
+    mutationFn: ({ input, files }: { input: SendInput; files: File[] }) =>
+      webmailService.send(accountId!, input, files),
     meta: { successMessage: 'Message envoyé', silentError: true },
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEY, 'inbox', accountId] }),
   });

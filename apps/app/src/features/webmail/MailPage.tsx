@@ -9,6 +9,7 @@ import {
   RefreshCw,
   Send,
   Settings as SettingsIcon,
+  X,
 } from 'lucide-react';
 import { Button, Card, EmptyState, Input, Modal, Skeleton, Textarea, cn } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
@@ -272,13 +273,23 @@ function Compose({
   const [to, setTo] = useState(initial.to ?? '');
   const [subject, setSubject] = useState(initial.subject ?? '');
   const [body, setBody] = useState('');
+  const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  const addFiles = (list: FileList | null) => {
+    if (!list) return;
+    setFiles((prev) => [...prev, ...Array.from(list)]);
+  };
+  const removeFile = (i: number) => setFiles((prev) => prev.filter((_, idx) => idx !== i));
 
   const submit = async () => {
     setError(null);
     if (!to.trim()) return setError('Destinataire requis.');
+    if (files.reduce((s, f) => s + f.size, 0) > 15 * 1024 * 1024) {
+      return setError('Pièces jointes trop volumineuses (15 Mo max au total).');
+    }
     try {
-      await send.mutateAsync({ to: to.trim(), subject: subject.trim(), body });
+      await send.mutateAsync({ input: { to: to.trim(), subject: subject.trim(), body }, files });
       onClose();
     } catch (err) {
       setError(apiErrorMessage(err, 'Envoi impossible.'));
@@ -305,7 +316,28 @@ function Compose({
       <div className="space-y-3">
         <Input label="À *" value={to} onChange={(e) => setTo(e.target.value)} placeholder="destinataire@exemple.com" />
         <Input label="Objet" value={subject} onChange={(e) => setSubject(e.target.value)} />
-        <Textarea label="Message" rows={10} value={body} onChange={(e) => setBody(e.target.value)} />
+        <Textarea label="Message" rows={8} value={body} onChange={(e) => setBody(e.target.value)} />
+
+        {files.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {files.map((f, i) => (
+              <span key={i} className="inline-flex items-center gap-1.5 rounded-lg bg-surface-muted px-2.5 py-1.5 text-xs text-ink">
+                <Paperclip size={13} className="text-ink-subtle" />
+                <span className="max-w-[14rem] truncate">{f.name}</span>
+                <span className="text-ink-subtle">· {humanSize(f.size)}</span>
+                <button type="button" onClick={() => removeFile(i)} className="text-ink-subtle hover:text-danger">
+                  <X size={13} />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+
+        <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-surface-border px-3 py-1.5 text-sm font-medium text-ink-muted transition hover:text-ink">
+          <Paperclip size={15} /> Joindre des fichiers
+          <input type="file" multiple className="hidden" onChange={(e) => { addFiles(e.target.files); e.target.value = ''; }} />
+        </label>
+
         {error && <p className="text-sm text-danger">{error}</p>}
       </div>
     </Modal>

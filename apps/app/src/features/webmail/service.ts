@@ -22,8 +22,15 @@ const httpApi = {
     api
       .get(`/webmail/accounts/${accountId}/messages/${uid}/attachments/${index}`, { responseType: 'blob' })
       .then((r) => r.data as Blob),
-  send: (accountId: string, input: SendInput) =>
-    api.post(`/webmail/accounts/${accountId}/send`, input).then(() => undefined),
+  send: (accountId: string, input: SendInput, files: File[] = []) => {
+    const fd = new FormData();
+    fd.append('to', input.to);
+    if (input.cc) fd.append('cc', input.cc);
+    fd.append('subject', input.subject);
+    fd.append('body', input.body);
+    files.forEach((f) => fd.append('attachments', f));
+    return api.post(`/webmail/accounts/${accountId}/send`, fd).then(() => undefined);
+  },
 };
 
 const delay = <T>(value: T, ms = 200): Promise<T> =>
@@ -37,7 +44,7 @@ const mockApi = {
   message: (_accountId: string, uid: number) =>
     delay<MailMessage>({ uid, from: null, to: null, subject: '(mock)', date: null, html: null, text: 'mock', attachments: [] }),
   downloadAttachment: (_accountId: string, _uid: number, _index: number) => delay(new Blob(['mock'])),
-  send: (_accountId: string, _input: SendInput) => delay(undefined),
+  send: (_accountId: string, _input: SendInput, _files: File[] = []) => delay(undefined),
 };
 
 export const webmailService = USE_MOCKS.webmail ? mockApi : httpApi;
