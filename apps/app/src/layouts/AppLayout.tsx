@@ -29,6 +29,7 @@ import { CommandPalette } from '@/components/CommandPalette';
 import { useNotificationSound } from '@/hooks/useNotificationSound';
 
 const COLLAPSE_KEY = 'drwindesk.sidebar.collapsed';
+const NAV_GROUPS_KEY = 'drwindesk.nav.openGroups';
 
 export function AppLayout() {
   const { user, logout } = useAuth();
@@ -216,6 +217,34 @@ function SidebarContent({
     items: modules.filter((m) => m.group === g),
   })).filter((g) => g.items.length > 0);
 
+  const isActive = (path: string) => (path === '/' ? location === '/' : location.startsWith(path));
+  const activeGroup = modules.find((m) => isActive(m.path))?.group;
+
+  const [openGroups, setOpenGroups] = useState<Set<string>>(() => {
+    try {
+      const raw = localStorage.getItem(NAV_GROUPS_KEY);
+      if (raw) return new Set<string>(JSON.parse(raw));
+    } catch {
+      /* ignore */
+    }
+    return new Set<string>([MODULE_GROUPS[0], activeGroup].filter(Boolean) as string[]);
+  });
+
+  const toggleGroup = (g: string) =>
+    setOpenGroups((prev) => {
+      const next = new Set(prev);
+      next.has(g) ? next.delete(g) : next.add(g);
+      try {
+        localStorage.setItem(NAV_GROUPS_KEY, JSON.stringify([...next]));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+
+  // Le groupe de la page active reste toujours déplié ; en mode icônes, tout est visible.
+  const groupOpen = (g: string) => collapsed || g === activeGroup || openGroups.has(g);
+
   return (
     <>
       {!hideBrand && (
@@ -223,14 +252,22 @@ function SidebarContent({
           <Brand collapsed={collapsed} />
         </div>
       )}
-      <nav className="flex-1 space-y-4 overflow-y-auto px-3 py-2">
-        {groups.map(({ group, items }) => (
+      <nav className="flex-1 space-y-2 overflow-y-auto px-3 py-2">
+        {groups.map(({ group, items }) => {
+          const expanded = groupOpen(group);
+          return (
           <div key={group}>
             {!collapsed && (
-              <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-ink-subtle">
-                {group}
-              </p>
+              <button
+                type="button"
+                onClick={() => toggleGroup(group)}
+                className="flex w-full items-center justify-between rounded-lg px-3 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-wider text-ink-subtle transition-colors hover:text-ink"
+              >
+                <span>{group}</span>
+                <ChevronDown size={14} className={cn('transition-transform', !expanded && '-rotate-90')} />
+              </button>
             )}
+            {expanded && (
             <div className="space-y-0.5">
               {items.map(({ path, label, icon: Icon }) => {
                 const active =
@@ -269,8 +306,10 @@ function SidebarContent({
                 );
               })}
             </div>
+            )}
           </div>
-        ))}
+          );
+        })}
       </nav>
     </>
   );
