@@ -77,6 +77,12 @@ export function MonPointagePage() {
   const daysWorked = month.filter((x) => x.heureEntree).length;
   const totalMin = month.reduce((s, x) => s + (workedMin(x) ?? 0), 0);
   const avgMin = daysWorked ? Math.round(totalMin / daysWorked) : 0;
+  // Heures supplémentaires : au-delà de 8 h par jour travaillé.
+  const STANDARD_DAY = 8 * 60;
+  const overtimeMin = month.reduce((s, x) => {
+    const w = workedMin(x);
+    return s + (w != null ? Math.max(0, w - STANDARD_DAY) : 0);
+  }, 0);
 
   const status = !hasEntree
     ? { label: 'Pas encore pointé', tone: 'warning' as const }
@@ -170,10 +176,11 @@ export function MonPointagePage() {
       </Card>
 
       {/* Stats du mois */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MiniStat icon={CalendarDays} label="Jours pointés (ce mois)" value={String(daysWorked)} />
         <MiniStat icon={Timer} label="Heures cumulées" value={fmtDur(totalMin)} />
         <MiniStat icon={Clock} label="Moyenne / jour" value={fmtDur(avgMin)} />
+        <MiniStat icon={Timer} label="Heures supp. (ce mois)" value={fmtDur(overtimeMin)} />
       </div>
 
       {/* Historique */}

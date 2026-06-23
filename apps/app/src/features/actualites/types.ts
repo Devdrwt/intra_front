@@ -13,6 +13,8 @@ export interface Annonce {
   clapCount: number;
   myReactions: ReactionType[];
   commentCount: number;
+  readCount: number;
+  viewedByMe: boolean;
   createdAt: string;
   updatedAt: string;
 }

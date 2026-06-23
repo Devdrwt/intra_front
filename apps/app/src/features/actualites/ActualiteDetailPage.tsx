@@ -1,9 +1,9 @@
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Hand, Pin, Send, ThumbsUp, Trash2 } from 'lucide-react';
+import { ArrowLeft, Eye, Hand, Pin, Send, ThumbsUp, Trash2 } from 'lucide-react';
 import { Badge, Button, Card, Input, Skeleton, cn } from '@drwindesk/ui';
 import { hasPermission, useAuth } from '@/auth/AuthContext';
-import { useAddComment, useAnnonceComments, useAnnonces, useRemoveComment, useToggleReaction } from './hooks';
+import { useAddComment, useAnnonceComments, useAnnonces, useMarkRead, useRemoveComment, useToggleReaction } from './hooks';
 import { CATEGORIE_META, annonceCoverUrl, type Annonce, type ReactionType } from './types';
 
 const fmt = (iso: string) =>
@@ -13,8 +13,19 @@ const fmtDT = (iso: string) =>
 
 export function ActualiteDetailPage() {
   const { id } = useParams();
+  const { user } = useAuth();
+  const canManage = hasPermission(user, 'news:manage');
   const { data, isLoading } = useAnnonces();
   const a = (data ?? []).find((x) => x.id === id);
+
+  const markRead = useMarkRead();
+  const marked = useRef(false);
+  useEffect(() => {
+    if (a && !marked.current) {
+      marked.current = true;
+      markRead.mutate(a.id);
+    }
+  }, [a, markRead]);
 
   if (isLoading) return <Skeleton className="h-96 w-full rounded-2xl" />;
 
@@ -50,6 +61,11 @@ export function ActualiteDetailPage() {
               {fmt(a.createdAt)}
               {a.authorNom ? ` · par ${a.authorNom}` : ''}
             </span>
+            {canManage && (
+              <span className="inline-flex items-center gap-1 text-xs text-ink-subtle">
+                <Eye size={12} /> vu par {a.readCount}
+              </span>
+            )}
           </div>
           <h1 className="mt-2 text-2xl font-bold text-ink">{a.titre}</h1>
           <div className="mt-4 whitespace-pre-wrap text-[15px] leading-relaxed text-ink-muted">{a.contenu}</div>

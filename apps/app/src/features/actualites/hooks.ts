@@ -8,6 +8,14 @@ export function useAnnonces() {
   return useQuery({ queryKey: [KEY], queryFn: actualitesService.list });
 }
 
+export function useMarkRead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => actualitesService.markRead(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [KEY] }),
+  });
+}
+
 export function useToggleReaction() {
   const qc = useQueryClient();
   return useMutation({

@@ -86,6 +86,7 @@ export function ActualitesPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
+                        {!a.viewedByMe && <span className="h-2 w-2 shrink-0 rounded-full bg-brand-500" title="Non lu" />}
                         <Badge tone={CATEGORIE_META[a.categorie].tone}>
                           {CATEGORIE_META[a.categorie].label}
                         </Badge>

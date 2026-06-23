@@ -5,6 +5,7 @@ export const actualitesService = {
   list: () => api.get<Annonce[]>('/annonces').then((r) => r.data),
   toggleReaction: (id: string, type: ReactionType) =>
     api.post<{ active: boolean }>(`/annonces/${id}/reactions/${type}`).then((r) => r.data),
+  markRead: (id: string) => api.post(`/annonces/${id}/read`).then(() => undefined),
   comments: (id: string) =>
     api.get<AnnonceComment[]>(`/annonces/${id}/comments`).then((r) => r.data),
   addComment: (id: string, contenu: string) =>
