@@ -1,8 +1,16 @@
 import { api } from '@/lib/api';
-import type { Annonce, CreateAnnonceInput } from './types';
+import type { Annonce, AnnonceComment, CreateAnnonceInput, ReactionType } from './types';
 
 export const actualitesService = {
   list: () => api.get<Annonce[]>('/annonces').then((r) => r.data),
+  toggleReaction: (id: string, type: ReactionType) =>
+    api.post<{ active: boolean }>(`/annonces/${id}/reactions/${type}`).then((r) => r.data),
+  comments: (id: string) =>
+    api.get<AnnonceComment[]>(`/annonces/${id}/comments`).then((r) => r.data),
+  addComment: (id: string, contenu: string) =>
+    api.post<AnnonceComment>(`/annonces/${id}/comments`, { contenu }).then((r) => r.data),
+  removeComment: (commentId: string) =>
+    api.delete(`/annonces/comments/${commentId}`).then(() => undefined),
   create: (input: CreateAnnonceInput) => {
     const fd = new FormData();
     fd.append('titre', input.titre);

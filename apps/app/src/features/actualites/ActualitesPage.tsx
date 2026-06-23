@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ImagePlus, Megaphone, Pencil, Pin, Plus, Trash2 } from 'lucide-react';
+import { ImagePlus, Megaphone, MessageSquare, Pencil, Pin, Plus, ThumbsUp, Trash2 } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -121,9 +121,15 @@ export function ActualitesPage() {
                     )}
                   </div>
                   <p className="mt-2 line-clamp-4 whitespace-pre-wrap text-sm leading-relaxed text-ink-muted">{a.contenu}</p>
-                  <Link to={`/actualites/${a.id}`} className="mt-2 inline-block text-sm font-medium text-brand-600 hover:underline">
-                    Lire la suite →
-                  </Link>
+                  <div className="mt-2 flex items-center gap-4">
+                    <Link to={`/actualites/${a.id}`} className="text-sm font-medium text-brand-600 hover:underline">
+                      Lire la suite →
+                    </Link>
+                    <span className="flex items-center gap-3 text-xs text-ink-subtle">
+                      {a.likeCount + a.clapCount > 0 && <span className="inline-flex items-center gap-1"><ThumbsUp size={12} /> {a.likeCount + a.clapCount}</span>}
+                      {a.commentCount > 0 && <span className="inline-flex items-center gap-1"><MessageSquare size={12} /> {a.commentCount}</span>}
+                    </span>
+                  </div>
                 </div>
               </Card>
             </StaggerItem>

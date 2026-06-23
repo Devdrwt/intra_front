@@ -9,8 +9,23 @@ export interface Annonce {
   hasCover: boolean;
   authorId: string | null;
   authorNom?: string;
+  likeCount: number;
+  clapCount: number;
+  myReactions: ReactionType[];
+  commentCount: number;
   createdAt: string;
   updatedAt: string;
+}
+
+export type ReactionType = 'LIKE' | 'CLAP';
+
+export interface AnnonceComment {
+  id: string;
+  annonceId: string;
+  authorId: string;
+  authorNom?: string;
+  contenu: string;
+  createdAt: string;
 }
 
 export interface CreateAnnonceInput {

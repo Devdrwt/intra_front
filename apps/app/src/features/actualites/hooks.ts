@@ -1,11 +1,50 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { actualitesService } from './service';
-import type { Annonce, CreateAnnonceInput } from './types';
+import type { Annonce, CreateAnnonceInput, ReactionType } from './types';
 
 const KEY = 'annonces';
 
 export function useAnnonces() {
   return useQuery({ queryKey: [KEY], queryFn: actualitesService.list });
+}
+
+export function useToggleReaction() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, type }: { id: string; type: ReactionType }) =>
+      actualitesService.toggleReaction(id, type),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [KEY] }),
+  });
+}
+
+export function useAnnonceComments(id: string | undefined) {
+  return useQuery({
+    queryKey: [KEY, 'comments', id],
+    queryFn: () => actualitesService.comments(id!),
+    enabled: !!id,
+  });
+}
+
+export function useAddComment(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (contenu: string) => actualitesService.addComment(id, contenu),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [KEY, 'comments', id] });
+      qc.invalidateQueries({ queryKey: [KEY] });
+    },
+  });
+}
+
+export function useRemoveComment(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (commentId: string) => actualitesService.removeComment(commentId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [KEY, 'comments', id] });
+      qc.invalidateQueries({ queryKey: [KEY] });
+    },
+  });
 }
 
 export function useCreateAnnonce() {
