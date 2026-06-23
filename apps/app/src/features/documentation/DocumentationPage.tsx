@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Download, Eye, FileText, FolderOpen, History, Search, Trash2, Upload } from 'lucide-react';
+import { Download, Eye, FileText, FolderOpen, History, RotateCcw, Search, Trash2, Upload } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -24,6 +24,7 @@ import {
   useDocVersions,
   useDocs,
   useRemoveDoc,
+  useRestoreVersion,
   useSetDocStatut,
 } from './hooks';
 import { documentationService } from './service';
@@ -181,6 +182,7 @@ export function DocumentationPage() {
 function VersionsModal({ doc, canManage, onClose }: { doc: DocItem; canManage: boolean; onClose: () => void }) {
   const { data: versions, isLoading } = useDocVersions(doc.id);
   const addVersion = useAddVersion(doc.id);
+  const restore = useRestoreVersion(doc.id);
   const fileRef = useRef<HTMLInputElement>(null);
   const [note, setNote] = useState('');
   const [dlId, setDlId] = useState<string | null>(null);
@@ -238,6 +240,11 @@ function VersionsModal({ doc, canManage, onClose }: { doc: DocItem; canManage: b
                 </p>
                 {v.note && <p className="truncate text-sm text-ink-muted">{v.note}</p>}
               </div>
+              {canManage && v.version !== doc.version && (
+                <Button size="sm" variant="ghost" onClick={() => restore.mutate(v.id)} loading={restore.isPending} title="Restaurer cette version">
+                  <RotateCcw size={15} />
+                </Button>
+              )}
               <Button size="sm" variant="ghost" onClick={() => void dl(v.id)} loading={dlId === v.id}>
                 <Download size={15} />
               </Button>

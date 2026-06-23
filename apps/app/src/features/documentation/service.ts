@@ -27,6 +27,8 @@ export const documentationService = {
     if (note) fd.append('note', note);
     return api.post<DocItem>(`/docs/${id}/versions`, fd).then((r) => r.data);
   },
+  restoreVersion: (docId: string, versionId: string) =>
+    api.post<DocItem>(`/docs/${docId}/versions/${versionId}/restore`).then((r) => r.data),
   downloadVersion: (versionId: string, name: string) =>
     api
       .get(`/docs/versions/${versionId}/file`, { responseType: 'blob' })

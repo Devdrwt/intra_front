@@ -59,3 +59,15 @@ export function useAddVersion(docId: string) {
     },
   });
 }
+
+export function useRestoreVersion(docId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (versionId: string) => documentationService.restoreVersion(docId, versionId),
+    meta: { successMessage: 'Version restaurée' },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [KEY] });
+      qc.invalidateQueries({ queryKey: [KEY, 'versions', docId] });
+    },
+  });
+}
