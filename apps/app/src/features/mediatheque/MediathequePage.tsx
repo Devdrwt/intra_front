@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react';
-import { ArrowLeft, Film, ImageIcon, Images, Plus, Trash2, Upload } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { ArrowLeft, ChevronLeft, ChevronRight, Download, Film, ImageIcon, Images, Plus, Trash2, Upload } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -14,6 +14,7 @@ import {
 } from '@drwindesk/ui';
 import { hasPermission, useAuth } from '@/auth/AuthContext';
 import { apiErrorMessage } from '@/lib/api';
+import { triggerDownload, humanSize } from '@/lib/download';
 import { toast } from '@/lib/toast';
 import { Stagger, StaggerItem } from '@/components/motion';
 import {
@@ -181,7 +182,7 @@ function CollectionView({
   const removeItem = useRemoveItem(collectionId);
   const removeCollection = useRemoveCollection();
   const fileRef = useRef<HTMLInputElement>(null);
-  const [lightbox, setLightbox] = useState<MediaItem | null>(null);
+  const [lbIndex, setLbIndex] = useState<number | null>(null);
   const [uploading, setUploading] = useState(false);
 
   const onPick = async (files: FileList | null) => {
@@ -259,10 +260,10 @@ function CollectionView({
         </Card>
       ) : (
         <Stagger className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {items.map((it) => (
+          {items.map((it, idx) => (
             <StaggerItem key={it.id}>
               <div className="group relative aspect-square overflow-hidden rounded-xl border border-surface-border bg-surface-muted">
-                <button onClick={() => setLightbox(it)} className="h-full w-full">
+                <button onClick={() => setLbIndex(idx)} className="h-full w-full">
                   {it.type === 'IMAGE' ? (
                     <img src={mediaFileUrl(it.id, true)} alt={it.nom} className="h-full w-full object-cover transition-transform group-hover:scale-105" loading="lazy" />
                   ) : (
@@ -287,14 +288,88 @@ function CollectionView({
         </Stagger>
       )}
 
-      <Modal open={!!lightbox} onClose={() => setLightbox(null)} size="xl" title={lightbox?.nom}>
-        {lightbox &&
-          (lightbox.type === 'IMAGE' ? (
-            <img src={mediaFileUrl(lightbox.id)} alt={lightbox.nom} className="mx-auto max-h-[70vh] w-auto rounded-lg" />
-          ) : (
-            <video src={mediaFileUrl(lightbox.id)} controls className="mx-auto max-h-[70vh] w-full rounded-lg" />
-          ))}
-      </Modal>
+      <Lightbox items={items ?? []} index={lbIndex} onIndex={setLbIndex} onClose={() => setLbIndex(null)} />
     </div>
+  );
+}
+
+function Lightbox({
+  items,
+  index,
+  onIndex,
+  onClose,
+}: {
+  items: MediaItem[];
+  index: number | null;
+  onIndex: (i: number | null) => void;
+  onClose: () => void;
+}) {
+  const [downloading, setDownloading] = useState(false);
+  const open = index != null;
+  const current = open ? items[index] : null;
+
+  useEffect(() => {
+    if (!open || index == null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft' && index > 0) onIndex(index - 1);
+      else if (e.key === 'ArrowRight' && index < items.length - 1) onIndex(index + 1);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, index, items.length, onIndex]);
+
+  if (!current || index == null) return null;
+
+  const download = async () => {
+    setDownloading(true);
+    try {
+      const res = await fetch(mediaFileUrl(current.id), { credentials: 'include' });
+      if (!res.ok) throw new Error('dl');
+      triggerDownload(await res.blob(), current.nom);
+    } catch {
+      toast.error('Téléchargement impossible.');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  return (
+    <Modal open={open} onClose={onClose} size="xl" title={current.nom}>
+      <div className="space-y-3">
+        <div className="relative">
+          {current.type === 'IMAGE' ? (
+            <img src={mediaFileUrl(current.id)} alt={current.nom} className="mx-auto max-h-[68vh] w-auto rounded-lg" />
+          ) : (
+            <video src={mediaFileUrl(current.id)} controls className="mx-auto max-h-[68vh] w-full rounded-lg" />
+          )}
+          {index > 0 && (
+            <button
+              onClick={() => onIndex(index - 1)}
+              aria-label="Précédent"
+              className="absolute left-1 top-1/2 -translate-y-1/2 rounded-full bg-ink/60 p-2 text-white hover:bg-ink/80"
+            >
+              <ChevronLeft size={20} />
+            </button>
+          )}
+          {index < items.length - 1 && (
+            <button
+              onClick={() => onIndex(index + 1)}
+              aria-label="Suivant"
+              className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full bg-ink/60 p-2 text-white hover:bg-ink/80"
+            >
+              <ChevronRight size={20} />
+            </button>
+          )}
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-ink-subtle">
+          <span>
+            {humanSize(current.taille)} · {new Date(current.createdAt).toLocaleDateString('fr-FR')} · {index + 1}/{items.length}
+          </span>
+          <Button size="sm" variant="secondary" onClick={() => void download()} loading={downloading}>
+            <Download size={15} /> Télécharger l'original
+          </Button>
+        </div>
+      </div>
+    </Modal>
   );
 }
