@@ -8,6 +8,7 @@ export interface Annonce {
   epingle: boolean;
   hasCover: boolean;
   authorId: string | null;
+  authorNom?: string;
   createdAt: string;
   updatedAt: string;
 }

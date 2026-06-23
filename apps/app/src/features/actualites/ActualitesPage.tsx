@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
-import { ImagePlus, Megaphone, Pin, Plus, Trash2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ImagePlus, Megaphone, Pencil, Pin, Plus, Trash2 } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -14,7 +15,7 @@ import {
 import { hasPermission, useAuth } from '@/auth/AuthContext';
 import { Select, cn } from '@drwindesk/ui';
 import { Stagger, StaggerItem } from '@/components/motion';
-import { useAnnonces, useCreateAnnonce, useRemoveAnnonce } from './hooks';
+import { useAnnonces, useCreateAnnonce, useRemoveAnnonce, useUpdateAnnonce } from './hooks';
 import { CATEGORIE_META, annonceCoverUrl, type Annonce, type AnnonceCategorie } from './types';
 
 const fmt = (iso: string) =>
@@ -26,6 +27,7 @@ export function ActualitesPage() {
   const { data, isLoading } = useAnnonces();
   const remove = useRemoveAnnonce();
   const [showNew, setShowNew] = useState(false);
+  const [editing, setEditing] = useState<Annonce | null>(null);
   const [filter, setFilter] = useState<AnnonceCategorie | 'ALL'>('ALL');
   const list = (data ?? []).filter((a) => filter === 'ALL' || a.categorie === filter);
 
@@ -92,23 +94,36 @@ export function ActualitesPage() {
                             <Pin size={12} /> Épinglé
                           </Badge>
                         )}
-                        <span className="text-xs text-ink-subtle">{fmt(a.createdAt)}</span>
+                        <span className="text-xs text-ink-subtle">
+                          {fmt(a.createdAt)}
+                          {a.authorNom ? ` · par ${a.authorNom}` : ''}
+                        </span>
                       </div>
-                      <h3 className="mt-1 text-lg font-semibold text-ink">{a.titre}</h3>
+                      <Link to={`/actualites/${a.id}`} className="mt-1 block text-lg font-semibold text-ink hover:text-brand-600">
+                        {a.titre}
+                      </Link>
                     </div>
                     {canManage && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => remove.mutate(a.id)}
-                        disabled={remove.isPending}
-                        className="text-ink-subtle hover:text-danger"
-                      >
-                        <Trash2 size={15} />
-                      </Button>
+                      <div className="flex shrink-0 gap-1">
+                        <Button size="sm" variant="ghost" onClick={() => setEditing(a)} className="text-ink-subtle hover:text-brand-600">
+                          <Pencil size={15} />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => remove.mutate(a.id)}
+                          disabled={remove.isPending}
+                          className="text-ink-subtle hover:text-danger"
+                        >
+                          <Trash2 size={15} />
+                        </Button>
+                      </div>
                     )}
                   </div>
-                  <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-ink-muted">{a.contenu}</p>
+                  <p className="mt-2 line-clamp-4 whitespace-pre-wrap text-sm leading-relaxed text-ink-muted">{a.contenu}</p>
+                  <Link to={`/actualites/${a.id}`} className="mt-2 inline-block text-sm font-medium text-brand-600 hover:underline">
+                    Lire la suite →
+                  </Link>
                 </div>
               </Card>
             </StaggerItem>
@@ -117,7 +132,62 @@ export function ActualitesPage() {
       )}
 
       {showNew && <NewAnnonceModal onClose={() => setShowNew(false)} />}
+      {editing && <EditAnnonceModal annonce={editing} onClose={() => setEditing(null)} />}
     </div>
+  );
+}
+
+function EditAnnonceModal({ annonce, onClose }: { annonce: Annonce; onClose: () => void }) {
+  const update = useUpdateAnnonce();
+  const [titre, setTitre] = useState(annonce.titre);
+  const [contenu, setContenu] = useState(annonce.contenu);
+  const [categorie, setCategorie] = useState<AnnonceCategorie>(annonce.categorie);
+  const [epingle, setEpingle] = useState(annonce.epingle);
+
+  const submit = async () => {
+    if (titre.trim().length < 2 || contenu.trim().length < 1) return;
+    await update.mutateAsync({
+      id: annonce.id,
+      patch: { titre: titre.trim(), contenu: contenu.trim(), categorie, epingle },
+    });
+    onClose();
+  };
+
+  return (
+    <Modal
+      open
+      onClose={onClose}
+      size="lg"
+      title="Modifier l'actualité"
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>Annuler</Button>
+          <Button onClick={() => void submit()} loading={update.isPending} disabled={titre.trim().length < 2}>
+            Enregistrer
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <Input label="Titre *" value={titre} onChange={(e) => setTitre(e.target.value)} />
+        <Select
+          label="Catégorie"
+          options={[
+            { value: 'ACTUALITE', label: 'Actualité' },
+            { value: 'RH', label: 'Annonce RH' },
+            { value: 'EVENEMENT', label: 'Événement' },
+          ]}
+          value={categorie}
+          onChange={(e) => setCategorie(e.target.value as AnnonceCategorie)}
+        />
+        <Textarea label="Contenu *" rows={6} value={contenu} onChange={(e) => setContenu(e.target.value)} />
+        <label className="flex items-center gap-2 text-sm text-ink">
+          <input type="checkbox" className="accent-brand-600" checked={epingle} onChange={(e) => setEpingle(e.target.checked)} />
+          Épingler en tête
+        </label>
+        <p className="text-xs text-ink-subtle">L'image de couverture ne se modifie pas ici (re-publier pour la changer).</p>
+      </div>
+    </Modal>
   );
 }
 
