@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { presencesService } from './service';
-import type { DemandeCongeInput, MissionInput, PointageSens, StatutConge } from './types';
+import type { DemandeCongeInput, FerieInput, MissionInput, PointageSens, StatutConge } from './types';
 
 const POINTAGES = 'pointages';
 const CONGES = 'conges';
@@ -36,6 +36,39 @@ export function useRemoveMission() {
     mutationFn: (id: string) => presencesService.removeMission(id),
     meta: { successMessage: 'Mission supprimée' },
     onSuccess: () => qc.invalidateQueries({ queryKey: [MISSIONS] }),
+  });
+}
+
+const FERIES = 'feries';
+
+export function useFeries(year: number) {
+  return useQuery({ queryKey: [FERIES, year], queryFn: () => presencesService.listFeries(year) });
+}
+
+export function useAddFerie() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: FerieInput) => presencesService.addFerie(input),
+    meta: { successMessage: 'Jour férié ajouté' },
+    onSuccess: () => qc.invalidateQueries({ queryKey: [FERIES] }),
+  });
+}
+
+export function useSeedFeries() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (year: number) => presencesService.seedFeries(year),
+    meta: { successMessage: 'Jours fériés du Bénin pré-remplis' },
+    onSuccess: () => qc.invalidateQueries({ queryKey: [FERIES] }),
+  });
+}
+
+export function useRemoveFerie() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => presencesService.removeFerie(id),
+    meta: { successMessage: 'Jour férié supprimé' },
+    onSuccess: () => qc.invalidateQueries({ queryKey: [FERIES] }),
   });
 }
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { CalendarOff, Check, Clock, LogIn, LogOut, Plane, Plus, Trash2, X } from 'lucide-react';
 import {
@@ -19,11 +19,15 @@ import { useOrgSettings } from '@/features/settings/org';
 import {
   useCancelConge,
   useConges,
+  useAddFerie,
   useCreateMission,
+  useFeries,
   useMissions,
   usePointagesDuJour,
   usePointer,
+  useRemoveFerie,
   useRemoveMission,
+  useSeedFeries,
   useSetStatutConge,
   useSuivi,
 } from './hooks';
@@ -39,7 +43,7 @@ import {
   type StatutConge,
 } from './types';
 
-type Tab = 'pointage' | 'conges' | 'missions' | 'suivi';
+type Tab = 'pointage' | 'conges' | 'missions' | 'suivi' | 'feries';
 
 const STATUT_TONE: Record<StatutConge, 'success' | 'warning' | 'danger'> = {
   APPROUVE: 'success',
@@ -90,6 +94,7 @@ export function PresencesPage() {
             ['conges', 'Demandes'],
             ['missions', 'Missions'],
             ['suivi', 'Suivi'],
+            ['feries', 'Jours fériés'],
           ] as [Tab, string][]
         ).map(([key, label]) => (
           <button
@@ -111,10 +116,70 @@ export function PresencesPage() {
         <CongesPanel />
       ) : tab === 'missions' ? (
         <MissionsPanel />
+      ) : tab === 'feries' ? (
+        <FeriesPanel />
       ) : (
         <SuiviPanel />
       )}
     </div>
+  );
+}
+
+function FeriesPanel() {
+  const year = new Date().getFullYear();
+  const { data, isLoading } = useFeries(year);
+  const add = useAddFerie();
+  const seed = useSeedFeries();
+  const remove = useRemoveFerie();
+  const [date, setDate] = useState('');
+  const [nom, setNom] = useState('');
+
+  const onAdd = (e: FormEvent) => {
+    e.preventDefault();
+    if (!date || nom.trim().length < 2) return;
+    add.mutate({ date, nom: nom.trim() }, { onSuccess: () => { setDate(''); setNom(''); } });
+  };
+
+  return (
+    <Card className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 className="font-semibold text-ink">Jours fériés {year}</h3>
+          <p className="text-sm text-ink-subtle">Exclus du décompte des congés et des alertes de pointage.</p>
+        </div>
+        <Button variant="secondary" size="sm" onClick={() => seed.mutate(year)} loading={seed.isPending}>
+          Pré-remplir (Bénin)
+        </Button>
+      </div>
+
+      <form onSubmit={onAdd} className="flex flex-wrap items-end gap-3">
+        <Input id="f-date" type="date" label="Date" value={date} onChange={(e) => setDate(e.target.value)} />
+        <Input id="f-nom" label="Nom" value={nom} onChange={(e) => setNom(e.target.value)} placeholder="Lundi de Pâques…" className="min-w-[200px] flex-1" />
+        <Button type="submit" loading={add.isPending}>Ajouter</Button>
+      </form>
+
+      {isLoading ? (
+        <SkeletonRows rows={4} cols={2} />
+      ) : (data ?? []).length === 0 ? (
+        <p className="py-6 text-center text-sm text-ink-subtle">Aucun jour férié — utilisez « Pré-remplir (Bénin) ».</p>
+      ) : (
+        <ul className="divide-y divide-surface-border">
+          {(data ?? []).map((f) => (
+            <li key={f.id} className="flex items-center justify-between gap-3 py-2.5">
+              <div>
+                <p className="text-sm font-medium text-ink">{f.nom}</p>
+                <p className="text-xs text-ink-subtle">
+                  {new Date(`${f.date}T00:00:00`).toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long' })}
+                </p>
+              </div>
+              <button onClick={() => remove.mutate(f.id)} disabled={remove.isPending} className="text-ink-subtle hover:text-danger" aria-label="Supprimer">
+                <Trash2 size={15} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
   );
 }
 

@@ -93,6 +93,18 @@ export interface Mission {
   dateFin: string;
   createdAt: string;
 }
+export interface Ferie {
+  id: string;
+  date: string; // yyyy-mm-dd
+  nom: string;
+  recurrent: boolean;
+}
+export interface FerieInput {
+  date: string;
+  nom: string;
+  recurrent?: boolean;
+}
+
 export interface MissionInput {
   employeId: string;
   objet: string;

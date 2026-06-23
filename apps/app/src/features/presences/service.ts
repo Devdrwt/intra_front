@@ -3,6 +3,8 @@ import { USE_MOCKS } from '@/lib/config';
 import type {
   DemandeConge,
   DemandeCongeInput,
+  Ferie,
+  FerieInput,
   Mission,
   MissionInput,
   Pointage,
@@ -104,6 +106,10 @@ const mockApi = {
     missions = missions.filter((m) => m.id !== id);
     return delay(undefined);
   },
+  listFeries: (_year: number) => delay([] as Ferie[]),
+  addFerie: (_input: FerieInput) => delay([] as Ferie[]),
+  seedFeries: (_year: number) => delay([] as Ferie[]),
+  removeFerie: (_id: string) => delay(undefined),
 };
 
 // --- HTTP (NestJS) ------------------------------------------------------------
@@ -127,6 +133,11 @@ const httpApi = {
   listMissions: () => api.get<Mission[]>('/missions').then((r) => r.data),
   createMission: (input: MissionInput) => api.post<Mission>('/missions', input).then((r) => r.data),
   removeMission: (id: string) => api.delete(`/missions/${id}`).then(() => undefined),
+  listFeries: (year: number) => api.get<Ferie[]>('/feries', { params: { year } }).then((r) => r.data),
+  addFerie: (input: FerieInput) => api.post<Ferie[]>('/feries', input).then((r) => r.data),
+  seedFeries: (year: number) =>
+    api.post<Ferie[]>('/feries/seed', null, { params: { year } }).then((r) => r.data),
+  removeFerie: (id: string) => api.delete(`/feries/${id}`).then(() => undefined),
 };
 
 export const presencesService = USE_MOCKS.presences ? mockApi : httpApi;
