@@ -12,6 +12,7 @@ import {
   PanelLeftOpen,
   Search,
   Settings,
+  Star,
   X,
 } from 'lucide-react';
 import { Avatar, cn } from '@drwindesk/ui';
@@ -30,6 +31,7 @@ import { useNotificationSound } from '@/hooks/useNotificationSound';
 
 const COLLAPSE_KEY = 'drwindesk.sidebar.collapsed';
 const NAV_GROUPS_KEY = 'drwindesk.nav.openGroups';
+const NAV_FAV_KEY = 'drwindesk.nav.favorites';
 
 export function AppLayout() {
   const { user, logout } = useAuth();
@@ -245,6 +247,32 @@ function SidebarContent({
   // Le groupe de la page active reste toujours déplié ; en mode icônes, tout est visible.
   const groupOpen = (g: string) => collapsed || g === activeGroup || openGroups.has(g);
 
+  const [favorites, setFavorites] = useState<string[]>(() => {
+    try {
+      const raw = localStorage.getItem(NAV_FAV_KEY);
+      if (raw) return JSON.parse(raw) as string[];
+    } catch {
+      /* ignore */
+    }
+    return [];
+  });
+  const toggleFav = (path: string) =>
+    setFavorites((prev) => {
+      const next = prev.includes(path) ? prev.filter((p) => p !== path) : [...prev, path];
+      try {
+        localStorage.setItem(NAV_FAV_KEY, JSON.stringify(next));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  const favSet = new Set(favorites);
+  const pinned = favorites
+    .map((p) => modules.find((m) => m.path === p))
+    .filter(Boolean) as typeof MODULES;
+
+  const badgeFor = (path: string) => (path === '/discussion' ? unreadMessages : 0);
+
   return (
     <>
       {!hideBrand && (
@@ -253,65 +281,131 @@ function SidebarContent({
         </div>
       )}
       <nav className="flex-1 space-y-2 overflow-y-auto px-3 py-2">
+        {pinned.length > 0 && (
+          <div>
+            {!collapsed && (
+              <p className="flex items-center gap-1.5 px-3 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-wider text-ink-subtle">
+                <Star size={12} className="fill-amber-400 text-amber-400" /> Favoris
+              </p>
+            )}
+            <div className="space-y-0.5">
+              {pinned.map((item) => (
+                <NavItem
+                  key={`fav-${item.path}`}
+                  item={item}
+                  active={isActive(item.path)}
+                  badge={badgeFor(item.path)}
+                  collapsed={collapsed}
+                  fav
+                  onToggleFav={toggleFav}
+                />
+              ))}
+            </div>
+          </div>
+        )}
         {groups.map(({ group, items }) => {
           const expanded = groupOpen(group);
           return (
-          <div key={group}>
-            {!collapsed && (
-              <button
-                type="button"
-                onClick={() => toggleGroup(group)}
-                className="flex w-full items-center justify-between rounded-lg px-3 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-wider text-ink-subtle transition-colors hover:text-ink"
-              >
-                <span>{group}</span>
-                <ChevronDown size={14} className={cn('transition-transform', !expanded && '-rotate-90')} />
-              </button>
-            )}
-            {expanded && (
-            <div className="space-y-0.5">
-              {items.map(({ path, label, icon: Icon }) => {
-                const active =
-                  path === '/' ? location === '/' : location.startsWith(path);
-                const badge = path === '/discussion' ? unreadMessages : 0;
-                return (
-                  <NavLink
-                    key={path}
-                    to={path}
-                    end={path === '/'}
-                    title={collapsed ? label : undefined}
-                    className={cn(
-                      'group relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors',
-                      collapsed && 'justify-center px-0',
-                      active
-                        ? 'bg-brand-soft text-brand-soft-fg'
-                        : 'text-ink-muted hover:bg-surface-muted hover:text-ink',
-                    )}
-                  >
-                    {active && (
-                      <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-brand-600" />
-                    )}
-                    <span className="relative">
-                      <Icon size={18} className={active ? '' : 'text-ink-subtle group-hover:text-ink'} />
-                      {badge > 0 && collapsed && (
-                        <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-brand-600 ring-2 ring-surface" />
-                      )}
-                    </span>
-                    {!collapsed && <span className="flex-1">{label}</span>}
-                    {!collapsed && badge > 0 && (
-                      <span className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-brand-600 px-1.5 text-[11px] font-semibold text-white">
-                        {badge > 99 ? '99+' : badge}
-                      </span>
-                    )}
-                  </NavLink>
-                );
-              })}
+            <div key={group}>
+              {!collapsed && (
+                <button
+                  type="button"
+                  onClick={() => toggleGroup(group)}
+                  className="flex w-full items-center justify-between rounded-lg px-3 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-wider text-ink-subtle transition-colors hover:text-ink"
+                >
+                  <span>{group}</span>
+                  <ChevronDown size={14} className={cn('transition-transform', !expanded && '-rotate-90')} />
+                </button>
+              )}
+              {expanded && (
+                <div className="space-y-0.5">
+                  {items.map((item) => (
+                    <NavItem
+                      key={item.path}
+                      item={item}
+                      active={isActive(item.path)}
+                      badge={badgeFor(item.path)}
+                      collapsed={collapsed}
+                      fav={favSet.has(item.path)}
+                      onToggleFav={toggleFav}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
-            )}
-          </div>
           );
         })}
       </nav>
     </>
+  );
+}
+
+function NavItem({
+  item,
+  active,
+  badge,
+  collapsed,
+  fav,
+  onToggleFav,
+}: {
+  item: (typeof MODULES)[number];
+  active: boolean;
+  badge: number;
+  collapsed: boolean;
+  fav: boolean;
+  onToggleFav: (path: string) => void;
+}) {
+  const Icon = item.icon;
+  return (
+    <div className="group/nav relative">
+      <NavLink
+        to={item.path}
+        end={item.path === '/'}
+        title={collapsed ? item.label : undefined}
+        className={cn(
+          'group relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors',
+          collapsed && 'justify-center px-0',
+          active
+            ? 'bg-brand-soft text-brand-soft-fg'
+            : 'text-ink-muted hover:bg-surface-muted hover:text-ink',
+        )}
+      >
+        {active && (
+          <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-brand-600" />
+        )}
+        <span className="relative">
+          <Icon size={18} className={active ? '' : 'text-ink-subtle group-hover:text-ink'} />
+          {badge > 0 && collapsed && (
+            <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-brand-600 ring-2 ring-surface" />
+          )}
+        </span>
+        {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
+        {!collapsed && badge > 0 && (
+          <span className="mr-5 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-brand-600 px-1.5 text-[11px] font-semibold text-white">
+            {badge > 99 ? '99+' : badge}
+          </span>
+        )}
+      </NavLink>
+      {!collapsed && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onToggleFav(item.path);
+          }}
+          title={fav ? 'Retirer des favoris' : 'Épingler aux favoris'}
+          className={cn(
+            'absolute right-1.5 top-1/2 -translate-y-1/2 rounded-md p-1 transition',
+            fav
+              ? 'text-amber-400 opacity-100'
+              : 'text-ink-subtle opacity-0 hover:text-amber-400 group-hover/nav:opacity-100',
+          )}
+        >
+          <Star size={13} className={fav ? 'fill-amber-400' : ''} />
+        </button>
+      )}
+    </div>
   );
 }
 
