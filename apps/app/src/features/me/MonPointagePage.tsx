@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { CalendarDays, Clock, Coffee, LogIn, LogOut, Play, Timer } from 'lucide-react';
+import { CalendarDays, Clock, Coffee, Download, LogIn, LogOut, Play, Timer } from 'lucide-react';
 import { Badge, Button, Card, CardTitle, EmptyState, PageHeader, Skeleton, cn } from '@drwindesk/ui';
 import type { Pointage } from '@/features/presences/types';
+import { triggerDownload } from '@/lib/download';
 import { Stagger, StaggerItem } from '@/components/motion';
 import { useMePointer, useMyPointages } from './hooks';
+import { meService } from './service';
 import { MeNotLinked } from './MeNotLinked';
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -88,7 +90,22 @@ export function MonPointagePage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Mon pointage" subtitle="Entrée, pause, reprise et sortie — suivez votre temps." />
+      <PageHeader
+        title="Mon pointage"
+        subtitle="Entrée, pause, reprise et sortie — suivez votre temps."
+        actions={
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              const ym = new Date().toISOString().slice(0, 7);
+              void meService.exportPointages(ym).then((b) => triggerDownload(b, `pointage-${ym}.csv`));
+            }}
+          >
+            <Download size={16} /> Exporter le mois
+          </Button>
+        }
+      />
 
       {/* Aujourd'hui */}
       <Card>

@@ -149,6 +149,7 @@ const mockApi = {
   downloadRapportAttachment: (_id: string) => delay(new Blob(['mock'])),
   uploadCongeAttachment: (file: File) => delay({ key: 'mock', name: file.name, size: file.size, type: file.type }),
   downloadCongeAttachment: (_id: string) => delay(new Blob(['mock'])),
+  exportPointages: (_ym: string) => delay(new Blob(['mock'])),
   cancelConge: (id: string) => {
     mConges = mConges.filter((c) => c.id !== id);
     return delay(undefined);
@@ -197,6 +198,8 @@ const httpApi = {
     fd.append('file', file);
     return api.post<AttachmentRef>('/me/conges/attachment', fd).then((r) => r.data);
   },
+  exportPointages: (ym: string) =>
+    api.get('/me/pointages/export', { params: { ym }, responseType: 'blob' }).then((r) => r.data as Blob),
   downloadCongeAttachment: (id: string) =>
     api.get(`/me/conges/${id}/attachment`, { responseType: 'blob' }).then((r) => r.data as Blob),
   cancelConge: (id: string) => api.delete(`/me/conges/${id}`).then(() => undefined),
