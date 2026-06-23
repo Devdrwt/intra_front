@@ -54,9 +54,10 @@ interface FormState {
   heureFin: string;
   joursRepos: JourSemaine[];
   reposIntervalle: string;
+  demiJournee: '' | 'AM' | 'PM';
   motif: string;
 }
-const EMPTY: FormState = { type: 'ANNUEL', dateDebut: '', dateFin: '', heureDebut: '', heureFin: '', joursRepos: [], reposIntervalle: '1', motif: '' };
+const EMPTY: FormState = { type: 'ANNUEL', dateDebut: '', dateFin: '', heureDebut: '', heureFin: '', joursRepos: [], reposIntervalle: '1', demiJournee: '', motif: '' };
 
 export function MesDemandesPage() {
   const { data: conges, isLoading, error } = useMyConges();
@@ -130,6 +131,7 @@ export function MesDemandesPage() {
         heureFin: intraJournee ? form.heureFin : undefined,
         joursRepos: tab === 'REPOS' ? form.joursRepos : undefined,
         reposIntervalleSemaines: tab === 'REPOS' ? Number(form.reposIntervalle) : undefined,
+        demiJournee: tab === 'CONGE' && form.demiJournee ? form.demiJournee : undefined,
         motif: form.motif || undefined,
         ...justif,
       });
@@ -248,7 +250,13 @@ export function MesDemandesPage() {
                     type="date"
                     label="Du *"
                     value={form.dateDebut}
-                    onChange={(e) => setForm((f) => ({ ...f, dateDebut: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        dateDebut: e.target.value,
+                        dateFin: tab === 'CONGE' && f.demiJournee ? e.target.value : f.dateFin,
+                      }))
+                    }
                     error={errors.dateDebut}
                   />
                   <Input
@@ -257,8 +265,27 @@ export function MesDemandesPage() {
                     value={form.dateFin}
                     onChange={(e) => setForm((f) => ({ ...f, dateFin: e.target.value }))}
                     error={errors.dateFin}
+                    disabled={tab === 'CONGE' && !!form.demiJournee}
                   />
                 </div>
+                {tab === 'CONGE' && (
+                  <Select
+                    label="Durée"
+                    options={[
+                      { value: '', label: 'Journée(s) complète(s)' },
+                      { value: 'AM', label: 'Demi-journée — matin' },
+                      { value: 'PM', label: 'Demi-journée — après-midi' },
+                    ]}
+                    value={form.demiJournee}
+                    onChange={(e) =>
+                      setForm((f) => {
+                        const demiJournee = e.target.value as '' | 'AM' | 'PM';
+                        // Demi-journée = un seul jour : on aligne la fin sur le début.
+                        return { ...f, demiJournee, dateFin: demiJournee ? f.dateDebut : f.dateFin };
+                      })
+                    }
+                  />
+                )}
                 {tab === 'PERMISSION' && (
                   <div className="grid gap-4 sm:grid-cols-2">
                     <Input

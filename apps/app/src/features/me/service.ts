@@ -37,6 +37,8 @@ export interface MeCongeInput {
   joursRepos?: JourSemaine[];
   /** Repos : cadence en semaines (1 = chaque semaine). */
   reposIntervalleSemaines?: number;
+  /** Congé d'une seule journée : demi-journée. */
+  demiJournee?: 'AM' | 'PM';
   motif?: string;
   justificatifKey?: string;
   justificatifName?: string;

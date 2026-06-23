@@ -60,6 +60,8 @@ export interface DemandeConge {
   joursRepos?: JourSemaine[];
   /** Repos : cadence en semaines (1 = chaque semaine, 2 = une sur deux…). */
   reposIntervalleSemaines?: number;
+  /** Congé d'une seule journée : demi-journée (matin/après-midi). */
+  demiJournee?: 'AM' | 'PM';
   motif?: string;
   /** Justificatif joint (certificat médical…) — métadonnées seulement. */
   justificatif?: { name: string; size: number; type: string };
@@ -78,6 +80,7 @@ export type DemandeCongeInput = Pick<
   | 'heureFin'
   | 'joursRepos'
   | 'reposIntervalleSemaines'
+  | 'demiJournee'
   | 'motif'
 >;
 
@@ -179,7 +182,12 @@ export function dureeHeures(heureDebut?: string, heureFin?: string): number {
  * Libellé lisible de durée : « 2 h (14:00–16:00) » pour une permission intra-journée,
  * sinon « N jour(s) ».
  */
-export function dureeLabel(c: Pick<DemandeConge, 'dateDebut' | 'dateFin' | 'heureDebut' | 'heureFin'>): string {
+export function dureeLabel(
+  c: Pick<DemandeConge, 'dateDebut' | 'dateFin' | 'heureDebut' | 'heureFin' | 'demiJournee'>,
+): string {
+  if (c.demiJournee) {
+    return `½ journée (${c.demiJournee === 'AM' ? 'matin' : 'après-midi'})`;
+  }
   if (c.heureDebut && c.heureFin) {
     const h = dureeHeures(c.heureDebut, c.heureFin);
     return `${h.toLocaleString('fr-FR')} h (${c.heureDebut}–${c.heureFin})`;
