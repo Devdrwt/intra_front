@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Download, FileText, FolderOpen, History, Search, Trash2, Upload } from 'lucide-react';
+import { Download, Eye, FileText, FolderOpen, History, Search, Trash2, Upload } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -27,7 +27,7 @@ import {
   useSetDocStatut,
 } from './hooks';
 import { documentationService } from './service';
-import { DOC_CATEGORIES, DOC_STATUT_META, type DocItem, type DocStatut } from './types';
+import { DOC_CATEGORIES, DOC_STATUT_META, docPreviewUrl, isPreviewable, type DocItem, type DocStatut } from './types';
 
 const fmt = (iso: string) => new Date(iso).toLocaleDateString('fr-FR');
 
@@ -42,6 +42,7 @@ export function DocumentationPage() {
   const [showNew, setShowNew] = useState(false);
   const [dlId, setDlId] = useState<string | null>(null);
   const [historyDoc, setHistoryDoc] = useState<DocItem | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<DocItem | null>(null);
 
   const download = async (d: DocItem) => {
     setDlId(d.id);
@@ -138,6 +139,11 @@ export function DocumentationPage() {
                     />
                   </div>
                 )}
+                {isPreviewable(d.mimeType) && (
+                  <Button size="sm" variant="ghost" onClick={() => setPreviewDoc(d)} title="Aperçu">
+                    <Eye size={15} />
+                  </Button>
+                )}
                 <Button size="sm" variant="ghost" onClick={() => setHistoryDoc(d)} title="Historique des versions">
                   <History size={15} />
                 </Button>
@@ -159,6 +165,15 @@ export function DocumentationPage() {
       {historyDoc && (
         <VersionsModal doc={historyDoc} canManage={canManage} onClose={() => setHistoryDoc(null)} />
       )}
+
+      <Modal open={!!previewDoc} onClose={() => setPreviewDoc(null)} size="xl" title={previewDoc?.titre}>
+        {previewDoc &&
+          (previewDoc.mimeType.startsWith('image/') ? (
+            <img src={docPreviewUrl(previewDoc.id)} alt={previewDoc.titre} className="mx-auto max-h-[72vh] w-auto rounded-lg" />
+          ) : (
+            <iframe src={docPreviewUrl(previewDoc.id)} title={previewDoc.titre} className="h-[72vh] w-full rounded-lg border border-surface-border" />
+          ))}
+      </Modal>
     </div>
   );
 }

@@ -44,3 +44,9 @@ export const DOC_CATEGORIES = [
   'Rapports',
   'Autres',
 ] as const;
+
+const API_BASE = import.meta.env.VITE_API_URL || '/api/v1';
+/** URL d'aperçu inline (PDF/image) d'un document, chargeable dans le navigateur. */
+export const docPreviewUrl = (id: string) => `${API_BASE}/docs/${id}/file?inline=1`;
+/** Vrai si le type permet un aperçu intégré (PDF ou image). */
+export const isPreviewable = (mime: string) => mime === 'application/pdf' || mime.startsWith('image/');
