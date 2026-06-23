@@ -4,15 +4,15 @@ import type { SaveAccountInput, SendInput } from './types';
 
 const KEY = 'webmail';
 
-export function useMailAccount() {
-  return useQuery({ queryKey: [KEY, 'account'], queryFn: webmailService.account });
+export function useMailAccounts() {
+  return useQuery({ queryKey: [KEY, 'accounts'], queryFn: webmailService.accounts });
 }
 
-export function useSaveMailAccount() {
+export function useAddMailAccount() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: SaveAccountInput) => webmailService.saveAccount(input),
-    meta: { successMessage: 'Messagerie connectée', silentError: true },
+    mutationFn: (input: SaveAccountInput) => webmailService.addAccount(input),
+    meta: { successMessage: 'Boîte mail connectée', silentError: true },
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEY] }),
   });
 }
@@ -20,34 +20,34 @@ export function useSaveMailAccount() {
 export function useRemoveMailAccount() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: () => webmailService.removeAccount(),
-    meta: { successMessage: 'Messagerie déconnectée' },
+    mutationFn: (id: string) => webmailService.removeAccount(id),
+    meta: { successMessage: 'Boîte mail déconnectée' },
     onSuccess: () => qc.invalidateQueries({ queryKey: [KEY] }),
   });
 }
 
-export function useInbox(enabled: boolean) {
+export function useInbox(accountId: string | null) {
   return useQuery({
-    queryKey: [KEY, 'inbox'],
-    queryFn: webmailService.inbox,
-    enabled,
+    queryKey: [KEY, 'inbox', accountId],
+    queryFn: () => webmailService.inbox(accountId!),
+    enabled: accountId != null,
     refetchInterval: 60_000,
   });
 }
 
-export function useMailMessage(uid: number | null) {
+export function useMailMessage(accountId: string | null, uid: number | null) {
   return useQuery({
-    queryKey: [KEY, 'message', uid],
-    queryFn: () => webmailService.message(uid!),
-    enabled: uid != null,
+    queryKey: [KEY, 'message', accountId, uid],
+    queryFn: () => webmailService.message(accountId!, uid!),
+    enabled: accountId != null && uid != null,
   });
 }
 
-export function useSendMail() {
+export function useSendMail(accountId: string | null) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: SendInput) => webmailService.send(input),
+    mutationFn: (input: SendInput) => webmailService.send(accountId!, input),
     meta: { successMessage: 'Message envoyé', silentError: true },
-    onSuccess: () => qc.invalidateQueries({ queryKey: [KEY, 'inbox'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [KEY, 'inbox', accountId] }),
   });
 }

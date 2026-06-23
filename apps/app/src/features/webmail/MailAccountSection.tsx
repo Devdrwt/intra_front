@@ -1,25 +1,28 @@
 import { useState, type FormEvent } from 'react';
-import { Mail, Plug, Unplug } from 'lucide-react';
+import { Mail, Plug, Plus, Unplug } from 'lucide-react';
 import { Badge, Button, Callout, Card, CardDescription, CardTitle, Input } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
-import { useMailAccount, useRemoveMailAccount, useSaveMailAccount } from './hooks';
+import { useAddMailAccount, useMailAccounts, useRemoveMailAccount } from './hooks';
 import type { SaveAccountInput } from './types';
 
+const EMPTY: SaveAccountInput = {
+  label: '',
+  email: '',
+  password: '',
+  imapHost: 'imap.hostinger.com',
+  imapPort: 993,
+  smtpHost: 'smtp.hostinger.com',
+  smtpPort: 465,
+};
+
 export function MailAccountSection() {
-  const { data: account } = useMailAccount();
-  const save = useSaveMailAccount();
+  const { data: accounts } = useMailAccounts();
+  const add = useAddMailAccount();
   const remove = useRemoveMailAccount();
 
-  const [open, setOpen] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [advanced, setAdvanced] = useState(false);
-  const [form, setForm] = useState<SaveAccountInput>({
-    email: '',
-    password: '',
-    imapHost: 'imap.hostinger.com',
-    imapPort: 993,
-    smtpHost: 'smtp.hostinger.com',
-    smtpPort: 465,
-  });
+  const [form, setForm] = useState<SaveAccountInput>(EMPTY);
   const [error, setError] = useState<string | null>(null);
 
   const set = <K extends keyof SaveAccountInput>(k: K, v: SaveAccountInput[K]) =>
@@ -29,15 +32,15 @@ export function MailAccountSection() {
     e.preventDefault();
     setError(null);
     try {
-      await save.mutateAsync(form);
-      setForm((f) => ({ ...f, password: '' }));
-      setOpen(false);
+      await add.mutateAsync(form);
+      setForm(EMPTY);
+      setShowForm(false);
     } catch (err) {
       setError(apiErrorMessage(err, 'Connexion impossible.'));
     }
   };
 
-  const configured = account?.configured;
+  const list = accounts ?? [];
 
   return (
     <Card>
@@ -46,35 +49,54 @@ export function MailAccountSection() {
           <Mail size={18} className="text-ink-subtle" />
           <CardTitle>Messagerie email</CardTitle>
         </div>
-        {configured && <Badge tone="success" dot>Connectée</Badge>}
+        {list.length > 0 && <Badge tone="success" dot>{list.length} boîte{list.length > 1 ? 's' : ''}</Badge>}
       </div>
       <CardDescription>
-        Connectez votre boîte Hostinger pour lire et envoyer vos mails depuis l'intranet.
+        Connectez une ou plusieurs boîtes (Gmail, Outlook, Hostinger…) pour les lire et envoyer depuis l'intranet.
       </CardDescription>
 
-      {configured && !open ? (
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-          <div className="text-sm">
-            <p className="font-medium text-ink">{account?.email}</p>
-            <p className="text-xs text-ink-subtle">
-              IMAP {account?.imapHost}:{account?.imapPort} · SMTP {account?.smtpHost}:{account?.smtpPort}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="secondary" size="sm" onClick={() => setOpen(true)}>
-              <Plug size={15} /> Reconfigurer
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => remove.mutate()} disabled={remove.isPending}>
-              <Unplug size={15} /> Déconnecter
-            </Button>
-          </div>
+      {list.length > 0 && (
+        <ul className="mt-4 space-y-2">
+          {list.map((a) => (
+            <li key={a.id} className="flex items-center justify-between gap-3 rounded-xl border border-surface-border px-3 py-2">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-ink">{a.label}</p>
+                <p className="truncate text-xs text-ink-subtle">
+                  {a.email} · IMAP {a.imapHost}:{a.imapPort} · SMTP {a.smtpHost}:{a.smtpPort}
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => remove.mutate(a.id)}
+                disabled={remove.isPending}
+                className="shrink-0 text-danger hover:bg-danger-soft"
+              >
+                <Unplug size={15} /> Déconnecter
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {!showForm ? (
+        <div className="mt-4">
+          <Button variant="secondary" size="sm" onClick={() => setShowForm(true)}>
+            <Plus size={15} /> Ajouter une boîte
+          </Button>
         </div>
       ) : (
         <form onSubmit={onSubmit} noValidate className="mt-4 space-y-4">
           <Callout tone="info">
-            Votre mot de passe est <strong>chiffré</strong> avant stockage et ne sert qu'à relever
-            votre boîte. La connexion est testée avant enregistrement.
+            Votre mot de passe est <strong>chiffré</strong> avant stockage et ne sert qu'à relever votre
+            boîte. La connexion est testée avant enregistrement.
           </Callout>
+          <Input
+            label="Nom de la boîte"
+            value={form.label}
+            onChange={(e) => set('label', e.target.value)}
+            placeholder="Perso, Support, Compta…"
+          />
           <div className="grid gap-4 sm:grid-cols-2">
             <Input
               type="email"
@@ -112,12 +134,10 @@ export function MailAccountSection() {
 
           {error && <Callout tone="danger">{error}</Callout>}
           <div className="flex justify-end gap-3">
-            {configured && (
-              <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
-                Annuler
-              </Button>
-            )}
-            <Button type="submit" loading={save.isPending}>
+            <Button type="button" variant="secondary" onClick={() => { setShowForm(false); setError(null); }}>
+              Annuler
+            </Button>
+            <Button type="submit" loading={add.isPending}>
               <Plug size={16} /> Tester &amp; connecter
             </Button>
           </div>

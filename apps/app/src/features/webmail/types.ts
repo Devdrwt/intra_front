@@ -1,13 +1,15 @@
-export interface MailAccountStatus {
-  configured: boolean;
-  email?: string;
-  imapHost?: string;
-  imapPort?: number;
-  smtpHost?: string;
-  smtpPort?: number;
+export interface MailAccount {
+  id: string;
+  label: string;
+  email: string;
+  imapHost: string;
+  imapPort: number;
+  smtpHost: string;
+  smtpPort: number;
 }
 
 export interface SaveAccountInput {
+  label?: string;
   email: string;
   password: string;
   imapHost?: string;

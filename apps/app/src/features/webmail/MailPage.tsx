@@ -14,7 +14,7 @@ import { Button, Card, EmptyState, Input, Modal, Skeleton, Textarea, cn } from '
 import { apiErrorMessage } from '@/lib/api';
 import { triggerDownload, humanSize } from '@/lib/download';
 import { toast } from '@/lib/toast';
-import { useInbox, useMailAccount, useMailMessage, useSendMail } from './hooks';
+import { useInbox, useMailAccounts, useMailMessage, useSendMail } from './hooks';
 import { webmailService } from './service';
 import type { SendInput } from './types';
 
@@ -24,18 +24,21 @@ const fmt = (iso: string | null) =>
     : '';
 
 export function MailPage() {
-  const { data: account, isLoading: loadingAccount } = useMailAccount();
-  const configured = account?.configured;
-  const { data: inbox, isLoading, isError, refetch, isFetching } = useInbox(Boolean(configured));
+  const { data: accounts, isLoading: loadingAccounts } = useMailAccounts();
+  const [picked, setPicked] = useState<string | null>(null);
+  const accountId = picked ?? accounts?.[0]?.id ?? null;
+  const account = accounts?.find((a) => a.id === accountId);
+
+  const { data: inbox, isLoading, isError, refetch, isFetching } = useInbox(accountId);
   const [uid, setUid] = useState<number | null>(null);
   const [mobileRead, setMobileRead] = useState(false);
   const [compose, setCompose] = useState<Partial<SendInput> | null>(null);
 
-  if (loadingAccount) {
+  if (loadingAccounts) {
     return <Skeleton className="h-64 w-full rounded-2xl" />;
   }
 
-  if (!configured) {
+  if (!accounts || accounts.length === 0) {
     return (
       <div className="space-y-4">
         <header>
@@ -44,8 +47,8 @@ export function MailPage() {
         <Card className="p-0">
           <EmptyState
             icon={<Mail size={22} />}
-            title="Messagerie non configurée"
-            description="Connectez votre boîte email pour lire et envoyer vos mails ici."
+            title="Aucune boîte connectée"
+            description="Connectez une ou plusieurs boîtes email pour les lire et envoyer vos mails ici."
             action={
               <Link to="/parametres">
                 <Button size="sm">
@@ -61,17 +64,41 @@ export function MailPage() {
   }
 
   const list = inbox ?? [];
+  const selectAccount = (id: string) => {
+    setPicked(id);
+    setUid(null);
+    setMobileRead(false);
+  };
 
   return (
     <div className="space-y-4">
-      <header className="flex items-center justify-between">
-        <div>
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
           <h2 className="text-2xl font-bold tracking-tight text-ink">Mail</h2>
-          <p className="text-ink-muted">{account?.email}</p>
+          <p className="truncate text-ink-muted">{account?.email}</p>
         </div>
-        <Button onClick={() => setCompose({})}>
-          <PenSquare size={16} /> Écrire
-        </Button>
+        <div className="flex items-center gap-2">
+          {accounts.length > 1 && (
+            <div className="flex rounded-xl bg-surface-muted p-1">
+              {accounts.map((a) => (
+                <button
+                  key={a.id}
+                  onClick={() => selectAccount(a.id)}
+                  title={a.email}
+                  className={cn(
+                    'max-w-[12rem] truncate rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+                    a.id === accountId ? 'bg-surface text-ink shadow-soft' : 'text-ink-muted hover:text-ink',
+                  )}
+                >
+                  {a.label}
+                </button>
+              ))}
+            </div>
+          )}
+          <Button onClick={() => setCompose({})}>
+            <PenSquare size={16} /> Écrire
+          </Button>
+        </div>
       </header>
 
       <Card className="flex h-[68vh] overflow-hidden p-0">
@@ -127,29 +154,38 @@ export function MailPage() {
 
         {/* Lecture */}
         <section className={cn('flex-1 flex-col', mobileRead ? 'flex' : 'hidden lg:flex')}>
-          {uid == null ? (
+          {uid == null || !accountId ? (
             <EmptyState icon={<Mail size={20} />} title="Sélectionnez un message" className="m-auto" />
           ) : (
-            <Reader uid={uid} onBack={() => setMobileRead(false)} onReply={(to, subject) => setCompose({ to, subject })} />
+            <Reader
+              accountId={accountId}
+              uid={uid}
+              onBack={() => setMobileRead(false)}
+              onReply={(to, subject) => setCompose({ to, subject })}
+            />
           )}
         </section>
       </Card>
 
-      {compose && <Compose initial={compose} onClose={() => setCompose(null)} />}
+      {compose && accountId && (
+        <Compose accountId={accountId} initial={compose} onClose={() => setCompose(null)} />
+      )}
     </div>
   );
 }
 
 function Reader({
+  accountId,
   uid,
   onBack,
   onReply,
 }: {
+  accountId: string;
   uid: number;
   onBack: () => void;
   onReply: (to: string, subject: string) => void;
 }) {
-  const { data: msg, isLoading } = useMailMessage(uid);
+  const { data: msg, isLoading } = useMailMessage(accountId, uid);
   const [dl, setDl] = useState<number | null>(null);
 
   if (isLoading || !msg) {
@@ -164,7 +200,7 @@ function Reader({
   const download = async (index: number, filename: string) => {
     setDl(index);
     try {
-      const blob = await webmailService.downloadAttachment(uid, index);
+      const blob = await webmailService.downloadAttachment(accountId, uid, index);
       triggerDownload(blob, filename);
     } catch {
       toast.error('Téléchargement impossible.');
@@ -223,8 +259,16 @@ function Reader({
   );
 }
 
-function Compose({ initial, onClose }: { initial: Partial<SendInput>; onClose: () => void }) {
-  const send = useSendMail();
+function Compose({
+  accountId,
+  initial,
+  onClose,
+}: {
+  accountId: string;
+  initial: Partial<SendInput>;
+  onClose: () => void;
+}) {
+  const send = useSendMail(accountId);
   const [to, setTo] = useState(initial.to ?? '');
   const [subject, setSubject] = useState(initial.subject ?? '');
   const [body, setBody] = useState('');
