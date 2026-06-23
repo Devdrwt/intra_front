@@ -29,6 +29,11 @@ export const documentationService = {
   },
   restoreVersion: (docId: string, versionId: string) =>
     api.post<DocItem>(`/docs/${docId}/versions/${versionId}/restore`).then((r) => r.data),
+  getAccess: (id: string) => api.get<string[]>(`/docs/${id}/access`).then((r) => r.data),
+  setAccess: (id: string, userIds: string[]) =>
+    api.put(`/docs/${id}/access`, { userIds }).then(() => undefined),
+  setRestricted: (id: string, restricted: boolean) =>
+    api.patch<DocItem>(`/docs/${id}/restricted`, { restricted }).then((r) => r.data),
   downloadVersion: (versionId: string, name: string) =>
     api
       .get(`/docs/versions/${versionId}/file`, { responseType: 'blob' })

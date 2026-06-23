@@ -9,6 +9,7 @@ export interface DocItem {
   mimeType: string;
   taille: number;
   version: number;
+  restricted: boolean;
   createdAt: string;
   updatedAt: string;
 }

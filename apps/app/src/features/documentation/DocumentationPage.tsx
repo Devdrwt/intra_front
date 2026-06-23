@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Download, Eye, FileText, FolderOpen, History, RotateCcw, Search, Trash2, Upload } from 'lucide-react';
+import { Download, Eye, FileText, FolderOpen, History, Lock, RotateCcw, Search, Trash2, Upload } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -21,12 +21,16 @@ import { Stagger, StaggerItem } from '@/components/motion';
 import {
   useAddVersion,
   useCreateDoc,
+  useDocAccess,
   useDocVersions,
   useDocs,
   useRemoveDoc,
   useRestoreVersion,
+  useSetDocAccess,
   useSetDocStatut,
 } from './hooks';
+import { useUsers } from '@/features/users/hooks';
+import { userLabel } from '@/features/users/types';
 import { documentationService } from './service';
 import { DOC_CATEGORIES, DOC_STATUT_META, docPreviewUrl, isPreviewable, type DocItem, type DocStatut } from './types';
 
@@ -44,6 +48,7 @@ export function DocumentationPage() {
   const [dlId, setDlId] = useState<string | null>(null);
   const [historyDoc, setHistoryDoc] = useState<DocItem | null>(null);
   const [previewDoc, setPreviewDoc] = useState<DocItem | null>(null);
+  const [accessDoc, setAccessDoc] = useState<DocItem | null>(null);
 
   const download = async (d: DocItem) => {
     setDlId(d.id);
@@ -117,6 +122,7 @@ export function DocumentationPage() {
                     <p className="truncate font-medium text-ink">{d.titre}</p>
                     <Badge tone="neutral">{d.categorie}</Badge>
                     {d.version > 1 && <Badge tone="brand">v{d.version}</Badge>}
+                    {d.restricted && <Lock size={13} className="text-amber-500" />}
                     {canManage && d.statut !== 'PUBLIE' && (
                       <Badge tone={DOC_STATUT_META[d.statut].tone}>{DOC_STATUT_META[d.statut].label}</Badge>
                     )}
@@ -152,6 +158,11 @@ export function DocumentationPage() {
                   <Download size={15} /> Télécharger
                 </Button>
                 {canManage && (
+                  <Button size="sm" variant="ghost" onClick={() => setAccessDoc(d)} title="Accès">
+                    <Lock size={15} />
+                  </Button>
+                )}
+                {canManage && (
                   <Button size="sm" variant="ghost" onClick={() => remove.mutate(d.id)} disabled={remove.isPending} className="text-ink-subtle hover:text-danger">
                     <Trash2 size={15} />
                   </Button>
@@ -166,6 +177,8 @@ export function DocumentationPage() {
       {historyDoc && (
         <VersionsModal doc={historyDoc} canManage={canManage} onClose={() => setHistoryDoc(null)} />
       )}
+
+      {accessDoc && <DocAccessModal doc={accessDoc} onClose={() => setAccessDoc(null)} />}
 
       <Modal open={!!previewDoc} onClose={() => setPreviewDoc(null)} size="xl" title={previewDoc?.titre}>
         {previewDoc &&
@@ -306,6 +319,68 @@ function NewDocModal({ onClose }: { onClose: () => void }) {
         <p className="text-xs text-ink-subtle">
           Le document est créé en <strong>brouillon</strong> — passez-le en « Publier » pour le rendre visible de tous.
         </p>
+      </div>
+    </Modal>
+  );
+}
+
+function DocAccessModal({ doc, onClose }: { doc: DocItem; onClose: () => void }) {
+  const { data: users } = useUsers();
+  const { data: access, isLoading } = useDocAccess(doc.id);
+  const save = useSetDocAccess(doc.id);
+  const [restricted, setRestricted] = useState(doc.restricted);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [init, setInit] = useState(false);
+
+  if (!init && access) {
+    setSelected(new Set(access));
+    setInit(true);
+  }
+  const toggle = (uid: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.has(uid) ? next.delete(uid) : next.add(uid);
+      return next;
+    });
+  const submit = async () => {
+    await save.mutateAsync({ userIds: [...selected], restricted });
+    onClose();
+  };
+
+  return (
+    <Modal
+      open
+      onClose={onClose}
+      size="md"
+      title="Accès au document"
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>Annuler</Button>
+          <Button onClick={() => void submit()} loading={save.isPending}>Enregistrer</Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <label className="flex items-center gap-2 text-sm text-ink">
+          <input type="checkbox" className="accent-brand-600" checked={restricted} onChange={(e) => setRestricted(e.target.checked)} />
+          Restreindre l'accès à certains utilisateurs
+        </label>
+        {restricted ? (
+          isLoading ? (
+            <Skeleton className="h-40 w-full rounded-lg" />
+          ) : (
+            <div className="max-h-64 space-y-1 overflow-y-auto rounded-xl border border-surface-border p-2">
+              {(users ?? []).map((u) => (
+                <label key={u.id} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-surface-muted">
+                  <input type="checkbox" className="accent-brand-600" checked={selected.has(u.id)} onChange={() => toggle(u.id)} />
+                  {userLabel(u)}
+                </label>
+              ))}
+            </div>
+          )
+        ) : (
+          <p className="text-sm text-ink-subtle">Le document suit la visibilité normale (publié = visible par tous).</p>
+        )}
       </div>
     </Modal>
   );

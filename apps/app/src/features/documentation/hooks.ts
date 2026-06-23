@@ -60,6 +60,27 @@ export function useAddVersion(docId: string) {
   });
 }
 
+export function useDocAccess(id: string | null) {
+  return useQuery({
+    queryKey: [KEY, 'access', id],
+    queryFn: () => documentationService.getAccess(id!),
+    enabled: !!id,
+  });
+}
+
+export function useSetDocAccess(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userIds, restricted }: { userIds: string[]; restricted: boolean }) =>
+      documentationService.setRestricted(id, restricted).then(() => documentationService.setAccess(id, userIds)),
+    meta: { successMessage: 'Accès mis à jour' },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [KEY] });
+      qc.invalidateQueries({ queryKey: [KEY, 'access', id] });
+    },
+  });
+}
+
 export function useRestoreVersion(docId: string) {
   const qc = useQueryClient();
   return useMutation({
