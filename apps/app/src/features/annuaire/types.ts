@@ -14,11 +14,14 @@ export interface Absent extends PersonneBrief {
 
 export interface AnnuaireEntry {
   id: string;
+  matricule: string;
   prenom: string;
   nom: string;
   poste: string;
   departement: string;
   service: string | null;
+  typeContrat: string;
+  dateEmbauche: string;
   email: string;
   telephone: string | null;
   userId: string | null;
