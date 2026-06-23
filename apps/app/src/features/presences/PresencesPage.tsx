@@ -33,6 +33,7 @@ import {
   STATUT_CONGE_LABEL,
   TYPE_CONGE_LABEL,
   joursReposLabel,
+  intervalleLabel,
   nbJours,
   type CategorieDemande,
   type StatutConge,
@@ -448,7 +449,7 @@ function CongesPanel() {
                     </td>
                     <td className="px-5 py-3 text-ink-muted">
                       {categorie === 'REPOS' && c.joursRepos?.length
-                        ? joursReposLabel(c.joursRepos)
+                        ? `${joursReposLabel(c.joursRepos)} · ${intervalleLabel(c.reposIntervalleSemaines)}`
                         : `${fmt(c.dateDebut)} → ${fmt(c.dateFin)}`}
                     </td>
                     <td className="hidden px-5 py-3 tabular-nums text-ink-muted sm:table-cell">

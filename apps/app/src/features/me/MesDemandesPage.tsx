@@ -11,8 +11,10 @@ import {
   TYPE_CONGE_LABEL,
   TYPE_CONGE_OPTIONS,
   dureeLabel,
+  intervalleLabel,
   joursReposLabel,
   nbJours,
+  REPOS_INTERVALLE_OPTIONS,
   type CategorieDemande,
   type JourSemaine,
   type StatutConge,
@@ -49,9 +51,10 @@ interface FormState {
   heureDebut: string;
   heureFin: string;
   joursRepos: JourSemaine[];
+  reposIntervalle: string;
   motif: string;
 }
-const EMPTY: FormState = { type: 'ANNUEL', dateDebut: '', dateFin: '', heureDebut: '', heureFin: '', joursRepos: [], motif: '' };
+const EMPTY: FormState = { type: 'ANNUEL', dateDebut: '', dateFin: '', heureDebut: '', heureFin: '', joursRepos: [], reposIntervalle: '1', motif: '' };
 
 export function MesDemandesPage() {
   const { data: conges, isLoading, error } = useMyConges();
@@ -113,6 +116,7 @@ export function MesDemandesPage() {
         heureDebut: intraJournee ? form.heureDebut : undefined,
         heureFin: intraJournee ? form.heureFin : undefined,
         joursRepos: tab === 'REPOS' ? form.joursRepos : undefined,
+        reposIntervalleSemaines: tab === 'REPOS' ? Number(form.reposIntervalle) : undefined,
         motif: form.motif || undefined,
       });
       setForm(EMPTY);
@@ -213,6 +217,14 @@ export function MesDemandesPage() {
                     );
                   })}
                 </div>
+                <div className="mt-4">
+                  <Select
+                    label="Fréquence"
+                    options={REPOS_INTERVALLE_OPTIONS}
+                    value={form.reposIntervalle}
+                    onChange={(e) => setForm((f) => ({ ...f, reposIntervalle: e.target.value }))}
+                  />
+                </div>
               </div>
             ) : (
               <>
@@ -304,7 +316,7 @@ export function MesDemandesPage() {
                     </p>
                     <p className="text-xs text-ink-subtle">
                       {(c.categorie ?? 'CONGE') === 'REPOS' && c.joursRepos?.length
-                        ? `Repos : ${joursReposLabel(c.joursRepos)}`
+                        ? `Repos : ${joursReposLabel(c.joursRepos)} · ${intervalleLabel(c.reposIntervalleSemaines)}`
                         : `Du ${fmt(c.dateDebut)} au ${fmt(c.dateFin)} · ${dureeLabel(c)}`}
                       {c.motif ? ` · ${c.motif}` : ''}
                     </p>

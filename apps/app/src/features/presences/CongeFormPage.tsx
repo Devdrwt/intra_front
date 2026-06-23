@@ -10,6 +10,7 @@ import {
   CATEGORIE_LABEL,
   JOURS_ORDER,
   JOUR_COURT,
+  REPOS_INTERVALLE_OPTIONS,
   TYPE_CONGE_OPTIONS,
   nbJours,
   type CategorieDemande,
@@ -37,6 +38,7 @@ export function CongeFormPage() {
     dateDebut: '',
     dateFin: '',
     joursRepos: [],
+    reposIntervalleSemaines: 1,
     motif: '',
   });
   const [errors, setErrors] = useState<Errors>({});
@@ -84,6 +86,7 @@ export function CongeFormPage() {
         dateDebut: isRepos ? '' : form.dateDebut,
         dateFin: isRepos ? '' : form.dateFin,
         joursRepos: isRepos ? form.joursRepos : undefined,
+        reposIntervalleSemaines: isRepos ? form.reposIntervalleSemaines : undefined,
         motif: form.motif || undefined,
       });
       navigate('/presences');
@@ -159,6 +162,14 @@ export function CongeFormPage() {
                 })}
               </div>
               {errors.joursRepos && <p className="mt-1 text-xs text-danger">{errors.joursRepos}</p>}
+              <div className="mt-4 max-w-xs">
+                <Select
+                  label="Fréquence"
+                  options={REPOS_INTERVALLE_OPTIONS}
+                  value={String(form.reposIntervalleSemaines ?? 1)}
+                  onChange={(e) => set('reposIntervalleSemaines', Number(e.target.value))}
+                />
+              </div>
             </div>
           ) : (
             <>

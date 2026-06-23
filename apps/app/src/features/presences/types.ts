@@ -33,6 +33,19 @@ export function joursReposLabel(jours?: JourSemaine[] | null): string {
   return JOURS_ORDER.filter((j) => jours.includes(j)).map((j) => JOUR_LABEL[j]).join(', ');
 }
 
+/** Cadence du repos : '' si chaque semaine, sinon « toutes les N semaines ». */
+export function intervalleLabel(n?: number | null): string {
+  return !n || n <= 1 ? 'chaque semaine' : `toutes les ${n} semaines`;
+}
+
+/** Options de cadence pour le formulaire de repos. */
+export const REPOS_INTERVALLE_OPTIONS = [
+  { value: '1', label: 'Chaque semaine' },
+  { value: '2', label: 'Une semaine sur deux' },
+  { value: '3', label: 'Toutes les 3 semaines' },
+  { value: '4', label: 'Toutes les 4 semaines' },
+];
+
 export interface DemandeConge {
   id: string;
   employeId: string;
@@ -45,6 +58,8 @@ export interface DemandeConge {
   heureFin?: string;
   /** Repos hebdomadaire : jour(s) de la semaine (au lieu d'une plage de dates). */
   joursRepos?: JourSemaine[];
+  /** Repos : cadence en semaines (1 = chaque semaine, 2 = une sur deux…). */
+  reposIntervalleSemaines?: number;
   motif?: string;
   statut: StatutConge;
   demandeLe: string; // ISO
@@ -60,6 +75,7 @@ export type DemandeCongeInput = Pick<
   | 'heureDebut'
   | 'heureFin'
   | 'joursRepos'
+  | 'reposIntervalleSemaines'
   | 'motif'
 >;
 

@@ -35,6 +35,8 @@ export interface MeCongeInput {
   heureFin?: string;
   /** Repos hebdomadaire : jour(s) de la semaine. */
   joursRepos?: JourSemaine[];
+  /** Repos : cadence en semaines (1 = chaque semaine). */
+  reposIntervalleSemaines?: number;
   motif?: string;
 }
 
