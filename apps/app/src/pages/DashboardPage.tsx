@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import {
   Bell,
   CalendarClock,
+  CalendarDays,
   ClipboardCheck,
   Clock,
   FileBarChart,
@@ -28,7 +29,7 @@ import { AgendaWidget } from '@/features/agenda/AgendaWidget';
 import { AlaUneCard } from '@/features/actualites/AlaUneCard';
 import { PresenceRepartitionCard } from '@/features/presences/PresenceRepartitionCard';
 import { MesTachesWidget } from '@/features/tasks/MesTachesWidget';
-import { WeatherCard } from '@/features/dashboard/WeatherCard';
+import { WeatherCard, useWeather, weatherMeta } from '@/features/dashboard/WeatherCard';
 import { EcheancesCard } from '@/features/dashboard/EcheancesCard';
 import { TempsFortsCard } from '@/features/dashboard/TempsFortsCard';
 import { AbsentsCard } from '@/features/dashboard/AbsentsCard';
@@ -45,7 +46,28 @@ function greeting(h: number = new Date().getHours()): { hello: string; emoji: st
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
 const fullDate = () =>
-  new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+  new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+/** Date du jour + température de Cotonou, réunies et bien visibles dans l'en-tête. */
+function DateWeather() {
+  const { data } = useWeather();
+  const m = data ? weatherMeta(data.code) : null;
+  return (
+    <span className="inline-flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl bg-surface/70 px-3 py-1.5 text-base font-semibold text-ink shadow-soft backdrop-blur">
+      <span className="inline-flex items-center gap-1.5">
+        <CalendarDays size={18} className="text-brand-600" />
+        <span className="capitalize">{fullDate()}</span>
+      </span>
+      {data && m && (
+        <span className="inline-flex items-center gap-1.5 border-l border-surface-border pl-3">
+          <m.Icon size={18} className={m.color} />
+          <span>{data.temp}°C</span>
+          <span className="text-sm font-normal text-ink-muted">Cotonou</span>
+        </span>
+      )}
+    </span>
+  );
+}
 
 type Tone = 'brand' | 'success' | 'warning' | 'danger';
 // Pastilles d'icônes en dégradés vifs (icône blanche) — pour donner de la vie.
@@ -288,7 +310,7 @@ export function DashboardPage() {
               {greeting().hello} {firstName} {greeting().emoji}
             </span>
           }
-          subtitle={<span className="capitalize">{fullDate()}</span>}
+          subtitle={<DateWeather />}
           actions={
             <>
               <Button variant="ghost" size="sm" onClick={() => setCustomizing(true)} title="Personnaliser l’accueil">

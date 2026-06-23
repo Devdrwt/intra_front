@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { Card } from '@drwindesk/ui';
 
-interface Weather {
+export interface Weather {
   temp: number;
   code: number;
 }
@@ -25,8 +25,18 @@ async function fetchWeather(): Promise<Weather> {
   return { temp: Math.round(j.current.temperature_2m), code: j.current.weather_code };
 }
 
+/** Hook météo Cotonou réutilisable (en-tête + carte). */
+export function useWeather() {
+  return useQuery({
+    queryKey: ['weather', 'cotonou'],
+    queryFn: fetchWeather,
+    staleTime: 30 * 60 * 1000,
+    retry: 1,
+  });
+}
+
 /** Libellé + icône depuis le code WMO. */
-function meta(code: number): { label: string; Icon: LucideIcon; color: string } {
+export function weatherMeta(code: number): { label: string; Icon: LucideIcon; color: string } {
   if (code === 0) return { label: 'Ciel dégagé', Icon: Sun, color: 'text-amber-500' };
   if (code <= 3) return { label: 'Partiellement nuageux', Icon: CloudSun, color: 'text-amber-400' };
   if (code <= 48) return { label: 'Brouillard', Icon: CloudFog, color: 'text-slate-400' };
@@ -38,14 +48,9 @@ function meta(code: number): { label: string; Icon: LucideIcon; color: string } 
 
 /** Météo du jour à Cotonou (la touche « dashboard moderne »). */
 export function WeatherCard() {
-  const { data } = useQuery({
-    queryKey: ['weather', 'cotonou'],
-    queryFn: fetchWeather,
-    staleTime: 30 * 60 * 1000,
-    retry: 1,
-  });
+  const { data } = useWeather();
   if (!data) return null;
-  const m = meta(data.code);
+  const m = weatherMeta(data.code);
 
   return (
     <Card className="flex items-center gap-4 bg-gradient-to-br from-sky-400/15 to-transparent">
