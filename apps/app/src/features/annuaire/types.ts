@@ -12,6 +12,17 @@ export interface Absent extends PersonneBrief {
   motif: string;
 }
 
+export interface OrgNode {
+  id: string;
+  prenom: string;
+  nom: string;
+  poste: string;
+  departement: string;
+  userId: string | null;
+  hasAvatar: boolean;
+  children: OrgNode[];
+}
+
 export interface AnnuaireEntry {
   id: string;
   matricule: string;

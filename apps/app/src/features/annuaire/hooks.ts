@@ -5,6 +5,10 @@ export function useAnnuaire() {
   return useQuery({ queryKey: ['annuaire'], queryFn: annuaireService.list });
 }
 
+export function useOrganigramme() {
+  return useQuery({ queryKey: ['annuaire', 'organigramme'], queryFn: annuaireService.organigramme });
+}
+
 export function useTempsForts() {
   return useQuery({ queryKey: ['annuaire', 'temps-forts'], queryFn: annuaireService.tempsForts });
 }
