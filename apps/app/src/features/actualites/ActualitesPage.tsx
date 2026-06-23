@@ -95,6 +95,8 @@ export function ActualitesPage() {
                             <Pin size={12} /> Épinglé
                           </Badge>
                         )}
+                        {a.statut === 'BROUILLON' && <Badge tone="warning">Brouillon</Badge>}
+                        {a.statut === 'PROGRAMMEE' && <Badge tone="warning">Programmée</Badge>}
                         <span className="text-xs text-ink-subtle">
                           {fmt(a.createdAt)}
                           {a.authorNom ? ` · par ${a.authorNom}` : ''}
@@ -205,15 +207,20 @@ function NewAnnonceModal({ onClose }: { onClose: () => void }) {
   const [categorie, setCategorie] = useState<AnnonceCategorie>('ACTUALITE');
   const [epingle, setEpingle] = useState(false);
   const [cover, setCover] = useState<File | null>(null);
+  const [statut, setStatut] = useState<'PUBLIEE' | 'PROGRAMMEE' | 'BROUILLON'>('PUBLIEE');
+  const [publishedAt, setPublishedAt] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
 
   const submit = async () => {
     if (titre.trim().length < 2 || contenu.trim().length < 1) return;
+    if (statut === 'PROGRAMMEE' && !publishedAt) return;
     await create.mutateAsync({
       titre: titre.trim(),
       contenu: contenu.trim(),
       categorie,
       epingle,
+      statut,
+      publishedAt: statut === 'PROGRAMMEE' ? new Date(publishedAt).toISOString() : undefined,
       cover: cover ?? undefined,
     });
     onClose();
@@ -249,6 +256,21 @@ function NewAnnonceModal({ onClose }: { onClose: () => void }) {
           onChange={(e) => setCategorie(e.target.value as AnnonceCategorie)}
         />
         <Textarea label="Contenu *" rows={6} value={contenu} onChange={(e) => setContenu(e.target.value)} />
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Select
+            label="Publication"
+            options={[
+              { value: 'PUBLIEE', label: 'Publier maintenant' },
+              { value: 'PROGRAMMEE', label: 'Programmer' },
+              { value: 'BROUILLON', label: 'Brouillon' },
+            ]}
+            value={statut}
+            onChange={(e) => setStatut(e.target.value as 'PUBLIEE' | 'PROGRAMMEE' | 'BROUILLON')}
+          />
+          {statut === 'PROGRAMMEE' && (
+            <Input type="datetime-local" label="Le" value={publishedAt} onChange={(e) => setPublishedAt(e.target.value)} />
+          )}
+        </div>
         <div>
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => setCover(e.target.files?.[0] ?? null)} />
           <Button variant="secondary" onClick={() => fileRef.current?.click()}>

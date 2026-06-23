@@ -18,6 +18,8 @@ export const actualitesService = {
     fd.append('contenu', input.contenu);
     if (input.categorie) fd.append('categorie', input.categorie);
     if (input.epingle != null) fd.append('epingle', String(input.epingle));
+    if (input.statut) fd.append('statut', input.statut);
+    if (input.publishedAt) fd.append('publishedAt', input.publishedAt);
     if (input.cover) fd.append('cover', input.cover);
     return api.post<Annonce>('/annonces', fd).then((r) => r.data);
   },

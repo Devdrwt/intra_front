@@ -7,6 +7,8 @@ export interface Annonce {
   categorie: AnnonceCategorie;
   epingle: boolean;
   hasCover: boolean;
+  statut: AnnonceStatut;
+  publishedAt: string | null;
   authorId: string | null;
   authorNom?: string;
   likeCount: number;
@@ -30,11 +32,15 @@ export interface AnnonceComment {
   createdAt: string;
 }
 
+export type AnnonceStatut = 'BROUILLON' | 'PROGRAMMEE' | 'PUBLIEE';
+
 export interface CreateAnnonceInput {
   titre: string;
   contenu: string;
   categorie?: AnnonceCategorie;
   epingle?: boolean;
+  statut?: AnnonceStatut;
+  publishedAt?: string;
   cover?: File;
 }
 
