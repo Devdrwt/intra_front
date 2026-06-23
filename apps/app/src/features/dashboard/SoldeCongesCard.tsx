@@ -1,27 +1,23 @@
 import { Palmtree } from 'lucide-react';
-import { Card, CardTitle } from '@drwindesk/ui';
-import { useMyConges } from '@/features/me/hooks';
-import { nbJours } from '@/features/presences/types';
+import { Card, CardTitle, Skeleton } from '@drwindesk/ui';
+import { useMySolde } from '@/features/me/hooks';
 
-const ALLOWANCE = 30; // jours/an (indicatif — paramétrable plus tard)
-
-/** Mon solde de congés : jours pris cette année vs droit annuel. */
+/** Mon solde de congés : jours pris cette année vs droit annuel (autoritatif serveur). */
 export function SoldeCongesCard() {
-  const { data: conges } = useMyConges();
-  const year = String(new Date().getFullYear());
+  const { data, isLoading } = useMySolde();
 
-  const pris = (conges ?? [])
-    .filter(
-      (c) =>
-        c.statut === 'APPROUVE' &&
-        (c.categorie ?? 'CONGE') === 'CONGE' &&
-        typeof c.dateDebut === 'string' &&
-        c.dateDebut.startsWith(year),
-    )
-    .reduce((s, c) => s + nbJours(c.dateDebut, c.dateFin), 0);
+  if (isLoading) {
+    return (
+      <Card>
+        <CardTitle>Mon solde de congés</CardTitle>
+        <Skeleton className="mt-4 h-12 w-full rounded-lg" />
+      </Card>
+    );
+  }
+  if (!data) return null;
 
-  const restants = Math.max(0, ALLOWANCE - pris);
-  const pct = Math.min(100, Math.round((pris / ALLOWANCE) * 100));
+  const { allowance, pris, restants } = data;
+  const pct = allowance > 0 ? Math.min(100, Math.round((pris / allowance) * 100)) : 0;
 
   return (
     <Card>
@@ -41,7 +37,7 @@ export function SoldeCongesCard() {
         <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-surface-muted">
           <div className="h-2 rounded-full bg-gradient-to-r from-emerald-400 to-teal-600 transition-all" style={{ width: `${pct}%` }} />
         </div>
-        <p className="mt-1 text-xs text-ink-subtle">Sur {ALLOWANCE} jours / an (indicatif)</p>
+        <p className="mt-1 text-xs text-ink-subtle">Sur {allowance} jours ouvrables / an</p>
       </div>
     </Card>
   );

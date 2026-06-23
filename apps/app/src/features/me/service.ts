@@ -111,6 +111,7 @@ const mockApi = {
     return delay({ ...p });
   },
   myConges: () => delay([...mConges]),
+  mySolde: () => delay({ allowance: 26, pris: 0, restants: 26 }),
   createConge: (input: MeCongeInput) => {
     const created: DemandeConge = {
       ...input,
@@ -170,6 +171,8 @@ const httpApi = {
       .post<Pointage>('/me/pointages/pointer', { sens, lat: coords?.lat, lng: coords?.lng })
       .then((r) => r.data),
   myConges: () => api.get<DemandeConge[]>('/me/conges').then((r) => r.data),
+  mySolde: () =>
+    api.get<{ allowance: number; pris: number; restants: number }>('/me/conges/solde').then((r) => r.data),
   createConge: (input: MeCongeInput) =>
     api.post<DemandeConge>('/me/conges', input).then((r) => r.data),
   myRapports: () => api.get<Rapport[]>('/me/rapports').then((r) => r.data),

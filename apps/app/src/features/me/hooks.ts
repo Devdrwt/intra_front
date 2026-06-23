@@ -99,6 +99,10 @@ export function useMyConges() {
   return useQuery({ queryKey: [ME, 'conges'], queryFn: meService.myConges });
 }
 
+export function useMySolde() {
+  return useQuery({ queryKey: [ME, 'conges', 'solde'], queryFn: meService.mySolde });
+}
+
 export function useCreateMyConge() {
   const qc = useQueryClient();
   return useMutation({
