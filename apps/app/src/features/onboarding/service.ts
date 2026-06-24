@@ -21,6 +21,17 @@ export interface Parcours {
   dateReference: string;
   etapes: EtapeParcours[];
 }
+export interface ParcoursModele {
+  id: string;
+  type: TypeParcours;
+  nom: string;
+  etapes: { id: string; titre: string }[];
+}
+export interface LancerParcoursInput {
+  type: TypeParcours;
+  employeId: string;
+  modeleId: string;
+}
 
 const delay = <T>(value: T, ms = 150): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(value), ms));
@@ -64,6 +75,9 @@ const mockApi = {
     );
     return delay(updated as EtapeParcours);
   },
+  modeles: () => delay([] as ParcoursModele[]),
+  lancer: (input: LancerParcoursInput) =>
+    delay({ id: `pc${Date.now()}`, type: input.type, employeNom: '', statut: 'EN_COURS', dateReference: new Date().toISOString().slice(0, 10), etapes: [] } as Parcours),
 };
 
 // --- HTTP ---------------------------------------------------------------------
@@ -71,6 +85,8 @@ const httpApi = {
   list: () => api.get<Parcours[]>('/parcours').then((r) => r.data),
   toggleEtape: (_parcoursId: string, etapeId: string) =>
     api.patch<EtapeParcours>(`/etapes-parcours/${etapeId}`, { faite: true }).then((r) => r.data),
+  modeles: () => api.get<ParcoursModele[]>('/parcours-modeles').then((r) => r.data),
+  lancer: (input: LancerParcoursInput) => api.post<Parcours>('/parcours', input).then((r) => r.data),
 };
 
 export const onboardingService = USE_MOCKS.onboarding ? mockApi : httpApi;
