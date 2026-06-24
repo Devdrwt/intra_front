@@ -1,10 +1,10 @@
 import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, FileSignature, Megaphone, Plus, X } from 'lucide-react';
-import { Badge, Button, Card, CardTitle, Input, PageHeader, SkeletonRows } from '@drwindesk/ui';
+import { Badge, Button, Card, CardTitle, Input, Modal, PageHeader, Select, SkeletonRows } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
 import { fcfa } from '@/lib/money';
-import { commercialService, type AaoInput, type StatutAao, type StatutSoumission } from './service';
+import { commercialService, type AaoInput, type StatutAao, type StatutSoumission, type TypePieceDao } from './service';
 
 const AAO_TONE: Record<StatutAao, NonNullable<BadgeProps['tone']>> = { REPERE: 'neutral', A_SOUMETTRE: 'brand', ECARTE: 'neutral' };
 const AAO_LABEL: Record<StatutAao, string> = { REPERE: 'Repéré', A_SOUMETTRE: 'On y va', ECARTE: 'Écarté' };
@@ -37,7 +37,18 @@ export function AppelsOffresPage() {
     meta: { successMessage: 'Résultat enregistré' },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['commercial'] }),
   });
+  const soumettre = useMutation({
+    mutationFn: (id: string) => commercialService.soumettre(id),
+    meta: { successMessage: 'Soumission déposée' },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['commercial'] }),
+  });
+  const convertir = useMutation({
+    mutationFn: (id: string) => commercialService.convertirProjet(id),
+    meta: { successMessage: 'Projet créé depuis la soumission' },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['commercial'] }),
+  });
   const [open, setOpen] = useState(false);
+  const [piecesSoum, setPiecesSoum] = useState<string | null>(null);
 
   return (
     <div className="space-y-5">
@@ -66,13 +77,20 @@ export function AppelsOffresPage() {
                     <div className="text-xs text-ink-subtle">{s.montantPropose ? `Proposé : ${fcfa(s.montantPropose)}` : '—'}</div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <Badge tone={SOUM_TONE[s.statut]} dot>{SOUM_LABEL[s.statut]}</Badge>
+                  <Button size="sm" variant="ghost" onClick={() => setPiecesSoum(s.id)}>Pièces (DAO)</Button>
+                  {s.statut === 'EN_PREPARATION' && (
+                    <Button size="sm" disabled={soumettre.isPending} onClick={() => soumettre.mutate(s.id)}>Déposer</Button>
+                  )}
                   {s.statut === 'DEPOSEE' && (
                     <>
                       <Button size="sm" disabled={resultat.isPending} onClick={() => resultat.mutate({ id: s.id, statut: 'GAGNEE' })}>Gagnée</Button>
                       <Button size="sm" variant="ghost" disabled={resultat.isPending} onClick={() => resultat.mutate({ id: s.id, statut: 'PERDUE' })}>Perdue</Button>
                     </>
+                  )}
+                  {s.statut === 'GAGNEE' && (
+                    <Button size="sm" disabled={convertir.isPending} onClick={() => convertir.mutate(s.id)}>Convertir en projet</Button>
                   )}
                 </div>
               </li>
@@ -125,7 +143,73 @@ export function AppelsOffresPage() {
           </table>
         )}
       </Card>
+
+      {piecesSoum && <PiecesModal soumissionId={piecesSoum} onClose={() => setPiecesSoum(null)} />}
     </div>
+  );
+}
+
+const TYPE_PIECE_LABEL: Record<TypePieceDao, string> = {
+  ADMINISTRATIVE: 'Administrative',
+  TECHNIQUE: 'Technique',
+  FINANCIERE: 'Financière',
+};
+
+function PiecesModal({ soumissionId, onClose }: { soumissionId: string; onClose: () => void }) {
+  const qc = useQueryClient();
+  const { data: pieces, isLoading } = useQuery({
+    queryKey: ['commercial', 'pieces', soumissionId],
+    queryFn: () => commercialService.pieces(soumissionId),
+  });
+  const invalidate = () => qc.invalidateQueries({ queryKey: ['commercial', 'pieces', soumissionId] });
+  const add = useMutation({
+    mutationFn: (input: { type: TypePieceDao; nom: string }) => commercialService.addPiece(soumissionId, input),
+    onSuccess: invalidate,
+  });
+  const toggle = useMutation({
+    mutationFn: ({ pieceId, fournie }: { pieceId: string; fournie: boolean }) => commercialService.updatePiece(soumissionId, pieceId, { fournie }),
+    onSuccess: invalidate,
+  });
+  const [type, setType] = useState<TypePieceDao>('ADMINISTRATIVE');
+  const [nom, setNom] = useState('');
+
+  const list = pieces ?? [];
+  const fournies = list.filter((p) => p.fournie).length;
+
+  return (
+    <Modal open onClose={onClose} size="md" title="Checklist du dossier (DAO)">
+      <div className="space-y-4">
+        {isLoading ? (
+          <SkeletonRows rows={3} cols={1} />
+        ) : (
+          <>
+            <p className="text-sm text-ink-subtle">{fournies}/{list.length} pièce(s) fournie(s)</p>
+            <ul className="space-y-1.5">
+              {list.map((p) => (
+                <li key={p.id} className="flex items-center gap-2 rounded-lg border border-surface-border px-3 py-2 text-sm">
+                  <input type="checkbox" className="accent-brand-600" checked={p.fournie} onChange={(e) => toggle.mutate({ pieceId: p.id, fournie: e.target.checked })} />
+                  <span className="flex-1 text-ink">{p.nom}</span>
+                  <Badge tone="neutral">{TYPE_PIECE_LABEL[p.type]}</Badge>
+                </li>
+              ))}
+              {list.length === 0 && <li className="text-sm text-ink-subtle">Aucune pièce — ajoutez la checklist.</li>}
+            </ul>
+          </>
+        )}
+        <form
+          onSubmit={(e) => { e.preventDefault(); if (nom.trim()) { add.mutate({ type, nom: nom.trim() }); setNom(''); } }}
+          className="flex items-end gap-2 border-t border-surface-border pt-4"
+        >
+          <Select label="Type" value={type} onChange={(e) => setType(e.target.value as TypePieceDao)} options={[
+            { value: 'ADMINISTRATIVE', label: 'Administrative' },
+            { value: 'TECHNIQUE', label: 'Technique' },
+            { value: 'FINANCIERE', label: 'Financière' },
+          ]} />
+          <Input label="Pièce" value={nom} onChange={(e) => setNom(e.target.value)} placeholder="Ex. Attestation fiscale" className="flex-1" />
+          <Button type="submit" loading={add.isPending}>Ajouter</Button>
+        </form>
+      </div>
+    </Modal>
   );
 }
 

@@ -30,6 +30,14 @@ export interface Soumission {
   montantPropose?: number;
   dateDepot?: string;
 }
+export type TypePieceDao = 'ADMINISTRATIVE' | 'TECHNIQUE' | 'FINANCIERE';
+export interface PieceDao {
+  id: string;
+  type: TypePieceDao;
+  nom: string;
+  documentId?: string;
+  fournie: boolean;
+}
 
 const delay = <T>(value: T, ms = 150): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(value), ms));
@@ -61,6 +69,16 @@ const mockApi = {
     soumissions = soumissions.map((s) => (s.id === id ? { ...s, statut } : s));
     return delay(soumissions.find((s) => s.id === id)!);
   },
+  soumettre: (id: string) => {
+    soumissions = soumissions.map((s) => (s.id === id ? { ...s, statut: 'DEPOSEE' as const } : s));
+    return delay(soumissions.find((s) => s.id === id)!);
+  },
+  convertirProjet: (_id: string) => delay({ projetId: 'mock-projet' }),
+  pieces: (_id: string) => delay([] as PieceDao[]),
+  addPiece: (_id: string, input: { type: TypePieceDao; nom: string }) =>
+    delay({ id: `p${Date.now()}`, type: input.type, nom: input.nom, fournie: false } as PieceDao),
+  updatePiece: (_id: string, pieceId: string, patch: { fournie?: boolean }) =>
+    delay({ id: pieceId, type: 'ADMINISTRATIVE', nom: '', fournie: patch.fournie ?? false } as PieceDao),
 };
 
 // --- HTTP ---------------------------------------------------------------------
@@ -71,6 +89,14 @@ const httpApi = {
   listSoumissions: () => api.get<Soumission[]>('/soumissions').then((r) => r.data),
   resultat: (id: string, statut: StatutSoumission) =>
     api.post<Soumission>(`/soumissions/${id}/resultat`, { statut }).then((r) => r.data),
+  soumettre: (id: string) => api.post<Soumission>(`/soumissions/${id}/soumettre`).then((r) => r.data),
+  convertirProjet: (id: string) =>
+    api.post<{ projetId: string }>(`/soumissions/${id}/convertir-projet`).then((r) => r.data),
+  pieces: (id: string) => api.get<PieceDao[]>(`/soumissions/${id}/pieces`).then((r) => r.data),
+  addPiece: (id: string, input: { type: TypePieceDao; nom: string }) =>
+    api.post<PieceDao>(`/soumissions/${id}/pieces`, input).then((r) => r.data),
+  updatePiece: (id: string, pieceId: string, patch: { fournie?: boolean }) =>
+    api.patch<PieceDao>(`/soumissions/${id}/pieces/${pieceId}`, patch).then((r) => r.data),
 };
 
 export const commercialService = USE_MOCKS.commercial ? mockApi : httpApi;
