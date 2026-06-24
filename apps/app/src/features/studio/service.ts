@@ -25,6 +25,12 @@ export interface Reservation {
   objet?: string;
   productionTitre?: string;
 }
+export interface Equipement {
+  id: string;
+  nom: string;
+  categorie?: string;
+  disponible: boolean;
+}
 
 const delay = <T>(value: T, ms = 150): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(value), ms));
@@ -59,6 +65,9 @@ const mockApi = {
     reservations = [...reservations, nr];
     return delay(nr);
   },
+  equipements: () => delay([] as Equipement[]),
+  createEquipement: (nom: string, categorie?: string) => delay({ id: `eq${Date.now()}`, nom, categorie, disponible: true } as Equipement),
+  updateEquipement: (id: string, patch: Partial<Equipement>) => delay({ id, nom: '', disponible: true, ...patch } as Equipement),
 };
 
 // --- HTTP ---------------------------------------------------------------------
@@ -71,6 +80,11 @@ const httpApi = {
   reservations: () => api.get<Reservation[]>('/reservations-studio').then((r) => r.data),
   reserver: (r: Omit<Reservation, 'id'>) =>
     api.post<Reservation>('/reservations-studio', r).then((r2) => r2.data),
+  equipements: () => api.get<Equipement[]>('/equipements-studio').then((r) => r.data),
+  createEquipement: (nom: string, categorie?: string) =>
+    api.post<Equipement>('/equipements-studio', { nom, categorie }).then((r) => r.data),
+  updateEquipement: (id: string, patch: Partial<Equipement>) =>
+    api.patch<Equipement>(`/equipements-studio/${id}`, patch).then((r) => r.data),
 };
 
 export const studioService = USE_MOCKS.studio ? mockApi : httpApi;

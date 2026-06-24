@@ -85,9 +85,61 @@ export function StudioPage() {
           )}
         </div>
 
-        <PlanningCard reservations={reservations ?? []} />
+        <div className="space-y-5">
+          <PlanningCard reservations={reservations ?? []} />
+          <MaterielCard />
+        </div>
       </div>
     </div>
+  );
+}
+
+function MaterielCard() {
+  const qc = useQueryClient();
+  const { data: equipements } = useQuery({ queryKey: ['studio', 'equipements'], queryFn: studioService.equipements });
+  const create = useMutation({
+    mutationFn: ({ nom, categorie }: { nom: string; categorie?: string }) => studioService.createEquipement(nom, categorie),
+    meta: { successMessage: 'Équipement ajouté' },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['studio', 'equipements'] }),
+  });
+  const update = useMutation({
+    mutationFn: ({ id, disponible }: { id: string; disponible: boolean }) => studioService.updateEquipement(id, { disponible }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['studio', 'equipements'] }),
+  });
+  const [nom, setNom] = useState('');
+  const [categorie, setCategorie] = useState('');
+
+  const onAdd = (e: FormEvent) => {
+    e.preventDefault();
+    if (!nom.trim()) return;
+    create.mutate({ nom: nom.trim(), categorie: categorie.trim() || undefined });
+    setNom('');
+    setCategorie('');
+  };
+
+  return (
+    <Card className="p-0">
+      <div className="p-5 pb-2"><CardTitle>Matériel</CardTitle></div>
+      <ul className="divide-y divide-surface-border">
+        {(equipements ?? []).map((eq) => (
+          <li key={eq.id} className="flex items-center justify-between gap-2 px-5 py-2.5 text-sm">
+            <div className="min-w-0">
+              <div className="truncate font-medium text-ink">{eq.nom}</div>
+              {eq.categorie && <div className="text-xs text-ink-subtle">{eq.categorie}</div>}
+            </div>
+            <button onClick={() => update.mutate({ id: eq.id, disponible: !eq.disponible })} title="Basculer la disponibilité">
+              <Badge tone={eq.disponible ? 'success' : 'neutral'} dot>{eq.disponible ? 'Disponible' : 'Indisponible'}</Badge>
+            </button>
+          </li>
+        ))}
+        {(equipements ?? []).length === 0 && <li className="px-5 py-4 text-sm text-ink-subtle">Aucun équipement.</li>}
+      </ul>
+      <form onSubmit={onAdd} className="space-y-2 border-t border-surface-border p-4">
+        <Input id="eqnom" label="Équipement" value={nom} onChange={(e) => setNom(e.target.value)} placeholder="Micro Rode, caméra…" />
+        <Input id="eqcat" label="Catégorie" value={categorie} onChange={(e) => setCategorie(e.target.value)} placeholder="micro, caméra, éclairage…" />
+        <Button type="submit" size="sm" className="w-full" loading={create.isPending} disabled={!nom.trim()}><Plus size={14} /> Ajouter</Button>
+      </form>
+    </Card>
   );
 }
 
