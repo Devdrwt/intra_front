@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Cloud, HardDrive, Lock, LockOpen, ShieldCheck } from 'lucide-react';
+import { Cloud, HardDrive, Lock, LockOpen, RotateCcw, ShieldCheck, Trash2 } from 'lucide-react';
 import { Badge, Button, Card, CardTitle, PageHeader, SkeletonRows } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
+import { toast } from '@/lib/toast';
 import { archivageService, type StatutArchive, type TypeArchiveStore } from './service';
 
 const STORE_LABEL: Record<TypeArchiveStore, string> = {
@@ -40,6 +41,21 @@ export function ArchivagePage() {
   const toggleRetention = useMutation({
     mutationFn: (id: string) => archivageService.toggleRetention(id),
     meta: { successMessage: 'Rétention légale mise à jour' },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['archivage', 'archives'] }),
+  });
+  const verifier = useMutation({
+    mutationFn: (id: string) => archivageService.verifierIntegrite(id),
+    onSuccess: (res) =>
+      res.ok ? toast.success('Intégrité vérifiée : le document est intact (hash conforme).') : toast.error('⚠️ Altération détectée : le hash ne correspond pas !'),
+  });
+  const restaurer = useMutation({
+    mutationFn: (id: string) => archivageService.restaurer(id),
+    meta: { successMessage: 'Archive restaurée dans la GED' },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['archivage', 'archives'] }),
+  });
+  const purger = useMutation({
+    mutationFn: (id: string) => archivageService.purger(id),
+    meta: { successMessage: 'Contenu purgé' },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['archivage', 'archives'] }),
   });
 
@@ -110,10 +126,27 @@ export function ArchivagePage() {
                   </td>
                   <td className="hidden px-5 py-3 text-ink-muted sm:table-cell">jusqu'au {a.retentionUntil ?? '—'}</td>
                   <td className="px-5 py-3"><Badge tone={ARCHIVE_TONE[a.statut]} dot>{ARCHIVE_LABEL[a.statut]}</Badge></td>
-                  <td className="px-5 py-3 text-right">
-                    <Button size="sm" variant="ghost" disabled={toggleRetention.isPending} onClick={() => toggleRetention.mutate(a.id)}>
-                      {a.retentionLegale ? <><LockOpen size={14} /> Lever</> : <><Lock size={14} /> Poser</>}
-                    </Button>
+                  <td className="px-5 py-3">
+                    <div className="flex flex-wrap items-center justify-end gap-1">
+                      {a.statut !== 'PURGE' && (
+                        <Button size="sm" variant="ghost" disabled={verifier.isPending} onClick={() => verifier.mutate(a.id)} title="Vérifier l'intégrité">
+                          <ShieldCheck size={14} /> Intégrité
+                        </Button>
+                      )}
+                      {a.statut !== 'PURGE' && (
+                        <Button size="sm" variant="ghost" disabled={restaurer.isPending} onClick={() => restaurer.mutate(a.id)} title="Restaurer dans la GED">
+                          <RotateCcw size={14} />
+                        </Button>
+                      )}
+                      <Button size="sm" variant="ghost" disabled={toggleRetention.isPending} onClick={() => toggleRetention.mutate(a.id)}>
+                        {a.retentionLegale ? <><LockOpen size={14} /> Lever</> : <><Lock size={14} /> Poser</>}
+                      </Button>
+                      {a.statut !== 'PURGE' && !a.retentionLegale && (
+                        <Button size="sm" variant="ghost" disabled={purger.isPending} onClick={() => { if (confirm('Purger définitivement le contenu de cette archive ?')) purger.mutate(a.id); }} className="text-ink-subtle hover:text-danger" title="Purger">
+                          <Trash2 size={14} />
+                        </Button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

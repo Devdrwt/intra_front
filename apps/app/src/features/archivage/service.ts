@@ -63,6 +63,9 @@ const mockApi = {
     );
     return delay(archives.find((a) => a.id === id)!);
   },
+  verifierIntegrite: (_id: string) => delay({ ok: true, hashSha256: 'mock', recomputed: 'mock', verifiedAt: new Date().toISOString() }),
+  restaurer: (_id: string) => delay(undefined),
+  purger: (id: string) => { archives = archives.map((a) => (a.id === id ? { ...a, statut: 'PURGE' as const } : a)); return delay(undefined); },
 };
 
 // --- HTTP ---------------------------------------------------------------------
@@ -73,6 +76,10 @@ const httpApi = {
   archives: () => api.get<ArchiveDocument[]>('/archives').then((r) => r.data),
   toggleRetention: (id: string) =>
     api.post<ArchiveDocument>(`/archives/${id}/retention-legale`, { active: true }).then((r) => r.data),
+  verifierIntegrite: (id: string) =>
+    api.get<{ ok: boolean; hashSha256: string; recomputed: string; verifiedAt: string }>(`/archives/${id}/verifier-integrite`).then((r) => r.data),
+  restaurer: (id: string) => api.post(`/archives/${id}/restaurer`).then(() => undefined),
+  purger: (id: string) => api.post(`/archives/${id}/purger`).then(() => undefined),
 };
 
 export const archivageService = USE_MOCKS.archivage ? mockApi : httpApi;
