@@ -8,6 +8,14 @@ export function useNotesFrais() {
 export function useFacturesFournisseur() {
   return useQuery({ queryKey: ['finance', 'factures-fourn'], queryFn: depensesService.listFactures });
 }
+export function usePayerFacture() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, montantPaye }: { id: string; montantPaye: number }) => depensesService.payerFacture(id, montantPaye),
+    meta: { successMessage: 'Paiement enregistré' },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['finance', 'factures-fourn'] }),
+  });
+}
 export function useCreateNote() {
   const qc = useQueryClient();
   return useMutation({

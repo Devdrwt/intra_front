@@ -1,8 +1,8 @@
-import { FileText } from 'lucide-react';
-import { Badge, Card, EmptyState, PageHeader, SkeletonRows } from '@drwindesk/ui';
+import { FileText, Wallet } from 'lucide-react';
+import { Badge, Button, Card, EmptyState, PageHeader, SkeletonRows } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
 import { fcfa } from '@/lib/money';
-import { useFacturesFournisseur } from './hooks';
+import { useFacturesFournisseur, usePayerFacture } from './hooks';
 import { STATUT_FF_LABEL, type StatutFactureFourn } from './types';
 
 const TONE: Record<StatutFactureFourn, NonNullable<BadgeProps['tone']>> = {
@@ -22,6 +22,16 @@ function echeanceBadge(date?: string) {
 
 export function AchatsPage() {
   const { data: factures, isLoading } = useFacturesFournisseur();
+  const payer = usePayerFacture();
+
+  const onPayer = (id: string, montantTtc: number, dejaPaye: number) => {
+    const reste = montantTtc - dejaPaye;
+    const raw = prompt(`Montant à régler (reste ${fcfa(reste)}) :`, String(reste));
+    if (!raw) return;
+    const m = Number(raw.replace(/\s/g, ''));
+    if (!Number.isFinite(m) || m <= 0) return;
+    payer.mutate({ id, montantPaye: dejaPaye + m });
+  };
 
   return (
     <div className="space-y-5">
@@ -40,6 +50,7 @@ export function AchatsPage() {
                 <th className="hidden px-5 py-2.5 font-medium sm:table-cell">Échéance</th>
                 <th className="px-5 py-2.5 font-medium">Montant</th>
                 <th className="px-5 py-2.5 font-medium">Statut</th>
+                <th className="px-5 py-2.5 text-right font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -57,6 +68,13 @@ export function AchatsPage() {
                     )}
                   </td>
                   <td className="px-5 py-3"><Badge tone={TONE[f.statut]} dot>{STATUT_FF_LABEL[f.statut]}</Badge></td>
+                  <td className="px-5 py-3 text-right">
+                    {f.statut !== 'PAYEE' && (
+                      <Button size="sm" variant="secondary" disabled={payer.isPending} onClick={() => onPayer(f.id, f.montantTtc, f.montantPaye)}>
+                        <Wallet size={14} /> Régler
+                      </Button>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

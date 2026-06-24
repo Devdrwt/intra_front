@@ -54,6 +54,11 @@ const mockApi = {
     return delay(notes.find((n) => n.id === id)!);
   },
   listFactures: () => delay([...factures]),
+  payerFacture: (id: string, montantPaye: number) => {
+    const f = factures.find((x) => x.id === id);
+    if (f) { f.montantPaye = montantPaye; f.statut = montantPaye >= f.montantTtc ? 'PAYEE' : 'PARTIELLEMENT_PAYEE'; }
+    return delay(f!);
+  },
 };
 
 // --- HTTP ---------------------------------------------------------------------
@@ -64,6 +69,8 @@ const httpApi = {
   rembourser: (id: string, modePaiement: ModePaiement, paiementRef: string) =>
     api.post<NoteDeFrais>(`/notes-frais/${id}/rembourser`, { modePaiement, paiementRef }).then((r) => r.data),
   listFactures: () => api.get<FactureFournisseur[]>('/factures-fournisseur').then((r) => r.data),
+  payerFacture: (id: string, montantPaye: number) =>
+    api.patch<FactureFournisseur>(`/factures-fournisseur/${id}`, { montantPaye }).then((r) => r.data),
 };
 
 export const depensesService = USE_MOCKS.finance ? mockApi : httpApi;
