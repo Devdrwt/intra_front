@@ -12,6 +12,7 @@ export type AgendaSource =
   | 'FORMATION'
   | 'STUDIO'
   | 'TACHE'
+  | 'MISSION'
   | 'AO'
   | 'PAIE'
   | 'EXTERNE';

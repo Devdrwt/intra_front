@@ -22,6 +22,7 @@ const SOURCE: Record<AgendaSource, { label: string; color: string }> = {
   FORMATION: { label: 'Formation', color: '#D97706' },
   STUDIO: { label: 'Studio', color: '#9333EA' },
   TACHE: { label: 'Tâche', color: '#2563EB' },
+  MISSION: { label: 'Mission', color: '#0D9488' },
   AO: { label: 'Appel d’offres', color: '#DC2626' },
   PAIE: { label: 'Paie', color: '#64748B' },
   EXTERNE: { label: 'Externe', color: '#0EA5E9' },

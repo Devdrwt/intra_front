@@ -11,6 +11,7 @@ const COLOR: Record<AgendaSource, string> = {
   FORMATION: '#D97706',
   STUDIO: '#9333EA',
   TACHE: '#2563EB',
+  MISSION: '#0D9488',
   AO: '#DC2626',
   PAIE: '#64748B',
   EXTERNE: '#0EA5E9',
