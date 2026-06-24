@@ -1,6 +1,23 @@
 import { api } from '@/lib/api';
 import { USE_MOCKS } from '@/lib/config';
+import { triggerDownload } from '@/lib/download';
 import type { BulletinPaie, PeriodePaie } from './types';
+
+export interface DeclarationCnss {
+  lignes: {
+    employeId: string;
+    employeNom: string;
+    numeroCnss: string | null;
+    assietteCotisable: number;
+    cnssSalariale: number;
+    cnssPatronale: number;
+  }[];
+  totaux: { assietteCotisable: number; cnssSalariale: number; cnssPatronale: number };
+}
+export interface DeclarationIts {
+  lignes: { employeId: string; employeNom: string; assietteImposable: number; itsRetenu: number }[];
+  total: { itsRetenu: number };
+}
 
 /**
  * Finance : paie (cf. docs/contracts/finance-paie.md). VITE_MOCK_FINANCE=false → réel.
@@ -56,6 +73,25 @@ const httpApi = {
   bulletins: (periodeId: string) => api.get<BulletinPaie[]>(`/paie/periodes/${periodeId}/bulletins`).then((r) => r.data),
   payer: (bulletinId: string, paiementRef: string) =>
     api.post<BulletinPaie>(`/paie/bulletins/${bulletinId}/payer`, { paiementRef }).then((r) => r.data),
+  declarationCnss: (id: string) =>
+    api.get<DeclarationCnss>(`/paie/periodes/${id}/declaration-cnss`).then((r) => r.data),
+  declarationIts: (id: string) =>
+    api.get<DeclarationIts>(`/paie/periodes/${id}/declaration-its`).then((r) => r.data),
+  exportCsv: (id: string, filename: string) =>
+    api.get(`/paie/periodes/${id}/export`, { responseType: 'blob' }).then((r) => triggerDownload(r.data as Blob, filename)),
+  bulletinPdf: (id: string, filename: string) =>
+    api.get(`/paie/bulletins/${id}/pdf`, { responseType: 'blob' }).then((r) => triggerDownload(r.data as Blob, filename)),
 };
 
-export const paieService = USE_MOCKS.finance ? mockApi : httpApi;
+const emptyCnss: DeclarationCnss = { lignes: [], totaux: { assietteCotisable: 0, cnssSalariale: 0, cnssPatronale: 0 } };
+const emptyIts: DeclarationIts = { lignes: [], total: { itsRetenu: 0 } };
+
+export const paieService = USE_MOCKS.finance
+  ? {
+      ...mockApi,
+      declarationCnss: (_id: string) => delay(emptyCnss),
+      declarationIts: (_id: string) => delay(emptyIts),
+      exportCsv: (_id: string, _filename: string) => delay(undefined),
+      bulletinPdf: (_id: string, _filename: string) => delay(undefined),
+    }
+  : httpApi;

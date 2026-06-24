@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { CheckCircle2, PlayCircle, Wallet } from 'lucide-react';
-import { Badge, Button, Callout, Card, CardTitle, PageHeader, SkeletonRows, cn } from '@drwindesk/ui';
+import { useEffect, useState } from 'react';
+import { CheckCircle2, FileDown, FileText, PlayCircle, Wallet } from 'lucide-react';
+import { Badge, Button, Callout, Card, CardTitle, Modal, PageHeader, SkeletonRows, Spinner, cn } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
 import { fcfa } from '@/lib/money';
 import {
@@ -10,6 +10,7 @@ import {
   usePeriodesPaie,
   useValiderPeriode,
 } from './hooks';
+import { paieService, type DeclarationCnss, type DeclarationIts } from './service';
 import {
   MOIS_LABEL,
   STATUT_BULLETIN_LABEL,
@@ -33,6 +34,7 @@ const BTONE: Record<StatutBulletin, NonNullable<BadgeProps['tone']>> = {
 export function PaiePage() {
   const { data: periodes, isLoading } = usePeriodesPaie();
   const [selected, setSelected] = useState<string | undefined>();
+  const [decl, setDecl] = useState<{ type: 'CNSS' | 'ITS'; periode: { id: string; label: string } } | null>(null);
   const generer = useGenererPeriode();
   const valider = useValiderPeriode();
 
@@ -67,6 +69,19 @@ export function PaiePage() {
                       <CheckCircle2 size={14} /> Valider
                     </Button>
                   )}
+                  {p.statut !== 'BROUILLON' && (
+                    <>
+                      <Button size="sm" variant="ghost" onClick={() => setDecl({ type: 'CNSS', periode: { id: p.id, label: `${MOIS_LABEL[p.mois]} ${p.annee}` } })}>
+                        CNSS
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => setDecl({ type: 'ITS', periode: { id: p.id, label: `${MOIS_LABEL[p.mois]} ${p.annee}` } })}>
+                        ITS
+                      </Button>
+                      <Button size="sm" variant="secondary" onClick={() => void paieService.exportCsv(p.id, `paie_${p.annee}-${String(p.mois).padStart(2, '0')}.csv`)}>
+                        <FileDown size={14} /> CSV
+                      </Button>
+                    </>
+                  )}
                 </div>
               </li>
             ))}
@@ -75,7 +90,76 @@ export function PaiePage() {
       )}
 
       {selected && <BulletinsCard periodeId={selected} />}
+      {decl && <DeclarationModal type={decl.type} periodeId={decl.periode.id} periodeLabel={decl.periode.label} onClose={() => setDecl(null)} />}
     </div>
+  );
+}
+
+function DeclarationModal({ type, periodeId, periodeLabel, onClose }: { type: 'CNSS' | 'ITS'; periodeId: string; periodeLabel: string; onClose: () => void }) {
+  const [cnss, setCnss] = useState<DeclarationCnss | null>(null);
+  const [its, setIts] = useState<DeclarationIts | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    (type === 'CNSS' ? paieService.declarationCnss(periodeId) : paieService.declarationIts(periodeId))
+      .then((d) => { if (!alive) return; if (type === 'CNSS') setCnss(d as DeclarationCnss); else setIts(d as DeclarationIts); })
+      .finally(() => alive && setLoading(false));
+    return () => { alive = false; };
+  }, [type, periodeId]);
+
+  return (
+    <Modal open onClose={onClose} size="lg" title={`Déclaration ${type} — ${periodeLabel}`}>
+      {loading ? (
+        <div className="flex justify-center py-8"><Spinner /></div>
+      ) : type === 'CNSS' && cnss ? (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="text-left text-xs uppercase text-ink-subtle">
+              <tr><th className="py-2">Employé</th><th>N° CNSS</th><th className="text-right">Assiette</th><th className="text-right">Sal.</th><th className="text-right">Pat.</th></tr>
+            </thead>
+            <tbody>
+              {cnss.lignes.map((l) => (
+                <tr key={l.employeId} className="border-t border-surface-border">
+                  <td className="py-2 font-medium text-ink">{l.employeNom}</td>
+                  <td className="text-ink-muted">{l.numeroCnss ?? '—'}</td>
+                  <td className="text-right text-ink-muted">{fcfa(l.assietteCotisable)}</td>
+                  <td className="text-right text-ink-muted">{fcfa(l.cnssSalariale)}</td>
+                  <td className="text-right text-ink-muted">{fcfa(l.cnssPatronale)}</td>
+                </tr>
+              ))}
+              <tr className="border-t-2 border-surface-border font-semibold text-ink">
+                <td className="py-2" colSpan={2}>Total</td>
+                <td className="text-right">{fcfa(cnss.totaux.assietteCotisable)}</td>
+                <td className="text-right">{fcfa(cnss.totaux.cnssSalariale)}</td>
+                <td className="text-right">{fcfa(cnss.totaux.cnssPatronale)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      ) : its ? (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="text-left text-xs uppercase text-ink-subtle">
+              <tr><th className="py-2">Employé</th><th className="text-right">Assiette imposable</th><th className="text-right">ITS retenu</th></tr>
+            </thead>
+            <tbody>
+              {its.lignes.map((l) => (
+                <tr key={l.employeId} className="border-t border-surface-border">
+                  <td className="py-2 font-medium text-ink">{l.employeNom}</td>
+                  <td className="text-right text-ink-muted">{fcfa(l.assietteImposable)}</td>
+                  <td className="text-right text-ink-muted">{fcfa(l.itsRetenu)}</td>
+                </tr>
+              ))}
+              <tr className="border-t-2 border-surface-border font-semibold text-ink">
+                <td className="py-2">Total</td><td />
+                <td className="text-right">{fcfa(its.total.itsRetenu)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      ) : null}
+    </Modal>
   );
 }
 
@@ -109,6 +193,9 @@ function BulletinsCard({ periodeId }: { periodeId: string }) {
               <td className="px-5 py-3 font-semibold text-ink">{fcfa(b.netAPayer)}</td>
               <td className="px-5 py-3"><Badge tone={BTONE[b.statut]} dot>{STATUT_BULLETIN_LABEL[b.statut]}</Badge></td>
               <td className={cn('px-5 py-3 text-right')}>
+                <Button size="sm" variant="ghost" onClick={() => void paieService.bulletinPdf(b.id, `bulletin_${b.employeNom}.pdf`)} title="PDF du bulletin">
+                  <FileText size={14} />
+                </Button>
                 {b.statut === 'VALIDE' && (
                   <Button size="sm" variant="secondary" disabled={payer.isPending} onClick={() => onPayer(b.id)}>
                     <Wallet size={14} /> Payer
