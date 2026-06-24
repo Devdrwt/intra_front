@@ -28,6 +28,19 @@ export interface Campagne {
   statut: 'PLANIFIEE' | 'EN_COURS' | 'CLOTUREE';
   nbEvaluations: number;
 }
+export interface ResultatCleInput {
+  libelle: string;
+  valeurCible: number;
+  unite?: string;
+}
+export interface ObjectifInput {
+  niveau: NiveauObjectif;
+  titre: string;
+  periode: string;
+  employeId?: string;
+  departement?: string;
+  resultatsCles: ResultatCleInput[];
+}
 
 const delay = <T>(value: T, ms = 150): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(value), ms));
@@ -53,12 +66,20 @@ const campagnes: Campagne[] = [
 const mockApi = {
   objectifs: () => delay([...objectifs]),
   campagnes: () => delay([...campagnes]),
+  createObjectif: (input: ObjectifInput) =>
+    delay({ id: `o${objectifs.length + 1}`, niveau: input.niveau, titre: input.titre, periode: input.periode, progression: 0, resultatsCles: input.resultatsCles.map((r, i) => ({ id: `nr${i}`, libelle: r.libelle, valeurCible: r.valeurCible, valeurActuelle: 0, unite: r.unite })) } as Objectif),
+  removeObjectif: (_id: string) => delay(undefined),
+  updateResultatCle: (id: string, valeurActuelle: number) => delay({ id, libelle: '', valeurCible: 0, valeurActuelle } as ResultatCle),
 };
 
 // --- HTTP ---------------------------------------------------------------------
 const httpApi = {
   objectifs: () => api.get<Objectif[]>('/objectifs').then((r) => r.data),
   campagnes: () => api.get<Campagne[]>('/campagnes-evaluation').then((r) => r.data),
+  createObjectif: (input: ObjectifInput) => api.post<Objectif>('/objectifs', input).then((r) => r.data),
+  removeObjectif: (id: string) => api.delete(`/objectifs/${id}`).then(() => undefined),
+  updateResultatCle: (id: string, valeurActuelle: number) =>
+    api.patch<ResultatCle>(`/resultats-cles/${id}`, { valeurActuelle }).then((r) => r.data),
 };
 
 export const evaluationService = USE_MOCKS.eval ? mockApi : httpApi;
