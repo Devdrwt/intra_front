@@ -15,7 +15,7 @@ import {
 } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
-import { useCreateTicket, useTickets } from './hooks';
+import { useCreateTicket, useTickets, useTicketStats } from './hooks';
 import {
   PRIORITY_LABEL,
   PRIORITY_OPTIONS,
@@ -54,6 +54,26 @@ export function SlaBadge({ dueAt, breached }: { dueAt?: string; breached?: boole
   return <Badge tone="success">OK</Badge>;
 }
 
+function StatsCards() {
+  const { data } = useTicketStats();
+  if (!data) return null;
+  const byStatus = (data.byStatus ?? {}) as Record<string, number>;
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      <Card className="bg-warning-soft/50">
+        <p className="text-xs text-ink-subtle">Ouverts</p>
+        <p className="text-2xl font-bold text-warning-soft-fg">{data.open ?? 0}</p>
+      </Card>
+      {(Object.keys(STATUS_LABEL) as TicketStatus[]).map((s) => (
+        <Card key={s}>
+          <p className="truncate text-xs text-ink-subtle">{STATUS_LABEL[s]}</p>
+          <p className="text-2xl font-bold text-ink">{byStatus[s] ?? 0}</p>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
 export function SupportPage() {
   const [status, setStatus] = useState<TicketStatus | ''>('');
   const [priority, setPriority] = useState<TicketPriority | ''>('');
@@ -76,6 +96,8 @@ export function SupportPage() {
       />
 
       {open && <CreatePanel onDone={() => setOpen(false)} />}
+
+      <StatsCards />
 
       <Card className="flex flex-wrap items-end gap-3">
         <Input

@@ -9,6 +9,10 @@ export function useTickets(filters: TicketFilters = {}) {
   });
 }
 
+export function useTicketStats() {
+  return useQuery({ queryKey: ['support', 'stats'], queryFn: supportService.stats });
+}
+
 export function useTicket(id: string | undefined) {
   return useQuery({
     queryKey: ['support', 'ticket', id],
