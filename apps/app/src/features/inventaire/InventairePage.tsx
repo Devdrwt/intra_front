@@ -84,7 +84,7 @@ export function InventairePage() {
               <tr>
                 <th className="px-5 py-2.5 font-medium">Bien</th>
                 <th className="hidden px-5 py-2.5 font-medium sm:table-cell">Affectation</th>
-                <th className="px-5 py-2.5 font-medium">Valeur</th>
+                <th className="px-5 py-2.5 font-medium">Valeur / VNC</th>
                 <th className="px-5 py-2.5 font-medium">État</th>
                 <th className="px-5 py-2.5 text-right font-medium">Actions</th>
               </tr>
@@ -97,7 +97,12 @@ export function InventairePage() {
                     <div className="text-xs text-ink-subtle">{b.reference}{b.categorie ? ` · ${b.categorie}` : ''}{b.localisation ? ` · ${b.localisation}` : ''}</div>
                   </td>
                   <td className="hidden px-5 py-3 text-ink-muted sm:table-cell">{b.affecteA ?? '—'}</td>
-                  <td className="px-5 py-3 text-ink">{b.valeurAcquisition ? fcfa(b.valeurAcquisition * b.quantite) : '—'}</td>
+                  <td className="px-5 py-3 text-ink">
+                    {b.valeurAcquisition ? fcfa(b.valeurAcquisition * b.quantite) : '—'}
+                    {b.valeurNette != null && (
+                      <div className="text-xs text-ink-subtle">VNC {fcfa(b.valeurNette * b.quantite)}</div>
+                    )}
+                  </td>
                   <td className="px-5 py-3"><Badge tone={ETAT_TONE[b.etat]} dot>{ETAT_LABEL[b.etat]}</Badge></td>
                   <td className="px-5 py-3 text-right">
                     <Button size="sm" variant="ghost" disabled={remove.isPending} onClick={() => remove.mutate(b.id)}><Trash2 size={15} /></Button>
@@ -149,9 +154,10 @@ function CreatePanel({ categories, onDone }: { categories: string[]; onDone: () 
           <Input id="qte" type="number" label="Quantité" value={String(form.quantite)} onChange={(e) => set('quantite', Number(e.target.value) || 1)} />
           <Input id="val" type="number" label="Valeur (F)" value={form.valeurAcquisition ? String(form.valeurAcquisition) : ''} onChange={(e) => set('valeurAcquisition', e.target.value ? Number(e.target.value) : undefined)} />
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-3">
           <Input id="loc" label="Localisation" value={form.localisation ?? ''} onChange={(e) => set('localisation', e.target.value)} />
           <Input id="aff" label="Affecté à" value={form.affecteA ?? ''} onChange={(e) => set('affecteA', e.target.value)} />
+          <Input id="amort" type="number" label="Amortissement (mois)" value={form.dureeAmortissementMois ? String(form.dureeAmortissementMois) : ''} onChange={(e) => set('dureeAmortissementMois', e.target.value ? Number(e.target.value) : undefined)} placeholder="ex. 36" />
         </div>
         {error && <Callout tone="danger">{error}</Callout>}
         <div className="flex justify-end gap-3">

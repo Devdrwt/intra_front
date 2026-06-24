@@ -20,6 +20,8 @@ export interface Bien {
   dateAcquisition?: string;
   localisation?: string;
   affecteA?: string;
+  dureeAmortissementMois?: number;
+  valeurNette?: number;
 }
 export interface BienInput {
   nom: string;
@@ -28,6 +30,7 @@ export interface BienInput {
   etat: EtatBien;
   quantite: number;
   valeurAcquisition?: number;
+  dureeAmortissementMois?: number;
   localisation?: string;
   affecteA?: string;
 }
