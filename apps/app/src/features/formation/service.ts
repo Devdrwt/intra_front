@@ -21,6 +21,27 @@ export interface DemandeFormation {
   statut: 'BROUILLON' | 'SOUMISE' | 'APPROUVEE' | 'REJETEE' | 'INSCRITE';
   coutEstime?: number;
 }
+export type StatutSession = 'PLANIFIEE' | 'OUVERTE' | 'COMPLETE' | 'TERMINEE' | 'ANNULEE';
+export interface Session {
+  id: string;
+  formationId?: string;
+  formationTitre: string;
+  dateDebut: string;
+  dateFin: string;
+  lieu?: string;
+  formateur?: string;
+  capacite?: number;
+  statut: StatutSession;
+  nbInscrits: number;
+}
+export interface SessionInput {
+  formationId: string;
+  dateDebut: string;
+  dateFin: string;
+  lieu?: string;
+  formateur?: string;
+  capacite?: number;
+}
 
 const delay = <T>(value: T, ms = 150): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(value), ms));
@@ -44,6 +65,9 @@ const mockApi = {
     demandes = [d, ...demandes];
     return delay(d);
   },
+  sessions: () => delay([] as Session[]),
+  createSession: (input: SessionInput) => delay({ id: `s${Date.now()}`, ...input, formationTitre: '', statut: 'PLANIFIEE', nbInscrits: 0 } as Session),
+  inscrire: (_sessionId: string, _employeId: string) => delay(undefined),
 };
 
 // --- HTTP ---------------------------------------------------------------------
@@ -52,6 +76,10 @@ const httpApi = {
   demandes: () => api.get<DemandeFormation[]>('/demandes-formation', { params: { mine: true } }).then((r) => r.data),
   demander: (formationTitre: string, coutEstime?: number) =>
     api.post<DemandeFormation>('/demandes-formation', { formationLibre: formationTitre, coutEstime }).then((r) => r.data),
+  sessions: () => api.get<Session[]>('/sessions-formation').then((r) => r.data),
+  createSession: (input: SessionInput) => api.post<Session>('/sessions-formation', input).then((r) => r.data),
+  inscrire: (sessionId: string, employeId: string) =>
+    api.post(`/sessions-formation/${sessionId}/inscriptions`, { employeId }).then(() => undefined),
 };
 
 export const formationService = USE_MOCKS.formation ? mockApi : httpApi;
