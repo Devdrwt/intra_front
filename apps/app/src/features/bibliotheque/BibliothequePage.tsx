@@ -1,82 +1,76 @@
-import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { api } from '@/lib/api';
-import { USE_MOCKS } from '@/lib/config';
-import { Download, FileText, FolderArchive, Library } from 'lucide-react';
-import { Badge, Card, EmptyState, Input, PageHeader, Select, SkeletonRows } from '@drwindesk/ui';
+import { useState } from 'react';
+import { Download, FileText, Library } from 'lucide-react';
+import { Badge, Button, Card, EmptyState, Input, PageHeader, Select, SkeletonRows } from '@drwindesk/ui';
+import { apiErrorMessage } from '@/lib/api';
+import { humanSize } from '@/lib/download';
+import { toast } from '@/lib/toast';
+import { useDocs } from '@/features/documentation/hooks';
+import { documentationService } from '@/features/documentation/service';
+import { DOC_CATEGORIES, type DocItem } from '@/features/documentation/types';
 
 /**
- * Bibliothèque centrale — vue transverse de TOUS les documents (GED + archives).
- * Réel : GET /documents/bibliotheque ?q&categorie. Mock sinon.
+ * Bibliothèque — vue lecture des documents publiés de la base documentaire (/docs).
+ * Réutilise le module Documentation (versions, ACL, statut gérés côté GED).
  */
-interface DocItem {
-  id: string;
-  nom: string;
-  categorie: string;
-  source: string; // "RH", "Finance", "Projet"…
-  taille: string;
-  date: string;
-  url?: string;
-}
-
-const delay = <T,>(value: T, ms = 150): Promise<T> => new Promise((r) => setTimeout(() => r(value), ms));
-
-const MOCK: DocItem[] = [
-  { id: 'd1', nom: 'Règlement intérieur 2026', categorie: 'Politiques', source: 'RH', taille: '320 Ko', date: '2026-01-10' },
-  { id: 'd2', nom: 'Modèle de contrat CDI', categorie: 'Modèles', source: 'RH', taille: '180 Ko', date: '2025-11-02' },
-  { id: 'd3', nom: 'Procédure achats', categorie: 'Procédures', source: 'Finance', taille: '95 Ko', date: '2026-03-15' },
-  { id: 'd4', nom: 'Charte graphique', categorie: 'Marque', source: 'Studio', taille: '4,2 Mo', date: '2025-09-20' },
-  { id: 'd5', nom: 'Cahier des charges — Refonte SI', categorie: 'Projets', source: 'Projet', taille: '1,1 Mo', date: '2026-05-01' },
-];
-
-function fetchDocs(): Promise<DocItem[]> {
-  if (USE_MOCKS.documents) return delay(MOCK);
-  return api.get<DocItem[]>('/documents/bibliotheque').then((r) => r.data);
-}
+const fmt = (iso: string) => new Date(iso).toLocaleDateString('fr-FR');
 
 export function BibliothequePage() {
-  const { data, isLoading } = useQuery({ queryKey: ['bibliotheque'], queryFn: fetchDocs });
   const [search, setSearch] = useState('');
-  const [categorie, setCategorie] = useState('');
+  const [cat, setCat] = useState('');
+  const { data, isLoading } = useDocs(cat, search);
+  const [dlId, setDlId] = useState<string | null>(null);
 
-  const categories = useMemo(() => [...new Set((data ?? []).map((d) => d.categorie))], [data]);
-  const filtered = (data ?? []).filter(
-    (d) =>
-      (!categorie || d.categorie === categorie) &&
-      (!search || `${d.nom} ${d.source}`.toLowerCase().includes(search.toLowerCase())),
-  );
+  const download = async (d: DocItem) => {
+    setDlId(d.id);
+    try {
+      await documentationService.download(d.id, d.titre);
+    } catch (e) {
+      toast.error(apiErrorMessage(e, 'Téléchargement impossible.'));
+    } finally {
+      setDlId(null);
+    }
+  };
+
+  const list = data ?? [];
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Bibliothèque" subtitle="Tous les documents de l'entreprise — politiques, modèles, procédures, livrables." />
+      <PageHeader title="Bibliothèque" subtitle="Documents publiés de l'entreprise — politiques, modèles, procédures, livrables." />
 
       <Card className="flex flex-wrap items-end gap-3">
-        <Input id="q" label="Recherche" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Nom, service…" className="min-w-[200px] flex-1" />
-        <Select id="cat" label="Catégorie" value={categorie} onChange={(e) => setCategorie(e.target.value)}
-          options={[{ value: '', label: 'Toutes' }, ...categories.map((c) => ({ value: c, label: c }))]} />
+        <Input id="q" label="Recherche" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Titre, description…" className="min-w-[200px] flex-1" />
+        <Select
+          id="cat"
+          label="Catégorie"
+          value={cat}
+          onChange={(e) => setCat(e.target.value)}
+          options={[{ value: '', label: 'Toutes' }, ...DOC_CATEGORIES.map((c) => ({ value: c, label: c }))]}
+        />
       </Card>
 
       <Card className="overflow-hidden p-0">
         {isLoading ? (
           <SkeletonRows rows={5} cols={3} />
-        ) : filtered.length === 0 ? (
-          <EmptyState icon={<Library size={20} />} title="Aucun document" description="Aucun document ne correspond à ces filtres." />
+        ) : list.length === 0 ? (
+          <EmptyState icon={<Library size={20} />} title="Aucun document" description="Aucun document publié ne correspond à ces filtres." />
         ) : (
           <ul className="divide-y divide-surface-border">
-            {filtered.map((d, i) => (
+            {list.map((d, i) => (
               <li key={d.id} className="flex items-center justify-between gap-3 px-5 py-3 animate-row" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
-                <div className="flex items-center gap-3">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-muted text-ink-muted"><FileText size={18} /></span>
-                  <div>
-                    <div className="font-medium text-ink">{d.nom}</div>
-                    <div className="text-xs text-ink-subtle">{d.source} · {d.taille} · {d.date}</div>
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-ink-muted"><FileText size={18} /></span>
+                  <div className="min-w-0">
+                    <div className="truncate font-medium text-ink">{d.titre}</div>
+                    <div className="text-xs text-ink-subtle">
+                      {d.taille > 0 ? `${humanSize(d.taille)} · ` : ''}{fmt(d.createdAt)}{d.version > 1 ? ` · v${d.version}` : ''}
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex shrink-0 items-center gap-2">
                   <Badge tone="neutral">{d.categorie}</Badge>
-                  <a href={d.url ?? '#'} className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-subtle hover:bg-surface-muted hover:text-ink" title="Télécharger">
-                    {d.url ? <Download size={16} /> : <FolderArchive size={16} className="opacity-40" />}
-                  </a>
+                  <Button size="sm" variant="ghost" onClick={() => void download(d)} loading={dlId === d.id} title="Télécharger">
+                    <Download size={16} />
+                  </Button>
                 </div>
               </li>
             ))}
