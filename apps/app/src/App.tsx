@@ -12,6 +12,7 @@ import { AgendaPage } from '@/features/agenda/AgendaPage';
 import { MonPointagePage } from '@/features/me/MonPointagePage';
 import { MesDemandesPage } from '@/features/me/MesDemandesPage';
 import { MesRapportsPage } from '@/features/me/MesRapportsPage';
+import { MonEspaceRhPage } from '@/features/monrh/MonEspaceRhPage';
 import { MesDocumentsPage } from '@/features/me/MesDocumentsPage';
 import { MesProjetsPage } from '@/features/me/MesProjetsPage';
 import { MesValidationsPage } from '@/features/approvals/MesValidationsPage';
@@ -94,6 +95,7 @@ export default function App() {
             <Route path="assistant" element={<AssistantPage />} />
             <Route path="bibliotheque" element={<BibliothequePage />} />
             <Route path="mes-rapports" element={<MesRapportsPage />} />
+            <Route path="mon-espace-rh" element={<MonEspaceRhPage />} />
             <Route path="mes-documents" element={<MesDocumentsPage />} />
             <Route path="mes-projets" element={<MesProjetsPage />} />
             <Route path="discussion" element={<DiscussionPage />} />

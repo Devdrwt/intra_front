@@ -80,6 +80,7 @@ export const MODULES: ModuleRoute[] = [
     requires: 'approval:read',
   },
   { path: '/mes-taches', label: 'Mes tâches', icon: FolderKanban, group: 'Mon espace' },
+  { path: '/mon-espace-rh', label: 'Mon espace RH', icon: Award, group: 'Mon espace' },
   { path: '/mes-rapports', label: 'Mes rapports', icon: FileBarChart, group: 'Mon espace' },
   { path: '/mes-documents', label: 'Mes documents', icon: FolderArchive, group: 'Mon espace' },
   { path: '/mes-projets', label: 'Mes projets', icon: FolderKanban, group: 'Mon espace' },
