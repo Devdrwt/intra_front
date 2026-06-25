@@ -180,6 +180,7 @@ export const MODULES: ModuleRoute[] = [
   // Paramètres = self-service (profil, mot de passe, messagerie, thème) ; la
   // section « Organisation » à l'intérieur reste réservée aux admins.
   { path: '/parametres', label: 'Paramètres', icon: Settings, group: 'Aide & réglages' },
+  { path: '/base-connaissances', label: 'Base de connaissances', icon: BookOpen, group: 'Aide & réglages' },
   { path: '/guide', label: 'Guide', icon: BookOpen, group: 'Aide & réglages' },
   { path: '/faq', label: 'FAQ', icon: HelpCircle, group: 'Aide & réglages' },
 ];

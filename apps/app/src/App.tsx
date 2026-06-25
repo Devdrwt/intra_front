@@ -63,6 +63,7 @@ import { AnnuairePage } from '@/features/annuaire/AnnuairePage';
 import { DocumentationPage } from '@/features/documentation/DocumentationPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { GuidePage } from '@/pages/GuidePage';
+import { KbPage } from '@/features/kb/KbPage';
 import { FaqPage } from '@/pages/FaqPage';
 
 export default function App() {
@@ -104,6 +105,7 @@ export default function App() {
 
             {/* --- Aide & réglages (transverse) ----------------------------- */}
             <Route path="parametres" element={<SettingsPage />} />
+            <Route path="base-connaissances" element={<KbPage />} />
             <Route path="guide" element={<GuidePage />} />
             <Route path="faq" element={<FaqPage />} />
 
