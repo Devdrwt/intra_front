@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Download, Eye, FileText, FolderOpen, History, Lock, RotateCcw, Search, Trash2, Upload } from 'lucide-react';
 import {
   Badge,
@@ -32,7 +32,7 @@ import {
 import { useUsers } from '@/features/users/hooks';
 import { userLabel } from '@/features/users/types';
 import { documentationService } from './service';
-import { DOC_CATEGORIES, DOC_STATUT_META, docPreviewUrl, isPreviewable, type DocItem, type DocStatut } from './types';
+import { DOC_CATEGORIES, DOC_STATUT_META, isPreviewable, type DocItem, type DocStatut } from './types';
 
 const fmt = (iso: string) => new Date(iso).toLocaleDateString('fr-FR');
 
@@ -181,14 +181,60 @@ export function DocumentationPage() {
       {accessDoc && <DocAccessModal doc={accessDoc} onClose={() => setAccessDoc(null)} />}
 
       <Modal open={!!previewDoc} onClose={() => setPreviewDoc(null)} size="xl" title={previewDoc?.titre}>
-        {previewDoc &&
-          (previewDoc.mimeType.startsWith('image/') ? (
-            <img src={docPreviewUrl(previewDoc.id)} alt={previewDoc.titre} className="mx-auto max-h-[72vh] w-auto rounded-lg" />
-          ) : (
-            <iframe src={docPreviewUrl(previewDoc.id)} title={previewDoc.titre} className="h-[72vh] w-full rounded-lg border border-surface-border" />
-          ))}
+        {previewDoc && <DocPreviewBody doc={previewDoc} />}
       </Modal>
     </div>
+  );
+}
+
+/**
+ * Aperçu d'un document : le fichier est récupéré via l'API authentifiée puis
+ * affiché en URL `blob:` (same-origin). Cela évite que le navigateur bloque
+ * l'embarquement cross-origin (« Ce contenu a été bloqué ») dû aux en-têtes de
+ * sécurité (X-Frame-Options / CSP frame-ancestors / CORP) posés sur l'API.
+ */
+function DocPreviewBody({ doc }: { doc: DocItem }) {
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    let objectUrl: string | null = null;
+    let active = true;
+    setError(false);
+    setBlobUrl(null);
+    documentationService
+      .previewBlob(doc.id)
+      .then((blob) => {
+        if (!active) return;
+        objectUrl = URL.createObjectURL(blob);
+        setBlobUrl(objectUrl);
+      })
+      .catch(() => active && setError(true));
+    return () => {
+      active = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [doc.id]);
+
+  if (error) {
+    return (
+      <div className="flex h-[72vh] items-center justify-center text-sm text-ink-subtle">
+        Impossible de charger le fichier.
+      </div>
+    );
+  }
+  if (!blobUrl) {
+    return <Skeleton className="h-[72vh] w-full rounded-lg" />;
+  }
+  if (doc.mimeType.startsWith('image/')) {
+    return <img src={blobUrl} alt={doc.titre} className="mx-auto max-h-[72vh] w-auto rounded-lg" />;
+  }
+  return (
+    <iframe
+      src={blobUrl}
+      title={doc.titre}
+      className="h-[72vh] w-full rounded-lg border border-surface-border"
+    />
   );
 }
 

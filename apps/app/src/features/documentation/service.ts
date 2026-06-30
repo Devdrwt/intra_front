@@ -18,6 +18,15 @@ export const documentationService = {
   remove: (id: string) => api.delete(`/docs/${id}`).then(() => undefined),
   download: (id: string, name: string) =>
     api.get(`/docs/${id}/file`, { responseType: 'blob' }).then((r) => triggerDownload(r.data, name)),
+  /**
+   * Récupère le fichier en blob via l'API authentifiée (cookies + CORS déjà
+   * configurés). Affiché ensuite via une URL `blob:` (same-origin), ce qui
+   * contourne X-Frame-Options / CSP frame-ancestors / CORP sur l'aperçu.
+   */
+  previewBlob: (id: string) =>
+    api
+      .get(`/docs/${id}/file`, { params: { inline: 1 }, responseType: 'blob' })
+      .then((r) => r.data as Blob),
 
   listVersions: (id: string) =>
     api.get<DocVersion[]>(`/docs/${id}/versions`).then((r) => r.data),
