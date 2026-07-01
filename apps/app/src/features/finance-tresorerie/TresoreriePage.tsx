@@ -3,6 +3,7 @@ import { ArrowDownLeft, ArrowUpRight, Banknote, CreditCard, Plus, Smartphone, X 
 import { Badge, Button, Callout, Card, CardTitle, Input, PageHeader, Select, SkeletonRows, cn } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
 import { fcfa } from '@/lib/money';
+import { PiecesJointesButton } from '@/features/pieces-jointes/PiecesJointesButton';
 import { useComptesTresorerie, useCreateMouvement, useMouvements, useRapprocher } from './hooks';
 import { TYPE_COMPTE_LABEL, type MouvementInput, type SensMouvement, type TypeCompteTresorerie } from './types';
 
@@ -89,6 +90,12 @@ export function TresoreriePage() {
                     Rapprocher
                   </Button>
                 )}
+                <PiecesJointesButton
+                  entityType="MOUVEMENT_TRESORERIE"
+                  entityId={m.id}
+                  writePermission="finance:write"
+                  title={`Pièces jointes — ${m.libelle}`}
+                />
               </div>
             </li>
           ))}

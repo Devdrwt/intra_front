@@ -4,6 +4,7 @@ import { Badge, Button, Callout, Card, EmptyState, Input, PageHeader, SkeletonRo
 import type { BadgeProps } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
 import { fcfa } from '@/lib/money';
+import { PiecesJointesButton } from '@/features/pieces-jointes/PiecesJointesButton';
 import { useCreateFacture, useEmettreFacture, useEncaisser, useFacturesClient } from './hooks';
 import { STATUT_FC_LABEL, type FactureClientInput, type StatutFactureClient } from './types';
 
@@ -85,16 +86,24 @@ export function FacturesClientPage() {
                       </div>
                     </td>
                     <td className="px-5 py-3 text-right">
-                      {f.statut === 'BROUILLON' && (
-                        <Button size="sm" disabled={emettre.isPending} onClick={() => emettre.mutate(f.id)}>
-                          <Send size={14} /> Émettre
-                        </Button>
-                      )}
-                      {(f.statut === 'EMISE' || f.statut === 'PARTIELLEMENT_PAYEE') && (
-                        <Button size="sm" variant="secondary" disabled={encaisser.isPending} onClick={() => onEncaisser(f.id, reste)}>
-                          <Wallet size={14} /> Encaisser
-                        </Button>
-                      )}
+                      <div className="flex items-center justify-end gap-1">
+                        {f.statut === 'BROUILLON' && (
+                          <Button size="sm" disabled={emettre.isPending} onClick={() => emettre.mutate(f.id)}>
+                            <Send size={14} /> Émettre
+                          </Button>
+                        )}
+                        {(f.statut === 'EMISE' || f.statut === 'PARTIELLEMENT_PAYEE') && (
+                          <Button size="sm" variant="secondary" disabled={encaisser.isPending} onClick={() => onEncaisser(f.id, reste)}>
+                            <Wallet size={14} /> Encaisser
+                          </Button>
+                        )}
+                        <PiecesJointesButton
+                          entityType="FACTURE_CLIENT"
+                          entityId={f.id}
+                          writePermission="finance:write"
+                          title={`Pièces jointes — ${f.reference}`}
+                        />
+                      </div>
                     </td>
                   </tr>
                 );

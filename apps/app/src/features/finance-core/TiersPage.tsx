@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Building2, Plus, Trash2, X } from 'lucide-react';
 import { Badge, Button, Callout, Card, EmptyState, Input, PageHeader, Select, SkeletonRows } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
+import { PiecesJointesButton } from '@/features/pieces-jointes/PiecesJointesButton';
 import { useCreateTiers, useDeleteTiers, useTiers } from './hooks';
 import { TIERS_TYPE_LABEL, TIERS_TYPE_OPTIONS, type TiersInput, type TiersType } from './types';
 
@@ -64,9 +65,17 @@ export function TiersPage() {
                   </td>
                   <td className="hidden px-5 py-3 text-ink-muted lg:table-cell">{t.compteCode ?? '—'}</td>
                   <td className="px-5 py-3 text-right">
-                    <Button size="sm" variant="ghost" disabled={remove.isPending} onClick={() => remove.mutate(t.id)}>
-                      <Trash2 size={15} />
-                    </Button>
+                    <div className="flex items-center justify-end gap-1">
+                      <PiecesJointesButton
+                        entityType="TIERS"
+                        entityId={t.id}
+                        writePermission="finance:write"
+                        title={`Pièces jointes — ${t.nom}`}
+                      />
+                      <Button size="sm" variant="ghost" disabled={remove.isPending} onClick={() => remove.mutate(t.id)}>
+                        <Trash2 size={15} />
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}

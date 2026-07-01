@@ -5,6 +5,7 @@ import { Badge, Button, Callout, Card, EmptyState, Input, PageHeader, Select, Sk
 import type { BadgeProps } from '@drwindesk/ui';
 import { apiErrorMessage } from '@/lib/api';
 import { fcfa, fcfaCompact } from '@/lib/money';
+import { PiecesJointesButton } from '@/features/pieces-jointes/PiecesJointesButton';
 import { inventaireService, type BienInput, type EtatBien, type TypeBien } from './service';
 
 const ETAT_LABEL: Record<EtatBien, string> = {
@@ -105,7 +106,15 @@ export function InventairePage() {
                   </td>
                   <td className="px-5 py-3"><Badge tone={ETAT_TONE[b.etat]} dot>{ETAT_LABEL[b.etat]}</Badge></td>
                   <td className="px-5 py-3 text-right">
-                    <Button size="sm" variant="ghost" disabled={remove.isPending} onClick={() => remove.mutate(b.id)}><Trash2 size={15} /></Button>
+                    <div className="flex items-center justify-end gap-1">
+                      <PiecesJointesButton
+                        entityType="BIEN"
+                        entityId={b.id}
+                        writePermission="finance:write"
+                        title={`Preuves — ${b.nom}`}
+                      />
+                      <Button size="sm" variant="ghost" disabled={remove.isPending} onClick={() => remove.mutate(b.id)}><Trash2 size={15} /></Button>
+                    </div>
                   </td>
                 </tr>
               ))}

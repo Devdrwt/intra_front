@@ -2,6 +2,7 @@ import { FileText, Wallet } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, PageHeader, SkeletonRows } from '@drwindesk/ui';
 import type { BadgeProps } from '@drwindesk/ui';
 import { fcfa } from '@/lib/money';
+import { PiecesJointesButton } from '@/features/pieces-jointes/PiecesJointesButton';
 import { useFacturesFournisseur, usePayerFacture } from './hooks';
 import { STATUT_FF_LABEL, type StatutFactureFourn } from './types';
 
@@ -69,11 +70,19 @@ export function AchatsPage() {
                   </td>
                   <td className="px-5 py-3"><Badge tone={TONE[f.statut]} dot>{STATUT_FF_LABEL[f.statut]}</Badge></td>
                   <td className="px-5 py-3 text-right">
-                    {f.statut !== 'PAYEE' && (
-                      <Button size="sm" variant="secondary" disabled={payer.isPending} onClick={() => onPayer(f.id, f.montantTtc, f.montantPaye)}>
-                        <Wallet size={14} /> Régler
-                      </Button>
-                    )}
+                    <div className="flex items-center justify-end gap-1">
+                      {f.statut !== 'PAYEE' && (
+                        <Button size="sm" variant="secondary" disabled={payer.isPending} onClick={() => onPayer(f.id, f.montantTtc, f.montantPaye)}>
+                          <Wallet size={14} /> Régler
+                        </Button>
+                      )}
+                      <PiecesJointesButton
+                        entityType="FACTURE_FOURNISSEUR"
+                        entityId={f.id}
+                        writePermission="finance:write"
+                        title={`Pièces jointes — ${f.reference}`}
+                      />
+                    </div>
                   </td>
                 </tr>
               ))}

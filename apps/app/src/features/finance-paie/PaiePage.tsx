@@ -10,6 +10,7 @@ import {
   usePeriodesPaie,
   useValiderPeriode,
 } from './hooks';
+import { PiecesJointesButton } from '@/features/pieces-jointes/PiecesJointesButton';
 import { paieService, type DeclarationCnss, type DeclarationIts } from './service';
 import {
   MOIS_LABEL,
@@ -193,15 +194,23 @@ function BulletinsCard({ periodeId }: { periodeId: string }) {
               <td className="px-5 py-3 font-semibold text-ink">{fcfa(b.netAPayer)}</td>
               <td className="px-5 py-3"><Badge tone={BTONE[b.statut]} dot>{STATUT_BULLETIN_LABEL[b.statut]}</Badge></td>
               <td className={cn('px-5 py-3 text-right')}>
-                <Button size="sm" variant="ghost" onClick={() => void paieService.bulletinPdf(b.id, `bulletin_${b.employeNom}.pdf`)} title="PDF du bulletin">
-                  <FileText size={14} />
-                </Button>
-                {b.statut === 'VALIDE' && (
-                  <Button size="sm" variant="secondary" disabled={payer.isPending} onClick={() => onPayer(b.id)}>
-                    <Wallet size={14} /> Payer
+                <div className="flex items-center justify-end gap-1">
+                  <Button size="sm" variant="ghost" onClick={() => void paieService.bulletinPdf(b.id, `bulletin_${b.employeNom}.pdf`)} title="PDF du bulletin">
+                    <FileText size={14} />
                   </Button>
-                )}
-                {b.paiementRef && <span className="text-xs text-ink-subtle">réf {b.paiementRef}</span>}
+                  {b.statut === 'VALIDE' && (
+                    <Button size="sm" variant="secondary" disabled={payer.isPending} onClick={() => onPayer(b.id)}>
+                      <Wallet size={14} /> Payer
+                    </Button>
+                  )}
+                  {b.paiementRef && <span className="text-xs text-ink-subtle">réf {b.paiementRef}</span>}
+                  <PiecesJointesButton
+                    entityType="BULLETIN_PAIE"
+                    entityId={b.id}
+                    writePermission="finance:manage"
+                    title={`Preuve de paiement — ${b.employeNom}`}
+                  />
+                </div>
               </td>
             </tr>
           ))}
